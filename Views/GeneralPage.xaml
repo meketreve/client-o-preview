@@ -11,16 +11,16 @@
     </Grid.RowDefinitions>
     <TextBlock Text="General" FontWeight="SemiBold" Margin="10"/>
     <StackPanel Grid.Row="1" Margin="10">
-      <CheckBox Content="Minimize to System Tray" IsEnabled="False"/>
-      <CheckBox Content="Track client locations" IsEnabled="False"/>
-      <CheckBox Content="Hide preview of active client" IsEnabled="False"/>
+      <CheckBox x:Name="ChkMinimizeToTray" Content="Minimize to System Tray" Checked="OnChanged" Unchecked="OnChanged"/>
+      <CheckBox x:Name="ChkTrackLocations" Content="Track client locations" Checked="OnChanged" Unchecked="OnChanged"/>
+      <CheckBox x:Name="ChkHideActivePreview" Content="Hide preview of active client" Checked="OnChanged" Unchecked="OnChanged"/>
 
       <CheckBox x:Name="ChkMinimizeInactive" Content="Minimize inactive clients" Margin="0,6,0,0" Checked="OnChanged" Unchecked="OnChanged"/>
       <CheckBox x:Name="ChkReorderInactive" Content="Send inactive clients to back" Margin="0,6,0,0" IsChecked="True" Checked="OnChanged" Unchecked="OnChanged"/>
       <CheckBox x:Name="ChkTopmost" Content="Previews always on top" Margin="0,6,0,0" IsChecked="True" Checked="OnChanged" Unchecked="OnChanged"/>
 
-      <CheckBox Content="Hide previews when client is not active" IsEnabled="False"/>
-      <CheckBox Content="Unique layout for each client" IsEnabled="False"/>
+      <CheckBox x:Name="ChkHideWhenNotActive" Content="Hide previews when client is not active" Checked="OnChanged" Unchecked="OnChanged"/>
+      <CheckBox x:Name="ChkUniqueLayout" Content="Unique layout for each client" Checked="OnChanged" Unchecked="OnChanged"/>
     </StackPanel>
   </Grid>
 </UserControl>

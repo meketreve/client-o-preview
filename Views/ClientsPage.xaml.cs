@@ -7,7 +7,7 @@ using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
 
-public partial class ClientsPage : UserControl
+public partial class ClientsPage : System.Windows.Controls.UserControl
 {
     public event EventHandler? RefreshRequested;
     public event EventHandler? OpenStreamsRequested;

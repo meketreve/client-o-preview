@@ -17,7 +17,10 @@ internal static class NativeMethods
     [DllImport("user32.dll", SetLastError=true)] internal static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
     [DllImport("user32.dll")] internal static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] internal static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")] internal static extern bool IsWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
     internal const int SW_RESTORE = 9;
     internal const int SW_MINIMIZE = 6;
     internal const int SW_SHOW = 5;

@@ -2,14 +2,14 @@ using System.Windows;
 
 namespace ClientOPreview;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     public App()
     {
         this.DispatcherUnhandledException += (s, e) =>
         {
             try { System.IO.File.WriteAllText("error.log", e.Exception.ToString()); } catch { }
-            MessageBox.Show(e.Exception.ToString(), "Unhandled Exception");
+            System.Windows.MessageBox.Show(e.Exception.ToString(), "Unhandled Exception");
             e.Handled = true;
         };
     }
@@ -24,7 +24,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             try { System.IO.File.WriteAllText("error.log", ex.ToString()); } catch { }
-            MessageBox.Show(ex.ToString(), "Startup Error");
+            System.Windows.MessageBox.Show(ex.ToString(), "Startup Error");
             Shutdown(-1);
         }
     }

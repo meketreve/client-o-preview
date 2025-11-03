@@ -6,7 +6,7 @@ namespace ClientOPreview.Views;
 
 public record ThumbnailArgs(int Width, int Height, int OpacityPct);
 
-public partial class ThumbnailPage : UserControl
+public partial class ThumbnailPage : System.Windows.Controls.UserControl
 {
     public event EventHandler<ThumbnailArgs>? ThumbnailChanged;
 

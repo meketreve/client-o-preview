@@ -70,7 +70,17 @@ public partial class StreamWindow : Window
         DwmUpdateThumbnailProperties(_thumb, ref props);
     }
 
-    private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateThumbnailRect();
+    private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateThumbnailRect();
+        _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
+    }
+
+    protected override void OnLocationChanged(EventArgs e)
+    {
+        base.OnLocationChanged(e);
+        _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
+    }
 
     private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
