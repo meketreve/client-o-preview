@@ -1,0 +1,23 @@
+# Ignore build artefacts e logs
+
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Logs
+*.log
+logs/
+
+# Python artefacts
+python/build/
+python/dist/
+__pycache__/
+python/__pycache__/
+
+# PyInstaller cache
+*.pyc
+build/
+dist/
