@@ -67,5 +67,5 @@ Estrutura principal:
 - Janelas minimizadas não são capturadas via fallback de tela; o app tenta restaurá-las antes de focar/capturar.
 
 ## Créditos / Sobre
-- Nome do app: client-o-preview (About mostra “client-o-preview 5.2.0”).
+- Nome do app: client-o-preview (About mostra “client-o-preview 1.0”).
 - “This program does NOT modify game interface or broadcast inputs. It only shows live previews.”

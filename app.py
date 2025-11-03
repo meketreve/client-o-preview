@@ -625,7 +625,7 @@ class App:
         # About
         pg = tk.Frame(self.content)
         self.pages['about'] = pg
-        tk.Label(pg, text="client-o-preview 5.2.0").pack(padx=10, pady=10)
+        tk.Label(pg, text="client-o-preview 1.0").pack(padx=10, pady=10)
         tk.Label(pg, text="This program does NOT modify game interface or broadcast inputs.\nIt only shows live previews.", justify='left').pack(padx=10)
 
     def show_page(self, name):

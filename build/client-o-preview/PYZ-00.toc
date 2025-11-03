@@ -1,4 +1,4 @@
-('D:\\git-projeto\\novo\\build\\client-o-preview\\PYZ-00.pyz',
+('D:\\git-projeto\\client-o-preview\\build\\client-o-preview\\PYZ-00.pyz',
  [('PIL',
    'C:\\Users\\meketreve\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\PIL\\__init__.py',
    'PYMODULE'),
