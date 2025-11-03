@@ -1,0 +1,17 @@
+{
+  "general": {
+    "minimize_to_tray": false,
+    "track_locations": true,
+    "hide_active_preview": true,
+    "minimize_inactive": false,
+    "previews_topmost": true,
+    "hide_when_not_active": false,
+    "unique_layout": false
+  },
+  "thumbnail": {
+    "width": 384,
+    "height": 216,
+    "opacity_pct": 90
+  },
+  "layouts": {}
+}
