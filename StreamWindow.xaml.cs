@@ -80,9 +80,36 @@ public partial class StreamWindow : Window
         _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
     }
 
-    private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void Content_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         _owner.OnPreviewClicked(_item.HWnd);
+    }
+
+    private void Window_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        try
+        {
+            if (e.RightButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Ignora erro quando DragMove não pode ser chamado
+        }
+    }
+
+    private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        try
+        {
+            DragMove();
+        }
+        catch (InvalidOperationException)
+        {
+            // Ignora erro quando DragMove não pode ser chamado
+        }
     }
 
     protected override void OnClosed(EventArgs e)

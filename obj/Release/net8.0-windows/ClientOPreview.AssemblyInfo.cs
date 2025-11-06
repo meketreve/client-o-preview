@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ClientOPreview")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cd7a8d4c5bf25a306b1d297e695b2a0edf076c69")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b63762c7a61a8156ded86fc2d9ec3e31bfc53d92")]
 [assembly: System.Reflection.AssemblyProductAttribute("ClientOPreview")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ClientOPreview")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

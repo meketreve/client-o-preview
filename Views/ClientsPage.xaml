@@ -9,7 +9,8 @@
             <TextBlock Text="Select windows:"/>
             <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
                 <Button Content="Refresh" Width="90" Margin="0,0,6,0" Click="OnRefresh"/>
-                <Button Content="Open streams" Width="120" Click="OnOpen"/>
+                <Button Content="Open streams" Width="120" Margin="0,0,6,0" Click="OnOpen"/>
+                <Button Content="Close all" Width="90" Click="OnCloseAll"/>
             </StackPanel>
         </StackPanel>
         <ListBox x:Name="ListWindows" SelectionMode="Extended" DisplayMemberPath="Display" Margin="8"/>

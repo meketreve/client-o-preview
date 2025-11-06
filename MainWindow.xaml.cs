@@ -61,6 +61,11 @@ public partial class MainWindow : Window
                 e.Cancel = true;
                 TrayHelper.MinimizeToTray(this);
             }
+            else
+            {
+                // Fechar todas as thumbnails ao fechar o app
+                CloseAllStreams();
+            }
         };
 
         // Load settings
@@ -88,6 +93,7 @@ public partial class MainWindow : Window
         // Wire events (clients)
         _clientsPage.RefreshRequested += (_, __) => RefreshList();
         _clientsPage.OpenStreamsRequested += (_, __) => OpenSelectedStreams();
+        _clientsPage.CloseAllRequested += (_, __) => CloseAllStreams();
 
         // Wire events (general)
         _generalPage.PreviewsTopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.Save(_settings); };
@@ -274,5 +280,14 @@ public partial class MainWindow : Window
         var t = (int)Math.Round(top);
         var geom = $"{w}x{h}+{l}+{t}";
         _settingsSvc.SetLayout(key, geom);
+    }
+
+    private void CloseAllStreams()
+    {
+        foreach (var win in _streams.Values.ToList())
+        {
+            win.Close();
+        }
+        _streams.Clear();
     }
 }
