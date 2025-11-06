@@ -9,13 +9,15 @@ public record ThumbnailArgs(int Width, int Height, int OpacityPct);
 public partial class ThumbnailPage : System.Windows.Controls.UserControl
 {
     public event EventHandler<ThumbnailArgs>? ThumbnailChanged;
+    public event EventHandler<bool>? TopmostChanged;
 
-    public ThumbnailPage(int width, int height, int opacityPct)
+    public ThumbnailPage(int width, int height, int opacityPct, bool topmost = true)
     {
         InitializeComponent();
         TxtWidth.Text = width.ToString();
         TxtHeight.Text = height.ToString();
         SldOpacity.Value = opacityPct;
+        ChkTopmost.IsChecked = topmost;
         // Label será definido no Loaded, após materialização completa
     }
 
@@ -49,5 +51,10 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         if (!int.TryParse(TxtHeight.Text, out var h)) h = 216;
         var pct = (int)SldOpacity.Value;
         ThumbnailChanged?.Invoke(this, new ThumbnailArgs(w, h, pct));
+    }
+
+    private void OnTopmostChanged(object sender, RoutedEventArgs e)
+    {
+        TopmostChanged?.Invoke(this, ChkTopmost.IsChecked == true);
     }
 }

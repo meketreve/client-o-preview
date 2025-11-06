@@ -79,7 +79,7 @@ public partial class MainWindow : Window
         // Instantiate pages
         _generalPage = new Views.GeneralPage();
         _generalPage.LoadFrom(g);
-        _thumbnailPage = new Views.ThumbnailPage(_thumbWidth, _thumbHeight, _opacityPct);
+        _thumbnailPage = new Views.ThumbnailPage(_thumbWidth, _thumbHeight, _opacityPct, _previewsTopmost);
         _zoomPage = new Views.ZoomPage();
         _overlayPage = new Views.OverlayPage();
         _clientsPage = new Views.ClientsPage();
@@ -111,6 +111,7 @@ public partial class MainWindow : Window
             ApplyThumbnailToStreams();
             _settingsSvc.Save(_settings);
         };
+        _thumbnailPage.TopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.Save(_settings); };
 
         // Default page
         ContentHost.Content = _clientsPage;

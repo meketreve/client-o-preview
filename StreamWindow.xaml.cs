@@ -33,8 +33,6 @@ public partial class StreamWindow : Window
     {
         EnsureThumbnail();
         UpdateThumbnailRect();
-        // Sincronizar check com estado atual de Topmost
-        ChkTopmostLocal.IsChecked = Topmost;
     }
 
     private void EnsureThumbnail()
@@ -85,14 +83,6 @@ public partial class StreamWindow : Window
     private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         _owner.OnPreviewClicked(_item.HWnd);
-    }
-
-    private void OnTopmostChanged(object sender, RoutedEventArgs e)
-    {
-        Topmost = ChkTopmostLocal.IsChecked == true;
-        // também ajustar via SetWindowPos para garantir
-        var hwnd = new WindowInteropHelper(this).Handle;
-        SetWindowPos(hwnd, Topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
     }
 
     protected override void OnClosed(EventArgs e)

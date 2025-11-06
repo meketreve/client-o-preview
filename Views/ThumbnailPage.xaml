@@ -14,6 +14,7 @@
     <TextBlock Text="Thumbnail" FontWeight="SemiBold"/>
 
     <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
+      <CheckBox x:Name="ChkTopmost" Content="Sempre ao topo" Margin="0,0,0,12" Checked="OnTopmostChanged" Unchecked="OnTopmostChanged"/>
       <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
         <TextBlock Text="Opacity" Width="80"/>
         <Slider x:Name="SldOpacity" Minimum="20" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Width="240" Margin="8,0"/>
