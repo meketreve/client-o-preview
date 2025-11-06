@@ -188,6 +188,24 @@ public partial class MainWindow : Window
     {
         try
         {
+            // Verificar e fechar thumbnails de janelas que não existem mais
+            var toClose = new List<IntPtr>();
+            foreach (var hwnd in _streams.Keys)
+            {
+                if (!IsWindow(hwnd))
+                {
+                    toClose.Add(hwnd);
+                }
+            }
+            foreach (var hwnd in toClose)
+            {
+                if (_streams.TryGetValue(hwnd, out var win))
+                {
+                    win.Close();
+                    _streams.Remove(hwnd);
+                }
+            }
+
             var fg = GetForegroundWindow();
             var tracked = new HashSet<IntPtr>(_streams.Keys);
             var thisHwnd = new WindowInteropHelper(this).Handle;
