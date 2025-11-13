@@ -1,6 +1,6 @@
 # client-o-preview
 
-Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Há duas implementações:
+Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Feito com IA:
 - C# (WPF + DWM Thumbnails) neste diretório
 
 ##  Build C# (WPF)
