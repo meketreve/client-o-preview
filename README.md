@@ -1,10 +1,9 @@
 # client-o-preview
 
-Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Há duas implementações:
-- Python (tkinter + Win32 + Pillow) em `python/`
+Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Feito com IA:
 - C# (WPF + DWM Thumbnails) neste diretório
 
-## C# (WPF)
+##  Build C# (WPF)
 
 - Executar (dev)
   ```powershell
@@ -17,6 +16,10 @@ Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Há duas 
   ```
   Saída: `bin/Release/net8.0-windows/win-x64/publish/ClientOPreview.exe`
 
+## Release
+  se não quiser fazer a compilação, pode baixar o executável aqui (https://github.com/meketreve/client-o-preview/releases) .
+
+
 ### Uso
 - Sidebar: General, Thumbnail, Zoom, Overlay, Active Clients, About.
 - Active Clients: Refresh → selecione janelas → Open streams.
@@ -25,24 +28,6 @@ Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Há duas 
 - Thumbnail: ajuste Opacity/Width/Height (aplica nas janelas abertas).
 - Configuração persiste em `%APPDATA%/client-o-preview/settings.json` (compatível com o formato Python).
 
-## Python (tkinter)
-
-- Instalação
-  ```powershell
-  cd python
-  python -m venv .venv; .\.venv\Scripts\Activate.ps1
-  pip install --upgrade pip
-  pip install Pillow pyinstaller
-  ```
-- Executar (dev)
-  ```powershell
-  python app.py
-  ```
-- Build (PyInstaller)
-  ```powershell
-  pyinstaller --clean --noconfirm client-o-preview.spec
-  ```
-  Saída: `python/dist/client-o-preview.exe`
 
 ## Sobre
 - Versão: 1.0
