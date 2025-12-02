@@ -69,7 +69,7 @@ public partial class MainWindow : Window
         };
 
         // Load settings
-        _settings = _settingsSvc.Load();
+        _settings = _settingsSvc.GetSettings();
         var g = _settings.General;
         var t = _settings.Thumbnail;
         _minimizeInactive = g.MinimizeInactive;
@@ -96,14 +96,14 @@ public partial class MainWindow : Window
         _clientsPage.CloseAllRequested += (_, __) => CloseAllStreams();
 
         // Wire events (general)
-        _generalPage.PreviewsTopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.Save(_settings); };
-        _generalPage.MinimizeInactiveChanged += (_, v) => { _minimizeInactive = v; _settings.General.MinimizeInactive = v; _settingsSvc.Save(_settings); };
-        _generalPage.ReorderInactiveChanged += (_, v) => { _reorderInactive = v; _settings.General.ReorderInactive = v; _settingsSvc.Save(_settings); };
-        _generalPage.HideActivePreviewChanged += (_, v) => { _hideActivePreview = v; _settings.General.HideActivePreview = v; _settingsSvc.Save(_settings); };
-        _generalPage.HideWhenNotActiveChanged += (_, v) => { _hideWhenNotActive = v; _settings.General.HideWhenNotActive = v; _settingsSvc.Save(_settings); };
-        _generalPage.TrackLocationsChanged += (_, v) => { _trackLocations = v; _settings.General.TrackLocations = v; _settingsSvc.Save(_settings); };
-        _generalPage.UniqueLayoutChanged += (_, v) => { _uniqueLayout = v; _settings.General.UniqueLayout = v; _settingsSvc.Save(_settings); };
-        _generalPage.MinimizeToTrayChanged += (_, v) => { _settings.General.MinimizeToTray = v; _settingsSvc.Save(_settings); };
+        _generalPage.PreviewsTopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.SaveSettings(); };
+        _generalPage.MinimizeInactiveChanged += (_, v) => { _minimizeInactive = v; _settings.General.MinimizeInactive = v; _settingsSvc.SaveSettings(); };
+        _generalPage.ReorderInactiveChanged += (_, v) => { _reorderInactive = v; _settings.General.ReorderInactive = v; _settingsSvc.SaveSettings(); };
+        _generalPage.HideActivePreviewChanged += (_, v) => { _hideActivePreview = v; _settings.General.HideActivePreview = v; _settingsSvc.SaveSettings(); };
+        _generalPage.HideWhenNotActiveChanged += (_, v) => { _hideWhenNotActive = v; _settings.General.HideWhenNotActive = v; _settingsSvc.SaveSettings(); };
+        _generalPage.TrackLocationsChanged += (_, v) => { _trackLocations = v; _settings.General.TrackLocations = v; _settingsSvc.SaveSettings(); };
+        _generalPage.UniqueLayoutChanged += (_, v) => { _uniqueLayout = v; _settings.General.UniqueLayout = v; _settingsSvc.SaveSettings(); };
+        _generalPage.MinimizeToTrayChanged += (_, v) => { _settings.General.MinimizeToTray = v; _settingsSvc.SaveSettings(); };
 
         // Wire events (thumbnail)
         _thumbnailPage.ThumbnailChanged += (_, args) =>
@@ -115,9 +115,9 @@ public partial class MainWindow : Window
             _settings.Thumbnail.Height = _thumbHeight;
             _settings.Thumbnail.OpacityPct = _opacityPct;
             ApplyThumbnailToStreams();
-            _settingsSvc.Save(_settings);
+            _settingsSvc.SaveSettings();
         };
-        _thumbnailPage.TopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.Save(_settings); };
+        _thumbnailPage.TopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.SaveSettings(); };
 
         // Default page
         ContentHost.Content = _clientsPage;

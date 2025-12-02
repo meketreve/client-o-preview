@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\git-projeto\\client-o-preview\\ClientOPreview.csproj": {}
+    "/mnt/d/git-projeto/client-o-preview/ClientOPreview.csproj": {}
   },
   "projects": {
-    "D:\\git-projeto\\client-o-preview\\ClientOPreview.csproj": {
+    "/mnt/d/git-projeto/client-o-preview/ClientOPreview.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\git-projeto\\client-o-preview\\ClientOPreview.csproj",
+        "projectUniqueName": "/mnt/d/git-projeto/client-o-preview/ClientOPreview.csproj",
         "projectName": "ClientOPreview",
-        "projectPath": "D:\\git-projeto\\client-o-preview\\ClientOPreview.csproj",
-        "packagesPath": "C:\\Users\\meketreve\\.nuget\\packages\\",
-        "outputPath": "D:\\git-projeto\\client-o-preview\\obj\\",
+        "projectPath": "/mnt/d/git-projeto/client-o-preview/ClientOPreview.csproj",
+        "packagesPath": "/home/meketreve/.nuget/packages/",
+        "outputPath": "/mnt/d/git-projeto/client-o-preview/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\meketreve\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "/home/meketreve/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0-windows"
@@ -46,6 +42,14 @@
       "frameworks": {
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
+          "dependencies": {
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.22, )",
+              "autoReferenced": true
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -57,6 +61,16 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
@@ -65,7 +79,12 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.416/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
         }
       }
     }

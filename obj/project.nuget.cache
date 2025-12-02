@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "TmNmAOJX+QE=",
+  "dgSpecHash": "13XoYyxUIq8=",
   "success": true,
-  "projectFilePath": "D:\\git-projeto\\client-o-preview\\ClientOPreview.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/mnt/d/git-projeto/client-o-preview/ClientOPreview.csproj",
+  "expectedPackageFiles": [
+    "/home/meketreve/.nuget/packages/microsoft.net.illink.tasks/8.0.22/microsoft.net.illink.tasks.8.0.22.nupkg.sha512",
+    "/home/meketreve/.nuget/packages/microsoft.windowsdesktop.app.ref/8.0.22/microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "/home/meketreve/.nuget/packages/microsoft.netcore.app.host.win-x64/8.0.22/microsoft.netcore.app.host.win-x64.8.0.22.nupkg.sha512"
+  ],
   "logs": []
 }

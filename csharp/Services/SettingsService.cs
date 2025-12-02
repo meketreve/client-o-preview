@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using ClientOPreview.Models;
 
 namespace ClientOPreview.Services;
@@ -9,6 +8,8 @@ namespace ClientOPreview.Services;
 public class SettingsService
 {
     private readonly string _path;
+    private SettingsData _settings;
+    private readonly object _lock = new();
 
     public SettingsService()
     {
@@ -23,9 +24,10 @@ public class SettingsService
         {
             _path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json");
         }
+        _settings = Load();
     }
 
-    public SettingsData Load()
+    private SettingsData Load()
     {
         try
         {
@@ -64,7 +66,7 @@ public class SettingsService
         return new SettingsData();
     }
 
-    public void Save(SettingsData data)
+    private void Save()
     {
         try
         {
@@ -73,26 +75,26 @@ public class SettingsService
             writer.WriteStartObject();
             writer.WritePropertyName("general");
             writer.WriteStartObject();
-            writer.WriteBoolean("minimize_to_tray", data.General.MinimizeToTray);
-            writer.WriteBoolean("track_locations", data.General.TrackLocations);
-            writer.WriteBoolean("hide_active_preview", data.General.HideActivePreview);
-            writer.WriteBoolean("minimize_inactive", data.General.MinimizeInactive);
-            writer.WriteBoolean("reorder_inactive", data.General.ReorderInactive);
-            writer.WriteBoolean("previews_topmost", data.General.PreviewsTopmost);
-            writer.WriteBoolean("hide_when_not_active", data.General.HideWhenNotActive);
-            writer.WriteBoolean("unique_layout", data.General.UniqueLayout);
+            writer.WriteBoolean("minimize_to_tray", _settings.General.MinimizeToTray);
+            writer.WriteBoolean("track_locations", _settings.General.TrackLocations);
+            writer.WriteBoolean("hide_active_preview", _settings.General.HideActivePreview);
+            writer.WriteBoolean("minimize_inactive", _settings.General.MinimizeInactive);
+            writer.WriteBoolean("reorder_inactive", _settings.General.ReorderInactive);
+            writer.WriteBoolean("previews_topmost", _settings.General.PreviewsTopmost);
+            writer.WriteBoolean("hide_when_not_active", _settings.General.HideWhenNotActive);
+            writer.WriteBoolean("unique_layout", _settings.General.UniqueLayout);
             writer.WriteEndObject();
 
             writer.WritePropertyName("thumbnail");
             writer.WriteStartObject();
-            writer.WriteNumber("width", data.Thumbnail.Width);
-            writer.WriteNumber("height", data.Thumbnail.Height);
-            writer.WriteNumber("opacity_pct", data.Thumbnail.OpacityPct);
+            writer.WriteNumber("width", _settings.Thumbnail.Width);
+            writer.WriteNumber("height", _settings.Thumbnail.Height);
+            writer.WriteNumber("opacity_pct", _settings.Thumbnail.OpacityPct);
             writer.WriteEndObject();
 
             writer.WritePropertyName("layouts");
             writer.WriteStartObject();
-            foreach (var kv in data.Layouts)
+            foreach (var kv in _settings.Layouts)
             {
                 writer.WriteString(kv.Key, kv.Value);
             }
@@ -105,19 +107,33 @@ public class SettingsService
         catch { }
     }
 
+    public SettingsData GetSettings()
+    {
+        return _settings;
+    }
+
+    public void SaveSettings()
+    {
+        lock(_lock)
+        {
+            Save();
+        }
+    }
+
     public string? GetLayout(string key)
     {
-        try { return Load().Layouts.TryGetValue(key, out var g) ? g : null; } catch { return null; }
+        lock (_lock)
+        {
+            return _settings.Layouts.TryGetValue(key, out var g) ? g : null;
+        }
     }
 
     public void SetLayout(string key, string geometry)
     {
-        try
+        lock (_lock)
         {
-            var d = Load();
-            d.Layouts[key] = geometry;
-            Save(d);
+            _settings.Layouts[key] = geometry;
+            Save();
         }
-        catch { }
     }
 }
