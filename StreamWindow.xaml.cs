@@ -31,8 +31,19 @@ public partial class StreamWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        HideFromAltTab();
         EnsureThumbnail();
         UpdateThumbnailRect();
+    }
+
+    private void HideFromAltTab()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        // Remove APPWINDOW flag and add TOOLWINDOW flag
+        exStyle &= ~WS_EX_APPWINDOW;
+        exStyle |= WS_EX_TOOLWINDOW;
+        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
     }
 
     private void EnsureThumbnail()

@@ -11,6 +11,7 @@ public partial class ClientsPage : System.Windows.Controls.UserControl
 {
     public event EventHandler? RefreshRequested;
     public event EventHandler? OpenStreamsRequested;
+    public event EventHandler? CloseSelectedRequested;
     public event EventHandler? CloseAllRequested;
 
     public ClientsPage()
@@ -27,5 +28,6 @@ public partial class ClientsPage : System.Windows.Controls.UserControl
 
     private void OnRefresh(object sender, RoutedEventArgs e) => RefreshRequested?.Invoke(this, EventArgs.Empty);
     private void OnOpen(object sender, RoutedEventArgs e) => OpenStreamsRequested?.Invoke(this, EventArgs.Empty);
+    private void OnCloseSelected(object sender, RoutedEventArgs e) => CloseSelectedRequested?.Invoke(this, EventArgs.Empty);
     private void OnCloseAll(object sender, RoutedEventArgs e) => CloseAllRequested?.Invoke(this, EventArgs.Empty);
 }

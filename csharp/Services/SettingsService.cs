@@ -54,10 +54,36 @@ public class SettingsService
                     data.Thumbnail.Height = th.TryGetProperty("height", out var h) ? h.GetInt32() : data.Thumbnail.Height;
                     data.Thumbnail.OpacityPct = th.TryGetProperty("opacity_pct", out var op) ? op.GetInt32() : data.Thumbnail.OpacityPct;
                 }
+                if (doc.RootElement.TryGetProperty("hotkeys", out var hk))
+                {
+                    data.Hotkeys.Enabled = !hk.TryGetProperty("enabled", out var en) || en.GetBoolean();
+                    data.Hotkeys.CycleKey = hk.TryGetProperty("cycle_key", out var ck) ? ck.GetString() ?? "Tab" : "Tab";
+                    data.Hotkeys.CycleModifiers = hk.TryGetProperty("cycle_modifiers", out var cm) ? cm.GetString() ?? "Alt" : "Alt";
+                    data.Hotkeys.DirectModifiers = hk.TryGetProperty("direct_modifiers", out var dm) ? dm.GetString() ?? "Alt" : "Alt";
+                    if (hk.TryGetProperty("direct_keys", out var dk) && dk.ValueKind == JsonValueKind.Array)
+                    {
+                        data.Hotkeys.DirectKeys.Clear();
+                        foreach (var key in dk.EnumerateArray())
+                        {
+                            var keyStr = key.GetString();
+                            if (!string.IsNullOrEmpty(keyStr))
+                                data.Hotkeys.DirectKeys.Add(keyStr);
+                        }
+                    }
+                }
                 if (doc.RootElement.TryGetProperty("layouts", out var layouts) && layouts.ValueKind == JsonValueKind.Object)
                 {
                     foreach (var prop in layouts.EnumerateObject())
                         data.Layouts[prop.Name] = prop.Value.GetString() ?? string.Empty;
+                }
+                if (doc.RootElement.TryGetProperty("last_open_windows", out var lastOpen) && lastOpen.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in lastOpen.EnumerateArray())
+                    {
+                        var title = item.GetString();
+                        if (!string.IsNullOrEmpty(title))
+                            data.LastOpenWindows.Add(title);
+                    }
                 }
                 return data;
             }
@@ -92,6 +118,21 @@ public class SettingsService
             writer.WriteNumber("opacity_pct", _settings.Thumbnail.OpacityPct);
             writer.WriteEndObject();
 
+            writer.WritePropertyName("hotkeys");
+            writer.WriteStartObject();
+            writer.WriteBoolean("enabled", _settings.Hotkeys.Enabled);
+            writer.WriteString("cycle_key", _settings.Hotkeys.CycleKey);
+            writer.WriteString("cycle_modifiers", _settings.Hotkeys.CycleModifiers);
+            writer.WriteString("direct_modifiers", _settings.Hotkeys.DirectModifiers);
+            writer.WritePropertyName("direct_keys");
+            writer.WriteStartArray();
+            foreach (var key in _settings.Hotkeys.DirectKeys)
+            {
+                writer.WriteStringValue(key);
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+
             writer.WritePropertyName("layouts");
             writer.WriteStartObject();
             foreach (var kv in _settings.Layouts)
@@ -99,6 +140,14 @@ public class SettingsService
                 writer.WriteString(kv.Key, kv.Value);
             }
             writer.WriteEndObject();
+
+            writer.WritePropertyName("last_open_windows");
+            writer.WriteStartArray();
+            foreach (var title in _settings.LastOpenWindows)
+            {
+                writer.WriteStringValue(title);
+            }
+            writer.WriteEndArray();
 
             writer.WriteEndObject();
             writer.Flush();
@@ -134,6 +183,23 @@ public class SettingsService
         {
             _settings.Layouts[key] = geometry;
             Save();
+        }
+    }
+
+    public void SetLastOpenWindows(List<string> titles)
+    {
+        lock (_lock)
+        {
+            _settings.LastOpenWindows = titles;
+            Save();
+        }
+    }
+
+    public List<string> GetLastOpenWindows()
+    {
+        lock (_lock)
+        {
+            return new List<string>(_settings.LastOpenWindows);
         }
     }
 }

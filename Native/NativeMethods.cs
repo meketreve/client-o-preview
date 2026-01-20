@@ -57,4 +57,32 @@ internal static class NativeMethods
     internal const uint DWM_TNP_OPACITY = 0x00000004;
     internal const uint DWM_TNP_VISIBLE = 0x00000008;
     internal const uint DWM_TNP_SOURCECLIENTAREAONLY = 0x00000010;
+
+    // Global Hotkeys
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+    
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+    
+    internal const int WM_HOTKEY = 0x0312;
+    
+    // Modifier keys for hotkeys
+    internal const uint MOD_NONE = 0x0000;
+    internal const uint MOD_ALT = 0x0001;
+    internal const uint MOD_CONTROL = 0x0002;
+    internal const uint MOD_SHIFT = 0x0004;
+    internal const uint MOD_WIN = 0x0008;
+    internal const uint MOD_NOREPEAT = 0x4000;
+
+    // Window Style manipulation (for hiding from Alt+Tab)
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+    
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+    
+    internal const int GWL_EXSTYLE = -20;
+    internal const int WS_EX_TOOLWINDOW = 0x00000080;
+    internal const int WS_EX_APPWINDOW = 0x00040000;
 }

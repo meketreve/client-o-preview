@@ -10,6 +10,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
                 <Button Content="Refresh" Width="90" Margin="0,0,6,0" Click="OnRefresh"/>
                 <Button Content="Open streams" Width="120" Margin="0,0,6,0" Click="OnOpen"/>
+                <Button Content="Close selected" Width="100" Margin="0,0,6,0" Click="OnCloseSelected"/>
                 <Button Content="Close all" Width="90" Click="OnCloseAll"/>
             </StackPanel>
         </StackPanel>
