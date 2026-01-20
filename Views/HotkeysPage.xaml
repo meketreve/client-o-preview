@@ -56,16 +56,23 @@
             <CheckBox x:Name="ChkDirectShift" Content="Shift" Checked="OnDirectModifiersChanged" Unchecked="OnDirectModifiersChanged"/>
           </StackPanel>
           
-          <TextBlock Text="Keys for thumbnails 1-10:" Margin="0,0,0,8"/>
+          <TextBlock Text="Hotkey mappings:" Margin="0,0,0,8"/>
           
           <ItemsControl x:Name="DirectKeysList">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                  <TextBlock Text="{Binding Label}" Width="100" VerticalAlignment="Center"/>
-                  <TextBox Width="100" Text="{Binding Key}" IsReadOnly="True" 
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                  <TextBlock Text="{Binding Label}" Width="80" VerticalAlignment="Center"/>
+                  <TextBox Width="80" Text="{Binding Key}" IsReadOnly="True" 
                            PreviewKeyDown="OnDirectKeyDown" Tag="{Binding Index}"
-                           GotFocus="OnKeyBoxFocus" LostFocus="OnKeyBoxLostFocus"/>
+                           GotFocus="OnKeyBoxFocus" LostFocus="OnKeyBoxLostFocus"
+                           Margin="0,0,8,0"/>
+                  <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                  <ComboBox Width="180" Tag="{Binding Index}"
+                            ItemsSource="{Binding AvailableThumbnails}"
+                            SelectedItem="{Binding SelectedThumbnail}"
+                            SelectionChanged="OnThumbnailSelectionChanged"
+                            DisplayMemberPath="Title"/>
                 </StackPanel>
               </DataTemplate>
             </ItemsControl.ItemTemplate>

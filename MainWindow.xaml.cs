@@ -518,6 +518,22 @@ public partial class MainWindow : Window
     {
         if (_streams.Count == 0) return;
         
+        // Check if there's a mapping for this hotkey index
+        if (_settings.Hotkeys.DirectKeyMappings.TryGetValue(index, out var mappedTitle) && !string.IsNullOrEmpty(mappedTitle))
+        {
+            // Find hwnd by title
+            foreach (var kv in _streams)
+            {
+                var title = GetWindowTitle(kv.Key);
+                if (title == mappedTitle)
+                {
+                    ActivateSourceWindow(kv.Key);
+                    return;
+                }
+            }
+        }
+        
+        // Fallback: activate by index order
         var hwndList = _streams.Keys.ToList();
         if (index >= 0 && index < hwndList.Count)
         {

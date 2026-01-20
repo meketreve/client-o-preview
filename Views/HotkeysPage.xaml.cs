@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,11 +10,33 @@ using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
 
-public class DirectKeyItem
+public class ThumbnailOption : INotifyPropertyChanged
+{
+    public string Title { get; set; } = "";
+    public event PropertyChangedEventHandler? PropertyChanged;
+}
+
+public class DirectKeyItem : INotifyPropertyChanged
 {
     public int Index { get; set; }
     public string Label { get; set; } = "";
     public string Key { get; set; } = "";
+    
+    private ObservableCollection<ThumbnailOption> _availableThumbnails = new();
+    public ObservableCollection<ThumbnailOption> AvailableThumbnails
+    {
+        get => _availableThumbnails;
+        set { _availableThumbnails = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AvailableThumbnails))); }
+    }
+    
+    private ThumbnailOption? _selectedThumbnail;
+    public ThumbnailOption? SelectedThumbnail
+    {
+        get => _selectedThumbnail;
+        set { _selectedThumbnail = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedThumbnail))); }
+    }
+    
+    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 public class OpenThumbnailItem
@@ -26,6 +51,7 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
     
     private readonly List<DirectKeyItem> _directKeyItems = new();
     private readonly List<OpenThumbnailItem> _openThumbnailItems = new();
+    private readonly List<string> _availableTitles = new();
     private Hotkeys _hotkeys = new();
     private bool _loading = false;
 
@@ -52,25 +78,28 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
         ChkDirectCtrl.IsChecked = hotkeys.DirectModifiers.Contains("Ctrl");
         ChkDirectShift.IsChecked = hotkeys.DirectModifiers.Contains("Shift");
         
-        // Direct keys
+        // Direct keys - will be populated with thumbnails in UpdateOpenThumbnails
         _directKeyItems.Clear();
         for (int i = 0; i < 10; i++)
         {
             _directKeyItems.Add(new DirectKeyItem
             {
                 Index = i,
-                Label = $"Thumbnail {i + 1}:",
+                Label = $"Hotkey {i + 1}:",
                 Key = i < hotkeys.DirectKeys.Count ? hotkeys.DirectKeys[i] : ""
             });
         }
-        DirectKeysList.ItemsSource = null;
-        DirectKeysList.ItemsSource = _directKeyItems;
         
+        RefreshDirectKeysList();
         _loading = false;
     }
 
     public void UpdateOpenThumbnails(IEnumerable<string> titles)
     {
+        _availableTitles.Clear();
+        _availableTitles.AddRange(titles);
+        
+        // Update open thumbnails display list
         _openThumbnailItems.Clear();
         int index = 1;
         foreach (var title in titles)
@@ -86,10 +115,60 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
         OpenThumbnailsList.ItemsSource = null;
         OpenThumbnailsList.ItemsSource = _openThumbnailItems;
         
-        // Show/hide "no thumbnails" message
         TxtNoThumbnails.Visibility = _openThumbnailItems.Count == 0 
             ? Visibility.Visible 
             : Visibility.Collapsed;
+        
+        // Update dropdowns in direct keys list
+        RefreshDirectKeysList();
+    }
+
+    private void RefreshDirectKeysList()
+    {
+        _loading = true;
+        
+        // Create thumbnail options with "(None)" option
+        var options = new List<ThumbnailOption> { new ThumbnailOption { Title = "(None)" } };
+        options.AddRange(_availableTitles.Select(t => new ThumbnailOption { Title = t }));
+        
+        foreach (var item in _directKeyItems)
+        {
+            item.AvailableThumbnails = new ObservableCollection<ThumbnailOption>(options);
+            
+            // Set selected based on saved mapping
+            if (_hotkeys.DirectKeyMappings.TryGetValue(item.Index, out var mappedTitle) && !string.IsNullOrEmpty(mappedTitle))
+            {
+                item.SelectedThumbnail = item.AvailableThumbnails.FirstOrDefault(t => t.Title == mappedTitle);
+            }
+            else
+            {
+                item.SelectedThumbnail = item.AvailableThumbnails.FirstOrDefault(); // (None)
+            }
+        }
+        
+        DirectKeysList.ItemsSource = null;
+        DirectKeysList.ItemsSource = _directKeyItems;
+        
+        _loading = false;
+    }
+
+    private void OnThumbnailSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading) return;
+        
+        if (sender is System.Windows.Controls.ComboBox cb && cb.Tag is int index)
+        {
+            var selected = cb.SelectedItem as ThumbnailOption;
+            if (selected != null && selected.Title != "(None)")
+            {
+                _hotkeys.DirectKeyMappings[index] = selected.Title;
+            }
+            else
+            {
+                _hotkeys.DirectKeyMappings.Remove(index);
+            }
+            NotifyChanged();
+        }
     }
 
     private void OnEnabledChanged(object sender, RoutedEventArgs e)

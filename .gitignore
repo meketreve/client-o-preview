@@ -1,23 +1,49 @@
-# Ignore build artefacts e logs
-
-# .NET
+# Build artifacts
 bin/
 obj/
+publish/
+
+# IDE and editor files
 .vs/
+.vscode/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
+.idea/
+
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
 
 # Logs
 *.log
 logs/
 
-# Python artefacts
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# User-specific files
+*.rsuser
+
+# Windows image file caches
+*.stackdump
+
+# Rider
+.idea/
+
+# JetBrains Rider
+*.sln.iml
+
+# Python artifacts (legacy)
 python/build/
 python/dist/
 __pycache__/
 python/__pycache__/
-
-# PyInstaller cache
 *.pyc
 build/
 dist/

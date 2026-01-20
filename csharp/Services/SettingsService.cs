@@ -70,6 +70,16 @@ public class SettingsService
                                 data.Hotkeys.DirectKeys.Add(keyStr);
                         }
                     }
+                    if (hk.TryGetProperty("direct_key_mappings", out var dkm) && dkm.ValueKind == JsonValueKind.Object)
+                    {
+                        foreach (var prop in dkm.EnumerateObject())
+                        {
+                            if (int.TryParse(prop.Name, out var idx))
+                            {
+                                data.Hotkeys.DirectKeyMappings[idx] = prop.Value.GetString() ?? "";
+                            }
+                        }
+                    }
                 }
                 if (doc.RootElement.TryGetProperty("layouts", out var layouts) && layouts.ValueKind == JsonValueKind.Object)
                 {
@@ -131,6 +141,13 @@ public class SettingsService
                 writer.WriteStringValue(key);
             }
             writer.WriteEndArray();
+            writer.WritePropertyName("direct_key_mappings");
+            writer.WriteStartObject();
+            foreach (var kv in _settings.Hotkeys.DirectKeyMappings)
+            {
+                writer.WriteString(kv.Key.ToString(), kv.Value);
+            }
+            writer.WriteEndObject();
             writer.WriteEndObject();
 
             writer.WritePropertyName("layouts");
