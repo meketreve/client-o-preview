@@ -10,9 +10,11 @@
         Loaded="Window_Loaded"
         SizeChanged="Window_SizeChanged">
     <DockPanel>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="6" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" Background="Transparent">
-            <TextBlock x:Name="TxtTitle" Foreground="#d0d0d0" VerticalAlignment="Center"/>
-        </StackPanel>
+        <Border x:Name="TitleBar" DockPanel.Dock="Top" Background="#202020" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <StackPanel Orientation="Horizontal" Margin="6,4">
+                <TextBlock x:Name="TxtTitle" Foreground="#d0d0d0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+            </StackPanel>
+        </Border>
         <Grid MouseLeftButtonDown="Content_MouseLeftButtonDown" Background="Transparent">
             <!-- O DWM Thumbnail preencherá esta área (janela inteira) -->
         </Grid>

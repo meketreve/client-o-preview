@@ -25,7 +25,31 @@ public partial class StreamWindow : Window
         TxtTitle.Text = $"{_item.Title}  (0x{_item.HWnd.ToInt64():X})";
     }
 
+    private System.Windows.Media.Brush _activeColorBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 100, 200));
+
     public void SetOpacity(double alpha) => Opacity = alpha;
+
+    public void SetTitleFontSize(int fontSize)
+    {
+        TxtTitle.FontSize = fontSize;
+    }
+
+    public void SetHighlightColor(string hex)
+    {
+        try
+        {
+            var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+            _activeColorBrush = new System.Windows.Media.SolidColorBrush(color);
+        }
+        catch { }
+    }
+
+    public void SetActiveState(bool active)
+    {
+        TitleBar.Background = active 
+            ? _activeColorBrush
+            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(32, 32, 32));  // Default dark
+    }
     public void SetSize(int w, int h)
     {
         Width = Math.Max(120, w + 16);

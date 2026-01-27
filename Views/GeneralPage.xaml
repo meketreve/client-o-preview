@@ -20,7 +20,7 @@
       <CheckBox x:Name="ChkTopmost" Content="Previews always on top" Margin="0,6,0,0" IsChecked="True" Checked="OnChanged" Unchecked="OnChanged"/>
 
       <CheckBox x:Name="ChkHideWhenNotActive" Content="Hide previews when client is not active" Checked="OnChanged" Unchecked="OnChanged"/>
-      <CheckBox x:Name="ChkUniqueLayout" Content="Unique layout for each client" Checked="OnChanged" Unchecked="OnChanged"/>
+      <CheckBox x:Name="ChkUniqueLayout" Content="Save individual window positions" Checked="OnChanged" Unchecked="OnChanged"/>
     </StackPanel>
   </Grid>
 </UserControl>

@@ -20,6 +20,23 @@
         <Slider x:Name="SldOpacity" Minimum="20" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Width="240" Margin="8,0"/>
         <TextBlock x:Name="LblOpacity" Width="40"/>
       </StackPanel>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,8,0,0">
+        <TextBlock Text="Title Size" Width="80"/>
+        <Slider x:Name="SldFontSize" Minimum="6" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True" Width="240" Margin="8,0"/>
+        <TextBlock x:Name="LblFontSize" Width="40"/>
+      </StackPanel>
+      
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,12,0,0">
+        <TextBlock Text="Active Color" Width="80"/>
+        <StackPanel Orientation="Horizontal">
+            <Button Width="24" Height="24" Background="#2864C8" Margin="4,0" Click="OnColorPresetClick"/>
+            <Button Width="24" Height="24" Background="#E81123" Margin="4,0" Click="OnColorPresetClick"/>
+            <Button Width="24" Height="24" Background="#107C10" Margin="4,0" Click="OnColorPresetClick"/>
+            <Button Width="24" Height="24" Background="#FF8C00" Margin="4,0" Click="OnColorPresetClick"/>
+            <Button Width="24" Height="24" Background="#800080" Margin="4,0" Click="OnColorPresetClick"/>
+            <TextBox x:Name="TxtActiveColor" Width="80" Margin="12,0,0,0" VerticalContentAlignment="Center" MaxLength="7"/>
+        </StackPanel>
+      </StackPanel>
       <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
         <TextBlock Text="Width" Width="80"/>
         <TextBox x:Name="TxtWidth" Width="80" Margin="8,0"/>

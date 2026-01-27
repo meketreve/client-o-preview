@@ -27,6 +27,8 @@ Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Feito com
 - General: “Previews always on top”, “Minimize to System Tray”, “Track client locations”, “Hide preview of active client”, “Hide when not active”, “Unique layout for each client”.
 - Thumbnail: ajuste Opacity/Width/Height (aplica nas janelas abertas).
 - Configuração persiste em `%APPDATA%/client-o-preview/settings.json`.
+- Video mostrando como usar https://youtu.be/sjbJxVLL4h4 
+
 
 
 ## Sobre
