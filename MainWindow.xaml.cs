@@ -47,9 +47,19 @@ public partial class MainWindow : Window
     private int _thumbWidth = 160;
     private int _thumbHeight = 90;
     private int _opacityPct = 90; // 20..100
+    private int _titleFontSize = 12;
+    private string _activeHighlightColor = "#2864C8";
+
+    private bool _isExplicitExit = false;
 
     private int _staggerCount = 0;
     private readonly DispatcherTimer _fgTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+
+    public void ForceClose()
+    {
+        _isExplicitExit = true;
+        this.Close();
+    }
 
     public MainWindow()
     {
@@ -67,14 +77,15 @@ public partial class MainWindow : Window
             // Save which windows are open before closing
             SaveOpenWindowTitles();
             
-            if (_settings.General.MinimizeToTray)
+            if (_settings.General.MinimizeToTray && !_isExplicitExit)
             {
                 e.Cancel = true;
                 TrayHelper.MinimizeToTray(this);
             }
             else
             {
-                // Fechar todas as thumbnails ao fechar o app
+                // Real exit: close everything and clean up tray
+                TrayHelper.Ensure(this, false);
                 CloseAllStreams();
             }
         };
@@ -91,11 +102,13 @@ public partial class MainWindow : Window
         _hideWhenNotActive = g.HideWhenNotActive;
         _uniqueLayout = g.UniqueLayout;
         _thumbWidth = t.Width; _thumbHeight = t.Height; _opacityPct = t.OpacityPct;
+        _titleFontSize = t.TitleFontSize;
+        _activeHighlightColor = t.ActiveHighlightColor;
 
         // Instantiate pages
         _generalPage = new Views.GeneralPage();
         _generalPage.LoadFrom(g);
-        _thumbnailPage = new Views.ThumbnailPage(_thumbWidth, _thumbHeight, _opacityPct, _previewsTopmost);
+        _thumbnailPage = new Views.ThumbnailPage(_thumbWidth, _thumbHeight, _opacityPct, _titleFontSize, _activeHighlightColor, _previewsTopmost);
         _hotkeysPage = new Views.HotkeysPage();
         _hotkeysPage.LoadFrom(_settings.Hotkeys);
         _zoomPage = new Views.ZoomPage();
@@ -125,9 +138,13 @@ public partial class MainWindow : Window
             _thumbWidth = args.Width;
             _thumbHeight = args.Height;
             _opacityPct = args.OpacityPct;
+            _titleFontSize = args.TitleFontSize;
+            _activeHighlightColor = args.ActiveColor;
             _settings.Thumbnail.Width = _thumbWidth;
             _settings.Thumbnail.Height = _thumbHeight;
             _settings.Thumbnail.OpacityPct = _opacityPct;
+            _settings.Thumbnail.TitleFontSize = _titleFontSize;
+            _settings.Thumbnail.ActiveHighlightColor = _activeHighlightColor;
             ApplyThumbnailToStreams();
             _settingsSvc.SaveSettings();
         };
@@ -220,6 +237,8 @@ public partial class MainWindow : Window
         {
             w.SetOpacity(alpha);
             w.SetSize(_thumbWidth, _thumbHeight);
+            w.SetTitleFontSize(_titleFontSize);
+            w.SetHighlightColor(_activeHighlightColor);
         }
     }
 
@@ -265,6 +284,12 @@ public partial class MainWindow : Window
                 {
                     if (kv.Key == fg) kv.Value.Hide(); else kv.Value.Show();
                 }
+            }
+
+            // Always update active state for highlighting
+            foreach (var kv in _streams)
+            {
+                kv.Value.SetActiveState(kv.Key == fg);
             }
         }
         catch { }
@@ -457,6 +482,8 @@ public partial class MainWindow : Window
         // Apply global default size first
         win.SetSize(_thumbWidth, _thumbHeight);
         win.SetOpacity(_opacityPct / 100.0);
+        win.SetTitleFontSize(_titleFontSize);
+        win.SetHighlightColor(_activeHighlightColor);
 
         // Then apply saved geometry (might override size/position if title matches)
         ApplySavedGeometry(item.HWnd, win, occIndex);

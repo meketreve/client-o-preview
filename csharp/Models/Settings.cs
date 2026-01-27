@@ -29,6 +29,8 @@ public class Thumbnail
     public int Width { get; set; } = 160;
     public int Height { get; set; } = 90;
     public int OpacityPct { get; set; } = 90;
+    public int TitleFontSize { get; set; } = 12;
+    public string ActiveHighlightColor { get; set; } = "#2864C8"; // Default blue
 }
 
 public class Hotkeys

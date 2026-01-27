@@ -27,7 +27,7 @@ public static class TrayHelper
             _icon.DoubleClick += (s, e) => Restore(window);
             var menu = new ContextMenuStrip();
             menu.Items.Add("Open", null, (s, e) => Restore(window));
-            menu.Items.Add("Exit", null, (s, e) => { _icon!.Visible = false; window.Close(); });
+            menu.Items.Add("Exit", null, (s, e) => { _icon!.Visible = false; window.ForceClose(); });
             _icon.ContextMenuStrip = menu;
         }
         else
