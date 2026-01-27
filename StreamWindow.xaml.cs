@@ -13,6 +13,9 @@ public partial class StreamWindow : Window
     private readonly WindowItem _item;
     private IntPtr _thumb = IntPtr.Zero;
 
+    public string WindowTitle => _item.Title;
+    public int OccurrenceIndex { get; set; } = 0;
+
     public StreamWindow(MainWindow owner, WindowItem item)
     {
         _owner = owner;

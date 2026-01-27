@@ -4,6 +4,7 @@
         Title="Stream" Height="320" Width="520"
         Background="#101010"
         WindowStyle="None"
+        WindowStartupLocation="Manual"
         ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="False"
         Loaded="Window_Loaded"

@@ -10,10 +10,9 @@ using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
 
-public class ThumbnailOption : INotifyPropertyChanged
+public class ThumbnailOption
 {
     public string Title { get; set; } = "";
-    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 public class DirectKeyItem : INotifyPropertyChanged

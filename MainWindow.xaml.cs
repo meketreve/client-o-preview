@@ -44,10 +44,11 @@ public partial class MainWindow : Window
     private bool _hideWhenNotActive = false;
     private bool _uniqueLayout = true;
 
-    private int _thumbWidth = 384;
-    private int _thumbHeight = 216;
+    private int _thumbWidth = 160;
+    private int _thumbHeight = 90;
     private int _opacityPct = 90; // 20..100
 
+    private int _staggerCount = 0;
     private readonly DispatcherTimer _fgTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
     public MainWindow()
@@ -328,22 +329,51 @@ public partial class MainWindow : Window
         if (_uniqueLayout)
         {
             var title = GetWindowTitle(hwnd);
-            if (!string.IsNullOrEmpty(title))
+            if (string.IsNullOrEmpty(title)) return "default";
+            
+            int occIndex = 0;
+            if (_streams.TryGetValue(hwnd, out var sw))
             {
-                return $"title:{SanitizeLayoutKey(title)}";
+                occIndex = sw.OccurrenceIndex;
             }
-            return $"hwnd:{hwnd.ToInt64()}";
+            
+            return $"title:{occIndex}:{SanitizeLayoutKey(title)}";
         }
         return "default";
     }
 
-    private void ApplySavedGeometry(IntPtr hwnd, StreamWindow win)
+    private void ApplySavedGeometry(IntPtr hwnd, StreamWindow win, int occurrenceIndex)
     {
-        if (!_trackLocations) return;
-        var key = LayoutKeyForHwnd(hwnd);
+        var title = GetWindowTitle(hwnd);
+        var sanitizedTitle = SanitizeLayoutKey(title);
+        var key = !_trackLocations ? string.Empty : 
+                 _uniqueLayout ? $"title:{occurrenceIndex}:{sanitizedTitle}" : "default";
+
         if (string.IsNullOrEmpty(key)) return;
+        
         var g = _settingsSvc.GetLayout(key);
-        if (string.IsNullOrWhiteSpace(g)) return;
+        
+        // Migrate old key format (without occurrence index) if new one not found
+        if (string.IsNullOrWhiteSpace(g) && occurrenceIndex == 0 && _uniqueLayout)
+        {
+            var oldKey = $"title:{sanitizedTitle}";
+            g = _settingsSvc.GetLayout(oldKey);
+            if (!string.IsNullOrWhiteSpace(g))
+            {
+                // Move to new key and delete old
+                _settingsSvc.SetLayout(key, g);
+                _settingsSvc.SetLayout(oldKey, ""); // or some way to delete if I added a DeleteLayout method
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(g)) 
+        {
+            // Stagger if no layout found to avoid stacking
+            win.Left = 50 + (_staggerCount % 10) * 30;
+            win.Top = 50 + (_staggerCount % 10) * 30;
+            _staggerCount++;
+            return;
+        }
         try
         {
             // geometry formato: WIDTHxHEIGHT+LEFT+TOP
@@ -351,7 +381,12 @@ public partial class MainWindow : Window
             var wh = parts[0].Split('x');
             int w = int.Parse(wh[0]); int h = int.Parse(wh[1]);
             int left = int.Parse(parts[1]); int top = int.Parse(parts[2]);
-            win.Left = left; win.Top = top; win.SetSize(w, h);
+            
+            win.Left = left; 
+            win.Top = top;
+            // Set window size directly to restore exact saved state
+            win.Width = Math.Max(120, w);
+            win.Height = Math.Max(90, h);
         }
         catch { }
     }
@@ -389,13 +424,13 @@ public partial class MainWindow : Window
         if (lastTitles.Count == 0) return;
         
         var selfHwnd = new WindowInteropHelper(this).Handle;
-        var availableWindows = WindowEnumerator.GetTopLevelWindows(selfHwnd);
+        var availableWindows = WindowEnumerator.GetTopLevelWindows(selfHwnd).ToList();
         
         foreach (var savedTitle in lastTitles)
         {
-            // Find a window that matches the saved title
-            var match = availableWindows.FirstOrDefault(w => w.Title == savedTitle);
-            if (match != null && !_streams.ContainsKey(match.HWnd))
+            // Find a window that matches the saved title AND isn't already open
+            var match = availableWindows.FirstOrDefault(w => w.Title == savedTitle && !_streams.ContainsKey(w.HWnd));
+            if (match != null)
             {
                 OpenStreamForItem(match);
             }
@@ -409,13 +444,23 @@ public partial class MainWindow : Window
             _streams[item.HWnd].Activate();
             return;
         }
+
+        // Calculate occurrence index for windows with same title
+        int occIndex = _streams.Values.Count(w => w.WindowTitle == item.Title);
+
         var win = new StreamWindow(this, item)
         {
-            Topmost = _previewsTopmost
+            Topmost = _previewsTopmost,
+            OccurrenceIndex = occIndex
         };
-        ApplySavedGeometry(item.HWnd, win);
-        win.SetOpacity(_opacityPct / 100.0);
+
+        // Apply global default size first
         win.SetSize(_thumbWidth, _thumbHeight);
+        win.SetOpacity(_opacityPct / 100.0);
+
+        // Then apply saved geometry (might override size/position if title matches)
+        ApplySavedGeometry(item.HWnd, win, occIndex);
+
         win.Closed += (_, __) => _streams.Remove(item.HWnd);
         _streams[item.HWnd] = win;
         win.Show();

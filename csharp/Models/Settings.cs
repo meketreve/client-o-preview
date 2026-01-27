@@ -26,8 +26,8 @@ public class General
 
 public class Thumbnail
 {
-    public int Width { get; set; } = 384;
-    public int Height { get; set; } = 216;
+    public int Width { get; set; } = 160;
+    public int Height { get; set; } = 90;
     public int OpacityPct { get; set; } = 90;
 }
 
