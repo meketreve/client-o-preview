@@ -1,18 +1,21 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
 
-public record ThumbnailArgs(int Width, int Height, int OpacityPct, int TitleFontSize, string ActiveColor);
+public record ThumbnailArgs(int Width, int Height, int OpacityPct, int TitleFontSize, string ActiveColor, bool ShowTitle);
 
 public partial class ThumbnailPage : System.Windows.Controls.UserControl
 {
     public event EventHandler<ThumbnailArgs>? ThumbnailChanged;
     public event EventHandler<bool>? TopmostChanged;
+    private bool _loading = false;
 
     public ThumbnailPage(int width, int height, int opacityPct, int titleFontSize, string activeColor, bool topmost = true)
     {
+        _loading = true;
         InitializeComponent();
         TxtWidth.Text = width.ToString();
         TxtHeight.Text = height.ToString();
@@ -20,6 +23,20 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         SldFontSize.Value = titleFontSize;
         TxtActiveColor.Text = activeColor;
         ChkTopmost.IsChecked = topmost;
+        ChkShowTitle.IsChecked = true; // Default, will be updated by LoadFrom if needed
+        _loading = false;
+    }
+
+    public void LoadFrom(Thumbnail thumb)
+    {
+        _loading = true;
+        TxtWidth.Text = thumb.Width.ToString();
+        TxtHeight.Text = thumb.Height.ToString();
+        SldOpacity.Value = thumb.OpacityPct;
+        SldFontSize.Value = thumb.TitleFontSize;
+        TxtActiveColor.Text = thumb.ActiveHighlightColor;
+        ChkShowTitle.IsChecked = thumb.ShowTitle;
+        _loading = false;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -51,14 +68,16 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
 
     private void OnApply(object sender, RoutedEventArgs e)
     {
+        if (_loading) return;
         if (!int.TryParse(TxtWidth.Text, out var w)) w = 160;
         if (!int.TryParse(TxtHeight.Text, out var h)) h = 90;
         var pct = (int)SldOpacity.Value;
         var fs = (int)SldFontSize.Value;
         var color = TxtActiveColor.Text;
         if (string.IsNullOrWhiteSpace(color) || !color.StartsWith("#")) color = "#2864C8";
+        var showTitle = ChkShowTitle.IsChecked == true;
         
-        ThumbnailChanged?.Invoke(this, new ThumbnailArgs(w, h, pct, fs, color));
+        ThumbnailChanged?.Invoke(this, new ThumbnailArgs(w, h, pct, fs, color, showTitle));
     }
 
     private void OnTopmostChanged(object sender, RoutedEventArgs e)

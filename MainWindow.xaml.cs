@@ -36,12 +36,8 @@ public partial class MainWindow : Window
     private readonly SettingsService _settingsSvc = new();
     private SettingsData _settings = new();
 
-    private bool _minimizeInactive = false;
-    private bool _reorderInactive = true;
     private bool _previewsTopmost = true;
     private bool _trackLocations = true;
-    private bool _hideActivePreview = true;
-    private bool _hideWhenNotActive = false;
     private bool _uniqueLayout = true;
 
     private int _thumbWidth = 160;
@@ -49,6 +45,7 @@ public partial class MainWindow : Window
     private int _opacityPct = 90; // 20..100
     private int _titleFontSize = 12;
     private string _activeHighlightColor = "#2864C8";
+    private bool _showTitle = true;
 
     private bool _isExplicitExit = false;
 
@@ -90,25 +87,22 @@ public partial class MainWindow : Window
             }
         };
 
-        // Load settings
         _settings = _settingsSvc.GetSettings();
         var g = _settings.General;
         var t = _settings.Thumbnail;
-        _minimizeInactive = g.MinimizeInactive;
-        _reorderInactive = g.ReorderInactive;
         _previewsTopmost = g.PreviewsTopmost;
         _trackLocations = g.TrackLocations;
-        _hideActivePreview = g.HideActivePreview;
-        _hideWhenNotActive = g.HideWhenNotActive;
         _uniqueLayout = g.UniqueLayout;
         _thumbWidth = t.Width; _thumbHeight = t.Height; _opacityPct = t.OpacityPct;
         _titleFontSize = t.TitleFontSize;
         _activeHighlightColor = t.ActiveHighlightColor;
+        _showTitle = t.ShowTitle;
 
         // Instantiate pages
         _generalPage = new Views.GeneralPage();
         _generalPage.LoadFrom(g);
         _thumbnailPage = new Views.ThumbnailPage(_thumbWidth, _thumbHeight, _opacityPct, _titleFontSize, _activeHighlightColor, _previewsTopmost);
+        _thumbnailPage.LoadFrom(t);
         _hotkeysPage = new Views.HotkeysPage();
         _hotkeysPage.LoadFrom(_settings.Hotkeys);
         _zoomPage = new Views.ZoomPage();
@@ -125,12 +119,10 @@ public partial class MainWindow : Window
 
         // Wire events (general)
         _generalPage.PreviewsTopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.SaveSettings(); };
-        _generalPage.MinimizeInactiveChanged += (_, v) => { _minimizeInactive = v; _settings.General.MinimizeInactive = v; _settingsSvc.SaveSettings(); };
-        _generalPage.ReorderInactiveChanged += (_, v) => { _reorderInactive = v; _settings.General.ReorderInactive = v; _settingsSvc.SaveSettings(); };
-        _generalPage.HideActivePreviewChanged += (_, v) => { _hideActivePreview = v; _settings.General.HideActivePreview = v; _settingsSvc.SaveSettings(); };
-        _generalPage.HideWhenNotActiveChanged += (_, v) => { _hideWhenNotActive = v; _settings.General.HideWhenNotActive = v; _settingsSvc.SaveSettings(); };
         _generalPage.TrackLocationsChanged += (_, v) => { _trackLocations = v; _settings.General.TrackLocations = v; _settingsSvc.SaveSettings(); };
         _generalPage.UniqueLayoutChanged += (_, v) => { _uniqueLayout = v; _settings.General.UniqueLayout = v; _settingsSvc.SaveSettings(); };
+        _generalPage.SnapToGridChanged += (_, v) => { _settings.General.SnapToGrid = v; _settingsSvc.SaveSettings(); UpdateGridSettings(); };
+        _generalPage.GridSizeChanged += (_, v) => { _settings.General.GridSize = v; _settingsSvc.SaveSettings(); UpdateGridSettings(); };
         _generalPage.MinimizeToTrayChanged += (_, v) => { _settings.General.MinimizeToTray = v; _settingsSvc.SaveSettings(); };
 
         // Wire events (zoom)
@@ -150,11 +142,13 @@ public partial class MainWindow : Window
             _opacityPct = args.OpacityPct;
             _titleFontSize = args.TitleFontSize;
             _activeHighlightColor = args.ActiveColor;
+            _showTitle = args.ShowTitle;
             _settings.Thumbnail.Width = _thumbWidth;
             _settings.Thumbnail.Height = _thumbHeight;
             _settings.Thumbnail.OpacityPct = _opacityPct;
             _settings.Thumbnail.TitleFontSize = _titleFontSize;
             _settings.Thumbnail.ActiveHighlightColor = _activeHighlightColor;
+            _settings.Thumbnail.ShowTitle = _showTitle;
             ApplyThumbnailToStreams();
             _settingsSvc.SaveSettings();
         };
@@ -249,6 +243,7 @@ public partial class MainWindow : Window
             w.SetSize(_thumbWidth, _thumbHeight);
             w.SetTitleFontSize(_titleFontSize);
             w.SetHighlightColor(_activeHighlightColor);
+            w.SetShowTitle(_showTitle);
         }
     }
 
@@ -277,24 +272,6 @@ public partial class MainWindow : Window
             var fg = GetForegroundWindow();
             var tracked = new HashSet<IntPtr>(_streams.Keys);
             var thisHwnd = new WindowInteropHelper(this).Handle;
-            if (_hideWhenNotActive)
-            {
-                if (!tracked.Contains(fg) && fg != thisHwnd)
-                {
-                    foreach (var w in _streams.Values) w.Hide();
-                }
-                else
-                {
-                    foreach (var w in _streams.Values) w.Show();
-                }
-            }
-            if (_hideActivePreview)
-            {
-                foreach (var kv in _streams)
-                {
-                    if (kv.Key == fg) kv.Value.Hide(); else kv.Value.Show();
-                }
-            }
 
             // Always update active state for highlighting
             foreach (var kv in _streams)
@@ -309,25 +286,6 @@ public partial class MainWindow : Window
     {
         if (IsIconic(hwnd)) ShowWindow(hwnd, SW_RESTORE);
         SetForegroundWindow(hwnd);
-
-        if (_minimizeInactive)
-        {
-            foreach (var kv in _streams)
-            {
-                if (kv.Key == hwnd) continue;
-                ShowWindow(kv.Key, SW_MINIMIZE);
-            }
-        }
-        else if (_reorderInactive)
-        {
-            // Bring active to top; send others to back
-            SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-            foreach (var kv in _streams)
-            {
-                if (kv.Key == hwnd) continue;
-                SetWindowPos(kv.Key, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-            }
-        }
     }
 
     // ===== Layout persistence =====
@@ -494,7 +452,9 @@ public partial class MainWindow : Window
         win.SetOpacity(_opacityPct / 100.0);
         win.SetTitleFontSize(_titleFontSize);
         win.SetHighlightColor(_activeHighlightColor);
+        win.SetShowTitle(_showTitle);
         win.ApplyZoomSettings(_settings.Zoom);
+        win.ApplyGridSettings(_settings.General.SnapToGrid, _settings.General.GridSize);
 
         // Then apply saved geometry (might override size/position if title matches)
         ApplySavedGeometry(item.HWnd, win, occIndex);
@@ -631,6 +591,14 @@ public partial class MainWindow : Window
         foreach (var win in _streams.Values)
         {
             win.ApplyZoomSettings(_settings.Zoom);
+        }
+    }
+
+    private void UpdateGridSettings()
+    {
+        foreach (var win in _streams.Values)
+        {
+            win.ApplyGridSettings(_settings.General.SnapToGrid, _settings.General.GridSize);
         }
     }
 

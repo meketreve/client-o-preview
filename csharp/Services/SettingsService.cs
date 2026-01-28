@@ -41,12 +41,10 @@ public class SettingsService
                 {
                     data.General.MinimizeToTray = gen.TryGetProperty("minimize_to_tray", out var v1) && v1.GetBoolean();
                     data.General.TrackLocations = !gen.TryGetProperty("track_locations", out var v2) || v2.GetBoolean();
-                    data.General.HideActivePreview = gen.TryGetProperty("hide_active_preview", out var v3) && v3.GetBoolean();
-                    data.General.MinimizeInactive = gen.TryGetProperty("minimize_inactive", out var v4) && v4.GetBoolean();
-                    data.General.ReorderInactive = !gen.TryGetProperty("reorder_inactive", out var v5) || v5.GetBoolean();
                     data.General.PreviewsTopmost = !gen.TryGetProperty("previews_topmost", out var v6) || v6.GetBoolean();
-                    data.General.HideWhenNotActive = gen.TryGetProperty("hide_when_not_active", out var v7) && v7.GetBoolean();
                     data.General.UniqueLayout = !gen.TryGetProperty("unique_layout", out var v8) || v8.GetBoolean();
+                    data.General.SnapToGrid = gen.TryGetProperty("snap_to_grid", out var v9) && v9.GetBoolean();
+                    data.General.GridSize = gen.TryGetProperty("grid_size", out var v10) ? v10.GetInt32() : 20;
                 }
                 if (doc.RootElement.TryGetProperty("thumbnail", out var th))
                 {
@@ -55,6 +53,7 @@ public class SettingsService
                     data.Thumbnail.OpacityPct = th.TryGetProperty("opacity_pct", out var op) ? op.GetInt32() : data.Thumbnail.OpacityPct;
                     data.Thumbnail.TitleFontSize = th.TryGetProperty("title_font_size", out var fs) ? fs.GetInt32() : data.Thumbnail.TitleFontSize;
                     data.Thumbnail.ActiveHighlightColor = th.TryGetProperty("active_highlight_color", out var hc) ? hc.GetString() ?? "#2864C8" : data.Thumbnail.ActiveHighlightColor;
+                    data.Thumbnail.ShowTitle = !th.TryGetProperty("show_title", out var st) || st.GetBoolean();
                 }
                 if (doc.RootElement.TryGetProperty("hotkeys", out var hk))
                 {
@@ -123,12 +122,10 @@ public class SettingsService
             writer.WriteStartObject();
             writer.WriteBoolean("minimize_to_tray", _settings.General.MinimizeToTray);
             writer.WriteBoolean("track_locations", _settings.General.TrackLocations);
-            writer.WriteBoolean("hide_active_preview", _settings.General.HideActivePreview);
-            writer.WriteBoolean("minimize_inactive", _settings.General.MinimizeInactive);
-            writer.WriteBoolean("reorder_inactive", _settings.General.ReorderInactive);
             writer.WriteBoolean("previews_topmost", _settings.General.PreviewsTopmost);
-            writer.WriteBoolean("hide_when_not_active", _settings.General.HideWhenNotActive);
             writer.WriteBoolean("unique_layout", _settings.General.UniqueLayout);
+            writer.WriteBoolean("snap_to_grid", _settings.General.SnapToGrid);
+            writer.WriteNumber("grid_size", _settings.General.GridSize);
             writer.WriteEndObject();
 
             writer.WritePropertyName("thumbnail");
@@ -138,6 +135,7 @@ public class SettingsService
             writer.WriteNumber("opacity_pct", _settings.Thumbnail.OpacityPct);
             writer.WriteNumber("title_font_size", _settings.Thumbnail.TitleFontSize);
             writer.WriteString("active_highlight_color", _settings.Thumbnail.ActiveHighlightColor);
+            writer.WriteBoolean("show_title", _settings.Thumbnail.ShowTitle);
             writer.WriteEndObject();
 
             writer.WritePropertyName("hotkeys");

@@ -51,7 +51,6 @@ Na aba **Hotkeys**, você pode configurar uma tecla para alternar entre as janel
 ### 5. Configurações Gerais (General)
 *   **Previews always on top**: Mantém as miniaturas sempre visíveis sobre outras janelas.
 *   **Minimize to System Tray**: Ao fechar o menu principal, o app continua rodando perto do relógio do Windows.
-*   **Minimize inactive/Send to back**: Ajuda na organização das janelas reais ao clicar nos previews.
 *   **Unique layout**: Salva a posição de cada miniatura individualmente por título de janela.
 
 ### 6. Personalização Visual (Thumbnail)

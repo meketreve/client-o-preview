@@ -26,12 +26,10 @@ public class General
 {
     public bool MinimizeToTray { get; set; } = false;
     public bool TrackLocations { get; set; } = true;
-    public bool HideActivePreview { get; set; } = true;
-    public bool MinimizeInactive { get; set; } = false;
-    public bool ReorderInactive { get; set; } = true;
     public bool PreviewsTopmost { get; set; } = true;
-    public bool HideWhenNotActive { get; set; } = false;
     public bool UniqueLayout { get; set; } = true;
+    public bool SnapToGrid { get; set; } = false;
+    public int GridSize { get; set; } = 20;
 }
 
 public class Thumbnail
@@ -40,7 +38,8 @@ public class Thumbnail
     public int Height { get; set; } = 90;
     public int OpacityPct { get; set; } = 90;
     public int TitleFontSize { get; set; } = 12;
-    public string ActiveHighlightColor { get; set; } = "#2864C8"; // Default blue
+    public string ActiveHighlightColor { get; set; } = "#2864C8";
+    public bool ShowTitle { get; set; } = true;
 }
 
 public class Hotkeys

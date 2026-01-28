@@ -16,6 +16,9 @@ public partial class StreamWindow : Window
     private bool _isZoomed = false;
     private double _originalWidth = 0;
     private double _originalHeight = 0;
+    private bool _snapToGrid = false;
+    private int _gridSize = 20;
+    private bool _showTitle = true;
 
     public string WindowTitle => _item.Title;
     public int OccurrenceIndex { get; set; } = 0;
@@ -57,7 +60,15 @@ public partial class StreamWindow : Window
     public void SetSize(int w, int h)
     {
         Width = Math.Max(120, w + 16);
-        Height = Math.Max(90, h + 48);
+        // If title is hidden, we don't need the extra header space (approx 36-40px)
+        Height = Math.Max(90, h + (_showTitle ? 48 : 12));
+    }
+
+    public void SetShowTitle(bool show)
+    {
+        _showTitle = show;
+        TitleBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        UpdateThumbnailRect(_isZoomed);
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -98,12 +109,15 @@ public partial class StreamWindow : Window
         if (_thumb == IntPtr.Zero) return;
         var dpi = VisualTreeHelper.GetDpi(this);
         int w = Math.Max(1, (int)Math.Round(ActualWidth * dpi.DpiScaleX));
-        int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - 36); 
+        
+        // Adjust thumbnail area based on whether title bar is visible
+        int titleOffset = _showTitle ? (int)Math.Round(TitleBar.ActualHeight * dpi.DpiScaleY) : 0;
+        int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - titleOffset); 
         
         var props = new DWM_THUMBNAIL_PROPERTIES
         {
             dwFlags = DWM_TNP_RECTDESTINATION | DWM_TNP_VISIBLE | DWM_TNP_OPACITY,
-            rcDestination = new RECT { Left = 0, Top = 32, Right = w, Bottom = 32 + h },
+            rcDestination = new RECT { Left = 0, Top = titleOffset, Right = w, Bottom = titleOffset + h },
             opacity = 255,
             fVisible = true,
             fSourceClientAreaOnly = false
@@ -140,8 +154,35 @@ public partial class StreamWindow : Window
 
     protected override void OnLocationChanged(EventArgs e)
     {
+        if (_snapToGrid && _gridSize > 1)
+        {
+            double newLeft = Math.Round(Left / _gridSize) * _gridSize;
+            double newTop = Math.Round(Top / _gridSize) * _gridSize;
+
+            if (Math.Abs(newLeft - Left) > 0.1 || Math.Abs(newTop - Top) > 0.1)
+            {
+                Left = newLeft;
+                Top = newTop;
+                return; // Re-entry will happen
+            }
+        }
+
         base.OnLocationChanged(e);
         _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
+    }
+
+    public void ApplyGridSettings(bool enabled, int size)
+    {
+        _snapToGrid = enabled;
+        _gridSize = size;
+        if (_snapToGrid)
+        {
+            // Optional: snap immediately
+            double newLeft = Math.Round(Left / _gridSize) * _gridSize;
+            double newTop = Math.Round(Top / _gridSize) * _gridSize;
+            Left = newLeft;
+            Top = newTop;
+        }
     }
 
     private void Content_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
