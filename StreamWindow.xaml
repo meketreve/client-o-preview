@@ -8,7 +8,9 @@
         ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="False"
         Loaded="Window_Loaded"
-        SizeChanged="Window_SizeChanged">
+        SizeChanged="Window_SizeChanged"
+        MouseEnter="Window_MouseEnter"
+        MouseLeave="Window_MouseLeave">
     <DockPanel>
         <Border x:Name="TitleBar" DockPanel.Dock="Top" Background="#202020" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <StackPanel Orientation="Horizontal" Margin="6,4">

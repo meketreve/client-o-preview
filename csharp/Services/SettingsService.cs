@@ -83,6 +83,14 @@ public class SettingsService
                         }
                     }
                 }
+                if (doc.RootElement.TryGetProperty("zoom", out var zm))
+                {
+                    data.Zoom.ResizeOnHover = zm.TryGetProperty("resize_on_hover", out var rh) ? rh.GetBoolean() : (zm.TryGetProperty("zoom_on_hover", out var zh) && zh.GetBoolean());
+                    data.Zoom.InternalZoom = !zm.TryGetProperty("internal_zoom", out var iz) || iz.GetBoolean();
+                    data.Zoom.Magnification = zm.TryGetProperty("magnification", out var mag) ? mag.GetDouble() : 1.5;
+                    data.Zoom.OffsetX = zm.TryGetProperty("offset_x", out var ox) ? ox.GetDouble() : 0.5;
+                    data.Zoom.OffsetY = zm.TryGetProperty("offset_y", out var oy) ? oy.GetDouble() : 0.5;
+                }
                 if (doc.RootElement.TryGetProperty("layouts", out var layouts) && layouts.ValueKind == JsonValueKind.Object)
                 {
                     foreach (var prop in layouts.EnumerateObject())
@@ -152,6 +160,15 @@ public class SettingsService
                 writer.WriteString(kv.Key.ToString(), kv.Value);
             }
             writer.WriteEndObject();
+            writer.WriteEndObject();
+
+            writer.WritePropertyName("zoom");
+            writer.WriteStartObject();
+            writer.WriteBoolean("resize_on_hover", _settings.Zoom.ResizeOnHover);
+            writer.WriteBoolean("internal_zoom", _settings.Zoom.InternalZoom);
+            writer.WriteNumber("magnification", _settings.Zoom.Magnification);
+            writer.WriteNumber("offset_x", _settings.Zoom.OffsetX);
+            writer.WriteNumber("offset_y", _settings.Zoom.OffsetY);
             writer.WriteEndObject();
 
             writer.WritePropertyName("layouts");

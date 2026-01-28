@@ -112,6 +112,7 @@ public partial class MainWindow : Window
         _hotkeysPage = new Views.HotkeysPage();
         _hotkeysPage.LoadFrom(_settings.Hotkeys);
         _zoomPage = new Views.ZoomPage();
+        _zoomPage.LoadFrom(_settings.Zoom);
         _overlayPage = new Views.OverlayPage();
         _clientsPage = new Views.ClientsPage();
         _aboutPage = new Views.AboutPage();
@@ -131,6 +132,15 @@ public partial class MainWindow : Window
         _generalPage.TrackLocationsChanged += (_, v) => { _trackLocations = v; _settings.General.TrackLocations = v; _settingsSvc.SaveSettings(); };
         _generalPage.UniqueLayoutChanged += (_, v) => { _uniqueLayout = v; _settings.General.UniqueLayout = v; _settingsSvc.SaveSettings(); };
         _generalPage.MinimizeToTrayChanged += (_, v) => { _settings.General.MinimizeToTray = v; _settingsSvc.SaveSettings(); };
+
+        // Wire events (zoom)
+        _zoomPage.ZoomChanged += (_, z) =>
+        {
+            _settings.Zoom = z;
+            _settingsSvc.SaveSettings();
+            // Trigger update to any active thumbnails if needed
+            UpdateZoomSettings();
+        };
 
         // Wire events (thumbnail)
         _thumbnailPage.ThumbnailChanged += (_, args) =>
@@ -484,6 +494,7 @@ public partial class MainWindow : Window
         win.SetOpacity(_opacityPct / 100.0);
         win.SetTitleFontSize(_titleFontSize);
         win.SetHighlightColor(_activeHighlightColor);
+        win.ApplyZoomSettings(_settings.Zoom);
 
         // Then apply saved geometry (might override size/position if title matches)
         ApplySavedGeometry(item.HWnd, win, occIndex);
@@ -612,6 +623,14 @@ public partial class MainWindow : Window
             var hwnd = hwndList[index];
             ActivateSourceWindow(hwnd);
             _currentCycleIndex = index;
+        }
+    }
+
+    private void UpdateZoomSettings()
+    {
+        foreach (var win in _streams.Values)
+        {
+            win.ApplyZoomSettings(_settings.Zoom);
         }
     }
 

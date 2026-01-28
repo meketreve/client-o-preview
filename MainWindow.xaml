@@ -12,6 +12,7 @@
             <Button Content="General" Margin="0,0,0,6" Click="Nav_General"/>
             <Button Content="Thumbnail" Margin="0,0,0,6" Click="Nav_Thumbnail"/>
             <Button Content="Hotkeys" Margin="0,0,0,6" Click="Nav_Hotkeys"/>
+            <Button Content="Zoom" Margin="0,0,0,6" Click="Nav_Zoom"/>
             <Button Content="Active Clients" Margin="0,0,0,6" Click="Nav_Clients"/>
             <Button Content="About" Margin="0,0,0,6" Click="Nav_About"/>
         </StackPanel>

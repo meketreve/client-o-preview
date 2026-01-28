@@ -12,6 +12,10 @@ public partial class StreamWindow : Window
     private readonly MainWindow _owner;
     private readonly WindowItem _item;
     private IntPtr _thumb = IntPtr.Zero;
+    private Zoom _zoomSettings = new();
+    private bool _isZoomed = false;
+    private double _originalWidth = 0;
+    private double _originalHeight = 0;
 
     public string WindowTitle => _item.Title;
     public int OccurrenceIndex { get; set; } = 0;
@@ -89,12 +93,13 @@ public partial class StreamWindow : Window
         }
     }
 
-    private void UpdateThumbnailRect()
+    private void UpdateThumbnailRect(bool zoomed = false)
     {
         if (_thumb == IntPtr.Zero) return;
         var dpi = VisualTreeHelper.GetDpi(this);
         int w = Math.Max(1, (int)Math.Round(ActualWidth * dpi.DpiScaleX));
-        int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - 36); // desconta barra superior aproximada
+        int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - 36); 
+        
         var props = new DWM_THUMBNAIL_PROPERTIES
         {
             dwFlags = DWM_TNP_RECTDESTINATION | DWM_TNP_VISIBLE | DWM_TNP_OPACITY,
@@ -103,12 +108,33 @@ public partial class StreamWindow : Window
             fVisible = true,
             fSourceClientAreaOnly = false
         };
+
+        if (zoomed && _zoomSettings.InternalZoom)
+        {
+            if (DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) == 0)
+            {
+                // Use dynamic magnification factor
+                double mag = Math.Max(1.0, _zoomSettings.Magnification);
+                int sw = srcSize.cx;
+                int sh = srcSize.cy;
+                int zw = (int)(sw / mag);
+                int zh = (int)(sh / mag);
+
+                // Use dynamic offsets (0.0 to 1.0) for center focus
+                int left = (int)((sw - zw) * _zoomSettings.OffsetX);
+                int top = (int)((sh - zh) * _zoomSettings.OffsetY);
+                
+                props.dwFlags |= DWM_TNP_RECTSOURCE;
+                props.rcSource = new RECT { Left = left, Top = top, Right = left + zw, Bottom = top + zh };
+            }
+        }
+
         DwmUpdateThumbnailProperties(_thumb, ref props);
     }
 
     private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        UpdateThumbnailRect();
+        UpdateThumbnailRect(_isZoomed);
         _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
     }
 
@@ -148,6 +174,51 @@ public partial class StreamWindow : Window
         {
             // Ignora erro quando DragMove não pode ser chamado
         }
+    }
+
+    public void ApplyZoomSettings(Zoom zoom)
+    {
+        _zoomSettings = zoom;
+        UpdateZoomState(IsMouseOver);
+    }
+
+    private void UpdateZoomState(bool mouseOver)
+    {
+        // Renamed to ResizeOnHover as requested
+        bool shouldZoom = (_zoomSettings.ResizeOnHover || _zoomSettings.InternalZoom) && mouseOver;
+        
+        if (shouldZoom && !_isZoomed)
+        {
+            if (_zoomSettings.ResizeOnHover)
+            {
+                _originalWidth = Width;
+                _originalHeight = Height;
+                Width *= _zoomSettings.Magnification;
+                Height *= _zoomSettings.Magnification;
+            }
+            _isZoomed = true;
+            UpdateThumbnailRect(true);
+        }
+        else if (!shouldZoom && _isZoomed)
+        {
+            if (_zoomSettings.ResizeOnHover && _originalWidth > 0)
+            {
+                Width = _originalWidth;
+                Height = _originalHeight;
+            }
+            _isZoomed = false;
+            UpdateThumbnailRect(false);
+        }
+    }
+
+    private void Window_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        UpdateZoomState(true);
+    }
+
+    private void Window_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        UpdateZoomState(false);
     }
 
     protected override void OnClosed(EventArgs e)

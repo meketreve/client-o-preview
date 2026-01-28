@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "TmNmAOJX+QE=",
+  "dgSpecHash": "my5lIWD9DPE=",
   "success": true,
   "projectFilePath": "D:\\git-projeto\\client-o-preview\\ClientOPreview.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\meketreve\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.21\\microsoft.net.illink.tasks.8.0.21.nupkg.sha512"
+  ],
   "logs": []
 }

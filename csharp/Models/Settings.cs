@@ -7,8 +7,18 @@ public class SettingsData
     public General General { get; set; } = new();
     public Thumbnail Thumbnail { get; set; } = new();
     public Hotkeys Hotkeys { get; set; } = new();
+    public Zoom Zoom { get; set; } = new();
     public Dictionary<string, string> Layouts { get; set; } = new();
     public List<string> LastOpenWindows { get; set; } = new();
+}
+
+public class Zoom
+{
+    public bool ResizeOnHover { get; set; } = false;
+    public bool InternalZoom { get; set; } = true;
+    public double Magnification { get; set; } = 1.5;
+    public double OffsetX { get; set; } = 0.5; // 0.0 to 1.0 (center X)
+    public double OffsetY { get; set; } = 0.5; // 0.0 to 1.0 (center Y)
 }
 
 

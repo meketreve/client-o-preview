@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <StackPanel Margin="12">
     <TextBlock Text="About" FontWeight="SemiBold" Margin="0,0,0,8"/>
-    <TextBlock Text="client-o-preview 1.0" Margin="0,0,0,8"/>
+    <TextBlock Text="client-o-preview 0.5.1" Margin="0,0,0,8"/>
     <TextBlock TextWrapping="Wrap" Text="This program does NOT modify game interface or broadcast inputs. It only shows live previews."/>
   </StackPanel>
 </UserControl>
