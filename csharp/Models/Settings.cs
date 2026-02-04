@@ -39,7 +39,6 @@ public class Thumbnail
     public int OpacityPct { get; set; } = 90;
     public int TitleFontSize { get; set; } = 12;
     public string ActiveHighlightColor { get; set; } = "#2864C8";
-    public bool ShowTitle { get; set; } = true;
 }
 
 public class Hotkeys

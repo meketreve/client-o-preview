@@ -18,7 +18,6 @@ public partial class StreamWindow : Window
     private double _originalHeight = 0;
     private bool _snapToGrid = false;
     private int _gridSize = 20;
-    private bool _showTitle = true;
 
     public string WindowTitle => _item.Title;
     public int OccurrenceIndex { get; set; } = 0;
@@ -60,15 +59,7 @@ public partial class StreamWindow : Window
     public void SetSize(int w, int h)
     {
         Width = Math.Max(120, w + 16);
-        // If title is hidden, we don't need the extra header space (approx 36-40px)
-        Height = Math.Max(90, h + (_showTitle ? 48 : 12));
-    }
-
-    public void SetShowTitle(bool show)
-    {
-        _showTitle = show;
-        TitleBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        UpdateThumbnailRect(_isZoomed);
+        Height = Math.Max(90, h + 48);
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -110,8 +101,7 @@ public partial class StreamWindow : Window
         var dpi = VisualTreeHelper.GetDpi(this);
         int w = Math.Max(1, (int)Math.Round(ActualWidth * dpi.DpiScaleX));
         
-        // Adjust thumbnail area based on whether title bar is visible
-        int titleOffset = _showTitle ? (int)Math.Round(TitleBar.ActualHeight * dpi.DpiScaleY) : 0;
+        int titleOffset = (int)Math.Round(TitleBar.ActualHeight * dpi.DpiScaleY);
         int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - titleOffset); 
         
         var props = new DWM_THUMBNAIL_PROPERTIES
@@ -127,14 +117,12 @@ public partial class StreamWindow : Window
         {
             if (DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) == 0)
             {
-                // Use dynamic magnification factor
                 double mag = Math.Max(1.0, _zoomSettings.Magnification);
                 int sw = srcSize.cx;
                 int sh = srcSize.cy;
                 int zw = (int)(sw / mag);
                 int zh = (int)(sh / mag);
 
-                // Use dynamic offsets (0.0 to 1.0) for center focus
                 int left = (int)((sw - zw) * _zoomSettings.OffsetX);
                 int top = (int)((sh - zh) * _zoomSettings.OffsetY);
                 

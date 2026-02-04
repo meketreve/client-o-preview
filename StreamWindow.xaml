@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Stream" Height="320" Width="520"
         Background="#101010"
+        AllowsTransparency="False"
         WindowStyle="None"
         WindowStartupLocation="Manual"
         ResizeMode="CanResizeWithGrip"
@@ -11,14 +12,14 @@
         SizeChanged="Window_SizeChanged"
         MouseEnter="Window_MouseEnter"
         MouseLeave="Window_MouseLeave">
-    <DockPanel>
+    <DockPanel LastChildFill="True">
         <Border x:Name="TitleBar" DockPanel.Dock="Top" Background="#202020" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <StackPanel Orientation="Horizontal" Margin="6,4">
                 <TextBlock x:Name="TxtTitle" Foreground="#d0d0d0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
             </StackPanel>
         </Border>
-        <Grid MouseLeftButtonDown="Content_MouseLeftButtonDown" Background="Transparent">
-            <!-- O DWM Thumbnail preencherá esta área (janela inteira) -->
+        <Grid x:Name="ContentGrid" MouseLeftButtonDown="Content_MouseLeftButtonDown" MouseRightButtonDown="Window_MouseRightButtonDown" Background="Transparent">
+            <!-- O DWM Thumbnail preencherá esta área -->
         </Grid>
     </DockPanel>
 </Window>

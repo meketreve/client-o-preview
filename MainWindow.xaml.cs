@@ -45,7 +45,6 @@ public partial class MainWindow : Window
     private int _opacityPct = 90; // 20..100
     private int _titleFontSize = 12;
     private string _activeHighlightColor = "#2864C8";
-    private bool _showTitle = true;
 
     private bool _isExplicitExit = false;
 
@@ -96,7 +95,6 @@ public partial class MainWindow : Window
         _thumbWidth = t.Width; _thumbHeight = t.Height; _opacityPct = t.OpacityPct;
         _titleFontSize = t.TitleFontSize;
         _activeHighlightColor = t.ActiveHighlightColor;
-        _showTitle = t.ShowTitle;
 
         // Instantiate pages
         _generalPage = new Views.GeneralPage();
@@ -142,13 +140,7 @@ public partial class MainWindow : Window
             _opacityPct = args.OpacityPct;
             _titleFontSize = args.TitleFontSize;
             _activeHighlightColor = args.ActiveColor;
-            _showTitle = args.ShowTitle;
-            _settings.Thumbnail.Width = _thumbWidth;
-            _settings.Thumbnail.Height = _thumbHeight;
-            _settings.Thumbnail.OpacityPct = _opacityPct;
-            _settings.Thumbnail.TitleFontSize = _titleFontSize;
             _settings.Thumbnail.ActiveHighlightColor = _activeHighlightColor;
-            _settings.Thumbnail.ShowTitle = _showTitle;
             ApplyThumbnailToStreams();
             _settingsSvc.SaveSettings();
         };
@@ -243,7 +235,6 @@ public partial class MainWindow : Window
             w.SetSize(_thumbWidth, _thumbHeight);
             w.SetTitleFontSize(_titleFontSize);
             w.SetHighlightColor(_activeHighlightColor);
-            w.SetShowTitle(_showTitle);
         }
     }
 
@@ -452,7 +443,6 @@ public partial class MainWindow : Window
         win.SetOpacity(_opacityPct / 100.0);
         win.SetTitleFontSize(_titleFontSize);
         win.SetHighlightColor(_activeHighlightColor);
-        win.SetShowTitle(_showTitle);
         win.ApplyZoomSettings(_settings.Zoom);
         win.ApplyGridSettings(_settings.General.SnapToGrid, _settings.General.GridSize);
 

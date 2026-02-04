@@ -5,7 +5,7 @@ using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
 
-public record ThumbnailArgs(int Width, int Height, int OpacityPct, int TitleFontSize, string ActiveColor, bool ShowTitle);
+public record ThumbnailArgs(int Width, int Height, int OpacityPct, int TitleFontSize, string ActiveColor);
 
 public partial class ThumbnailPage : System.Windows.Controls.UserControl
 {
@@ -23,7 +23,6 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         SldFontSize.Value = titleFontSize;
         TxtActiveColor.Text = activeColor;
         ChkTopmost.IsChecked = topmost;
-        ChkShowTitle.IsChecked = true; // Default, will be updated by LoadFrom if needed
         _loading = false;
     }
 
@@ -35,7 +34,6 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         SldOpacity.Value = thumb.OpacityPct;
         SldFontSize.Value = thumb.TitleFontSize;
         TxtActiveColor.Text = thumb.ActiveHighlightColor;
-        ChkShowTitle.IsChecked = thumb.ShowTitle;
         _loading = false;
     }
 
@@ -75,9 +73,7 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         var fs = (int)SldFontSize.Value;
         var color = TxtActiveColor.Text;
         if (string.IsNullOrWhiteSpace(color) || !color.StartsWith("#")) color = "#2864C8";
-        var showTitle = ChkShowTitle.IsChecked == true;
-        
-        ThumbnailChanged?.Invoke(this, new ThumbnailArgs(w, h, pct, fs, color, showTitle));
+        ThumbnailChanged?.Invoke(this, new ThumbnailArgs(w, h, pct, fs, color));
     }
 
     private void OnTopmostChanged(object sender, RoutedEventArgs e)
