@@ -53,6 +53,8 @@ dist/
 .wolf/backups/
 .claude/settings.local.json
 
-# OpenWolf runtime state (rewritten every session)
+# OpenWolf runtime state (rewritten every session / scan / heartbeat)
 .wolf/hooks/_session.json
 .wolf/token-ledger.json
+.wolf/_scan-state.json
+.wolf/cron-state.json

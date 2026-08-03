@@ -1,12 +1,12 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-03T02:52:03.221Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-03T03:00:00.024Z
 > Files: 44 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
 - `.gitattributes` — Git attributes (~18 tok)
-- `.gitignore` — Git ignore rules (~155 tok)
+- `.gitignore` — Git ignore rules (~186 tok)
 - `App.xaml` (~72 tok)
 - `App.xaml.cs` — Class: App (~224 tok)
 - `build.bat` (~195 tok)
