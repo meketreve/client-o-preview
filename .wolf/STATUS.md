@@ -18,21 +18,31 @@
 - README: seção 4 "Foco de Região" (numeração das seções seguintes corrigida).
 - Build validado: `dotnet build` → **Build succeeded**, 0 warnings.
 
+### Versão / release
+- `<Version>0.6.0</Version>` no `ClientOPreview.csproj` virou **fonte única**; `Views/AboutPage.xaml.cs` lê do assembly (antes era texto chumbado no XAML e já estava defasado em 0.5.0). Bumpar = editar 1 linha do csproj.
+- Tag `v0.6.0` + release publicada com o `.exe`: https://github.com/meketreve/client-o-preview/releases/tag/v0.6.0
+- Merge feito em `main` (`2338678`), commit da versão `03916ec`.
+
+### Infra do repo
+- `.wolf/`, `.claude/` e `CLAUDE.md` versionados. Fora do git: `.wolf/dashboard-token` (credencial do dashboard local) e `.claude/settings.local.json`.
+- `.wolf/config.json`: `bin`, `obj`, `publish` adicionados aos `exclude_patterns` — sem isso o scan indexava 181 arquivos de build em vez de 44 de código.
+
 ---
 
 ## 🚀 Next phase
 
-**Goal:** _validar Region Focus em uso real (multi-cliente, DPI misto) e decidir sobre atalho de hotkey por região._
+**Goal:** _colher o feedback do teste real da v0.6.0 (o usuário e o Epic Suicide vão usar in-game) e corrigir o que aparecer._
 
 ### Acceptance criteria
-1. Recorte do painel de drones fica estável ao mover/redimensionar a preview.
-2. Preset por piloto reaplicado corretamente quando 2+ clientes têm o mesmo título (occurrence index).
-3. Overlay do seletor alinhado ao thumbnail em monitores com DPI diferente.
+1. Recorte do painel de drones estável ao mover/redimensionar a preview.
+2. Preset por piloto reaplicado certo quando 2+ clientes têm o mesmo título (occurrence index).
+3. Overlay do seletor alinhado ao thumbnail em monitor com DPI diferente do primário.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| edit | `RegionPickerWindow.xaml.cs` | ajuste de DPI por monitor, se aparecer desalinhamento |
+| edit | `RegionPickerWindow.xaml.cs` | `SyncOverlay()` usa o DPI da janela do picker; se desalinhar em setup multi-DPI, usar o DPI do monitor de destino |
+| edit | `.gitignore` | (pendente, usuário não decidiu) ignorar `.wolf/hooks/_session.json` e `.wolf/token-ledger.json`, que sujam o status a cada sessão |
 
 ### Closed decisions
 - Crop implementado com `DWM_TNP_RECTSOURCE` (não captura de tela) — mantém o "sem interação com o processo" prometido no README.
@@ -43,6 +53,7 @@
 ### Open decisions
 - Hotkey para alternar região ↔ janela inteira?
 - Presets globais por jogo (perfil) além do preset por piloto?
+- Versionar ou ignorar os arquivos de runtime do OpenWolf que mudam toda sessão?
 
 ---
 
@@ -64,8 +75,10 @@
 
 ```bash
 ~/.dotnet/dotnet build                      # compila no WSL (validação de sintaxe/tipos)
+~/.dotnet/dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained false
+git checkout -- obj/                        # SEMPRE após build no WSL: obj/ é versionado e recebe paths Linux
 dotnet run                                  # dev, no Windows
-dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained false
+gh release create vX.Y.Z <exe> --title ... --notes ...
 ```
 
 ---

@@ -18,7 +18,10 @@
 - **Usuários:** jogadores multi-cliente (Star Citizen e afins) — querem vigiar painéis específicos (drones, capacitor) sem gastar espaço de tela.
 - **WinForms habilitado no csproj** → `Point`, `Rectangle`, `Color`, `MouseEventArgs`, `KeyEventArgs` ficam ambíguos. Usar alias `using X = System.Windows...;` no topo do arquivo.
 - **DWM compõe o thumbnail acima do conteúdo da janela host** → overlay de UI sobre o preview precisa ser outra janela (`AllowsTransparency`, `Background="#01000000"` para manter hit-test).
-- **Build no WSL funciona** com `~/.dotnet/dotnet build` graças a `EnableWindowsTargeting=true` (só compila; rodar, só no Windows). O Windows tem só runtime, sem SDK.
+- **Build no WSL funciona** com `~/.dotnet/dotnet build` graças a `EnableWindowsTargeting=true` (só compila; rodar, só no Windows). O Windows tem só runtime (`Microsoft.WindowsDesktop.App 8.0.28`), sem SDK.
+- **`obj/` é versionado no repo** (entrou antes do `.gitignore`): todo build no WSL reescreve com paths Linux → rodar `git checkout -- obj/` depois de compilar.
+- **Versão do app**: `<Version>` no csproj + `AboutPage` lendo do assembly. Release = tag `vX.Y.Z` + `gh release create` com o `.exe` single-file.
+- Copiar `.exe` pra `/mnt/c/...` falha com I/O error se a versão anterior estiver rodando no Windows — salvar com nome versionado.
 
 ## Do-Not-Repeat
 

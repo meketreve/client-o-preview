@@ -50,4 +50,5 @@ dist/
 
 # OpenWolf / Claude Code (local-only)
 .wolf/dashboard-token
+.wolf/backups/
 .claude/settings.local.json
