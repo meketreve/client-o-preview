@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
+using ClientOPreview.Localization;
 
 namespace ClientOPreview;
 
@@ -26,8 +27,13 @@ public static class TrayHelper
             };
             _icon.DoubleClick += (s, e) => Restore(window);
             var menu = new ContextMenuStrip();
-            menu.Items.Add("Open", null, (s, e) => Restore(window));
-            menu.Items.Add("Exit", null, (s, e) => { _icon!.Visible = false; window.ForceClose(); });
+            var open = menu.Items.Add(Loc.Get("TrayOpen"), null, (s, e) => Restore(window));
+            var exit = menu.Items.Add(Loc.Get("TrayExit"), null, (s, e) => { _icon!.Visible = false; window.ForceClose(); });
+            Loc.LanguageChanged += (s, e) =>
+            {
+                open.Text = Loc.Get("TrayOpen");
+                exit.Text = Loc.Get("TrayExit");
+            };
             _icon.ContextMenuStrip = menu;
         }
         else
@@ -41,7 +47,7 @@ public static class TrayHelper
         Ensure(window, true);
         window.Hide();
         _icon!.BalloonTipTitle = "client-o-preview";
-        _icon.BalloonTipText = "Minimized to tray.";
+        _icon.BalloonTipText = Loc.Get("TrayMinimized");
         _icon.ShowBalloonTip(1000);
     }
 

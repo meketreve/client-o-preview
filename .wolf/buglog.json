@@ -1,4 +1,17 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-08-03T00:00:00Z",
+      "error_message": "usuário: \"as listas de região as vezes bugam e não altera\" — escolher um preset no combo da aba Region Focus às vezes não aplicava o recorte na preview",
+      "file": "MainWindow.xaml.cs",
+      "root_cause": "A associação preview ↔ preset era resolvida SÓ pela chave persistida `title:<occurrence>:<title>`. O título do cliente EVE muda em runtime (tela de login → nome do piloto) e o occurrence index muda quando uma preview com título repetido é fechada/reaberta, então a chave gravada no clique deixava de bater com a chave lida no ApplyRegionForStream.",
+      "fix": "Adicionado `_liveRegions: Dictionary<IntPtr,string?>` em MainWindow: enquanto a preview está aberta, o preset atribuído é resolvido pelo HWND (ResolveRegionName), com a chave por título só como fallback/persistência. AssignRegion() grava nos dois. Entrada removida no Closed da StreamWindow e zerada no delete do preset.",
+      "tags": ["region-focus", "wpf", "assignment", "hwnd", "title-drift", "settings"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T00:00:00Z"
+    }
+  ]
 }

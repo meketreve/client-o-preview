@@ -1,0 +1,18 @@
+<UserControl x:Class="ClientOPreview.Views.LanguagePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="clr-namespace:ClientOPreview.Localization"
+             mc:Ignorable="d">
+  <StackPanel Margin="10">
+    <TextBlock Text="{loc:Tr LanguageTitle}" FontWeight="SemiBold"/>
+    <TextBlock Text="{loc:Tr LanguageDesc}" Foreground="Gray" TextWrapping="Wrap" Margin="0,6,0,14"/>
+
+    <!-- Language names stay in their own language on purpose. -->
+    <RadioButton x:Name="RbPt" GroupName="Lang" Tag="pt-BR" Content="Português (Brasil)"
+                 Margin="0,0,0,10" Checked="OnLanguageChecked"/>
+    <RadioButton x:Name="RbEn" GroupName="Lang" Tag="en" Content="English"
+                 Checked="OnLanguageChecked"/>
+  </StackPanel>
+</UserControl>

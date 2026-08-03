@@ -3,15 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="clr-namespace:ClientOPreview.Localization"
              mc:Ignorable="d">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="8">
-            <TextBlock Text="Select windows:"/>
+            <TextBlock Text="{loc:Tr ClientsSelectWindows}"/>
             <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
-                <Button Content="Refresh" Width="90" Margin="0,0,6,0" Click="OnRefresh"/>
-                <Button Content="Open streams" Width="120" Margin="0,0,6,0" Click="OnOpen"/>
-                <Button Content="Close selected" Width="100" Margin="0,0,6,0" Click="OnCloseSelected"/>
-                <Button Content="Close all" Width="90" Click="OnCloseAll"/>
+                <Button Content="{loc:Tr ClientsRefresh}" MinWidth="90" Padding="8,2" Margin="0,0,6,0" Click="OnRefresh"/>
+                <Button Content="{loc:Tr ClientsOpenStreams}" MinWidth="120" Padding="8,2" Margin="0,0,6,0" Click="OnOpen"/>
+                <Button Content="{loc:Tr ClientsCloseSelected}" MinWidth="100" Padding="8,2" Margin="0,0,6,0" Click="OnCloseSelected"/>
+                <Button Content="{loc:Tr ClientsCloseAll}" MinWidth="90" Padding="8,2" Click="OnCloseAll"/>
             </StackPanel>
         </StackPanel>
         <ListBox x:Name="ListWindows" SelectionMode="Extended" DisplayMemberPath="Display" Margin="8"/>

@@ -55,9 +55,12 @@ Mostra **só um pedaço** da janela monitorada (painel de drones, capacitor, min
 *   Opções:
     *   **Keep crop proportions**: mantém o formato original do recorte (sem esticar a imagem).
     *   **Resize preview to the crop**: ajusta a altura da miniatura ao formato da região.
-*   Na aba **Region Focus** você reaplica qualquer preset salvo em qualquer miniatura pelo combo, limpa a região (**Clear region**) ou apaga presets antigos.
+O fluxo recomendado na aba **Region Focus** é em dois passos:
 
-A região é salva em coordenadas relativas (0–1), então continua correta mesmo se o cliente mudar de resolução. A associação preset ↔ miniatura é lembrada por título + ordem de abertura, e o zoom por hover continua funcionando **dentro** da região escolhida.
+1.  **Crie a região uma vez** — selecione uma preview para usar como tela de exemplo e clique em **Novo preset…**. Presets salvos são **imutáveis**: se você digitar um nome que já existe, o app recusa em vez de sobrescrever.
+2.  **Aplique nas outras contas** — selecione a preview e escolha o preset salvo no combo. Também dá para limpar a região (**Limpar região**), editar a região daquela preview (**Editar esta região…**) ou apagar presets antigos.
+
+A região é salva em coordenadas relativas (0–1), então continua correta mesmo se o cliente mudar de resolução. A associação preset ↔ miniatura é lembrada por título + ordem de abertura no `settings.json` e, enquanto a preview estiver aberta, pela própria janela — assim a seleção não "escapa" quando o título do cliente muda (tela de login → nome do piloto). O zoom por hover continua funcionando **dentro** da região escolhida.
 
 ### 5. Atalhos de Teclado (Hotkeys)
 Na aba **Hotkeys**, você pode configurar uma tecla para alternar entre as janelas abertas:
@@ -65,14 +68,18 @@ Na aba **Hotkeys**, você pode configurar uma tecla para alternar entre as janel
 *   **Device Filter**: O sistema detecta automaticamente seu teclado. Isso garante que a hotkey funcione apenas no dispositivo desejado.
 *   Ao pressionar a hotkey, o app trará a próxima janela da lista para o primeiro plano.
 
-### 6. Configurações Gerais (General)
-*   **Previews always on top**: Mantém as miniaturas sempre visíveis sobre outras janelas.
-*   **Minimize to System Tray**: Ao fechar o menu principal, o app continua rodando perto do relógio do Windows.
-*   **Unique layout**: Salva a posição de cada miniatura individualmente por título de janela.
+### 6. Miniatura (Thumbnail)
+A antiga aba **General** foi incorporada aqui — todas as opções de preview ficam em um lugar só.
 
-### 7. Personalização Visual (Thumbnail)
-*   Ajuste a **Opacidade** para deixar os previews semitransparentes.
-*   Defina a **Largura/Altura** padrão para todas as novas miniaturas.
+*   **Previews sempre no topo**: Mantém as miniaturas sempre visíveis sobre outras janelas.
+*   **Só no topo enquanto um cliente estiver em foco**: quando você sai para o navegador, Discord ou qualquer outra janela, as previews descem para trás; ao voltar para um cliente (ou para o próprio app), elas sobem de novo.
+*   **Opacidade**, **Tamanho do título**, **Cor ativa**, **Largura/Altura** padrão das novas miniaturas.
+*   **Minimizar para a bandeja**: Ao fechar o menu principal, o app continua rodando perto do relógio do Windows.
+*   **Lembrar a posição das previews** e **Salvar a posição de cada janela separadamente**.
+*   **Alinhar à grade ao mover** + **Tamanho da grade**.
+
+### 7. Idioma (Language)
+Aba **Idioma**: alterna a interface entre **Português (Brasil)** e **English**. A troca é aplicada na hora, sem reiniciar, e fica salva no `settings.json`. Na primeira execução o idioma segue o do Windows.
 
 ---
 

@@ -1,4 +1,5 @@
 using System.Windows;
+using ClientOPreview.Localization;
 
 namespace ClientOPreview;
 
@@ -9,7 +10,7 @@ public partial class App : System.Windows.Application
         this.DispatcherUnhandledException += (s, e) =>
         {
             try { System.IO.File.WriteAllText("error.log", e.Exception.ToString()); } catch { }
-            System.Windows.MessageBox.Show(e.Exception.ToString(), "Unhandled Exception");
+            System.Windows.MessageBox.Show(e.Exception.ToString(), Loc.Get("ErrorUnhandled"));
             e.Handled = true;
         };
     }
@@ -24,7 +25,7 @@ public partial class App : System.Windows.Application
         catch (Exception ex)
         {
             try { System.IO.File.WriteAllText("error.log", ex.ToString()); } catch { }
-            System.Windows.MessageBox.Show(ex.ToString(), "Startup Error");
+            System.Windows.MessageBox.Show(ex.ToString(), Loc.Get("ErrorStartup"));
             Shutdown(-1);
         }
     }
