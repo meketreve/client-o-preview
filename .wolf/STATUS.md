@@ -24,7 +24,7 @@
 - Merge feito em `main` (`2338678`), commit da versão `03916ec`.
 
 ### Infra do repo
-- `.wolf/`, `.claude/` e `CLAUDE.md` versionados. Fora do git: `.wolf/dashboard-token` (credencial do dashboard local) e `.claude/settings.local.json`.
+- `.wolf/`, `.claude/` e `CLAUDE.md` versionados. Fora do git: `.wolf/dashboard-token` (credencial do dashboard local), `.claude/settings.local.json`, `.wolf/backups/` e o estado de runtime (`.wolf/hooks/_session.json`, `.wolf/token-ledger.json`) que era reescrito a cada sessão.
 - `.wolf/config.json`: `bin`, `obj`, `publish` adicionados aos `exclude_patterns` — sem isso o scan indexava 181 arquivos de build em vez de 44 de código.
 
 ---
@@ -42,7 +42,6 @@
 | Type | File | Content |
 |---|---|---|
 | edit | `RegionPickerWindow.xaml.cs` | `SyncOverlay()` usa o DPI da janela do picker; se desalinhar em setup multi-DPI, usar o DPI do monitor de destino |
-| edit | `.gitignore` | (pendente, usuário não decidiu) ignorar `.wolf/hooks/_session.json` e `.wolf/token-ledger.json`, que sujam o status a cada sessão |
 
 ### Closed decisions
 - Crop implementado com `DWM_TNP_RECTSOURCE` (não captura de tela) — mantém o "sem interação com o processo" prometido no README.
@@ -53,7 +52,7 @@
 ### Open decisions
 - Hotkey para alternar região ↔ janela inteira?
 - Presets globais por jogo (perfil) além do preset por piloto?
-- Versionar ou ignorar os arquivos de runtime do OpenWolf que mudam toda sessão?
+- `.wolf/_scan-state.json` e `.wolf/cron-state.json` também mudam a cada scan/heartbeat — ignorar também?
 
 ---
 

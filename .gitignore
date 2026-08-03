@@ -52,3 +52,7 @@ dist/
 .wolf/dashboard-token
 .wolf/backups/
 .claude/settings.local.json
+
+# OpenWolf runtime state (rewritten every session)
+.wolf/hooks/_session.json
+.wolf/token-ledger.json
