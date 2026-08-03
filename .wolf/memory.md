@@ -41,3 +41,4 @@ Pacote de 4 pedidos do usuário, todos entregues e compilando (0 warnings):
 **Estado:** build de teste `client-o-preview-0.7.0-dev.exe` na pasta Downloads do Windows, **ainda não executada** (WPF não roda no WSL). Nada commitado — 27 modificados, 3 novos (`Localization/`, `Views/LanguagePage.*`), 2 deletados (`Views/GeneralPage.*`).
 **Próximo passo:** feedback do teste in-game → ajustar termos pt-BR → tirar o sufixo `-dev` do csproj → commit + release v0.7.0.
 | 06:00 | Teste in-game aprovado pelo usuário → versão final | ClientOPreview.csproj (0.7.0-dev → 0.7.0) | publish refeito, 284 KB | ~1k |
+| 06:15 | Commit + push + release v0.7.0 | branch feat/i18n-thumbnail-merge → main | ed79992 na main, tag v0.7.0 com ClientOPreview.exe (284 KB) | ~2k |
