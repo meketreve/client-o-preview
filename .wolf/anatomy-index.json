@@ -1,0 +1,463 @@
+{
+  "version": 1,
+  "meta": {
+    "lastScanned": "2026-08-02T23:20:06.515Z",
+    "fileCount": 50,
+    "hits": 0,
+    "misses": 0,
+    "renderedHash": "94d43bf8d5b83880fa45f2b77a0287cc0febbdbf4bf8e6e1a51b6bc24c4bf443",
+    "storeUpdatedAt": "2026-08-02T23:20:06.516Z"
+  },
+  "files": {
+    ".claude/commands/reframe.md": {
+      "description": "Mode: migrate [framework]",
+      "tokens": 551,
+      "hash": "17a75695be5d4629",
+      "size": 2221,
+      "mtimeMs": 1785712806481.5955,
+      "updatedAt": "2026-08-02T23:20:06.499Z",
+      "source": "scan"
+    },
+    ".claude/commands/security-audit.md": {
+      "description": "Layer 1 — Dependencies",
+      "tokens": 510,
+      "hash": "e6f7e0b7337c9c86",
+      "size": 2060,
+      "mtimeMs": 1785712806477.5955,
+      "updatedAt": "2026-08-02T23:20:06.499Z",
+      "source": "scan"
+    },
+    ".claude/rules/openwolf.md": {
+      "description": "",
+      "tokens": 328,
+      "hash": "6d735b2c1c54a916",
+      "size": 1323,
+      "mtimeMs": 1785712805257.5955,
+      "updatedAt": "2026-08-02T23:20:06.500Z",
+      "source": "scan"
+    },
+    ".claude/settings.json": {
+      "description": "",
+      "tokens": 514,
+      "hash": "f68759bb50af5ee4",
+      "size": 1799,
+      "mtimeMs": 1785712805253.5955,
+      "updatedAt": "2026-08-02T23:20:06.501Z",
+      "source": "scan"
+    },
+    ".gitattributes": {
+      "description": "Git attributes",
+      "tokens": 18,
+      "hash": "1a1dbe176bc233b4",
+      "size": 66,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.501Z",
+      "source": "scan"
+    },
+    ".gitignore": {
+      "description": "Git ignore rules",
+      "tokens": 131,
+      "hash": "cc82040ecd2a84b4",
+      "size": 489,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.501Z",
+      "source": "scan"
+    },
+    "App.xaml": {
+      "description": "",
+      "tokens": 72,
+      "hash": "195ca38cda79525a",
+      "size": 267,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.501Z",
+      "source": "scan"
+    },
+    "App.xaml.cs": {
+      "description": "Class: App",
+      "tokens": 224,
+      "hash": "fc38e6b58916a497",
+      "size": 839,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.502Z",
+      "source": "scan"
+    },
+    "build.bat": {
+      "description": "",
+      "tokens": 195,
+      "hash": "0e8a116d096276d6",
+      "size": 731,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.503Z",
+      "source": "scan"
+    },
+    "CLAUDE.md": {
+      "description": "OpenWolf",
+      "tokens": 57,
+      "hash": "b1ca356fa9d5f3a6",
+      "size": 225,
+      "mtimeMs": 1785712805257.5955,
+      "updatedAt": "2026-08-02T23:20:06.503Z",
+      "source": "scan"
+    },
+    "ClientOPreview.csproj": {
+      "description": "",
+      "tokens": 101,
+      "hash": "02d081d8bd2312e0",
+      "size": 376,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.503Z",
+      "source": "scan"
+    },
+    "csharp/Models/Settings.cs": {
+      "description": "Class: SettingsData",
+      "tokens": 510,
+      "hash": "9dd4c60ec90e2b7a",
+      "size": 1912,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.504Z",
+      "source": "scan"
+    },
+    "csharp/Services/SettingsService.cs": {
+      "description": "SettingsService: GetSettings, SaveSettings, SetLayout, SetLastOpenWindows + 1 more",
+      "tokens": 2783,
+      "hash": "debf6ecfc5aff1e7",
+      "size": 10434,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.504Z",
+      "source": "scan"
+    },
+    "MainWindow.xaml": {
+      "description": "",
+      "tokens": 311,
+      "hash": "b993710ef2457c49",
+      "size": 1166,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.504Z",
+      "source": "scan"
+    },
+    "MainWindow.xaml.cs": {
+      "description": "MainWindow: ForceClose",
+      "tokens": 5565,
+      "hash": "779520bc0f1053c0",
+      "size": 20868,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.505Z",
+      "source": "scan"
+    },
+    "Models/WindowItem.cs": {
+      "description": "Class: WindowItem",
+      "tokens": 63,
+      "hash": "938b2c0a22edcbd3",
+      "size": 233,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.505Z",
+      "source": "scan"
+    },
+    "Native/NativeMethods.cs": {
+      "description": "Class: NativeMethods",
+      "tokens": 1222,
+      "hash": "8ff94f32f2b0f36a",
+      "size": 4582,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.505Z",
+      "source": "scan"
+    },
+    "obj/ClientOPreview.csproj.nuget.dgspec.json": {
+      "description": "",
+      "tokens": 647,
+      "hash": "f9208110fca4adc2",
+      "size": 2262,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.506Z",
+      "source": "scan"
+    },
+    "obj/ClientOPreview.csproj.nuget.g.props": {
+      "description": "",
+      "tokens": 346,
+      "hash": "837f22fc8d28826a",
+      "size": 1296,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.506Z",
+      "source": "scan"
+    },
+    "obj/ClientOPreview.csproj.nuget.g.targets": {
+      "description": "",
+      "tokens": 40,
+      "hash": "b14461e0cb1be3f7",
+      "size": 149,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.506Z",
+      "source": "scan"
+    },
+    "obj/Debug/net8.0-windows/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs": {
+      "description": "<autogenerated />",
+      "tokens": 52,
+      "hash": "ae41ca1e67556e4b",
+      "size": 194,
+      "mtimeMs": 1785712754353.5952,
+      "updatedAt": "2026-08-02T23:20:06.507Z",
+      "source": "scan"
+    },
+    "obj/Debug/net8.0-windows/ClientOPreview.assets.cache": {
+      "description": "",
+      "tokens": 62,
+      "hash": "1b1dd6f7f3d56e4a",
+      "size": 232,
+      "mtimeMs": 1785712754353.5952,
+      "updatedAt": "2026-08-02T23:20:06.507Z",
+      "source": "scan"
+    },
+    "obj/Debug/net8.0-windows/ClientOPreview.csproj.FileListAbsolute.txt": {
+      "description": "",
+      "tokens": 739,
+      "hash": "27fbe64318f456cc",
+      "size": 2953,
+      "mtimeMs": 1785712754353.5952,
+      "updatedAt": "2026-08-02T23:20:06.507Z",
+      "source": "scan"
+    },
+    "obj/Debug/net8.0-windows/ClientOPreview.GlobalUsings.g.cs": {
+      "description": "<auto-generated/>",
+      "tokens": 80,
+      "hash": "5fc2dc5eaabaebd7",
+      "size": 297,
+      "mtimeMs": 1785712754353.5952,
+      "updatedAt": "2026-08-02T23:20:06.508Z",
+      "source": "scan"
+    },
+    "obj/project.assets.json": {
+      "description": "",
+      "tokens": 650,
+      "hash": "1e47e5718f04ba5c",
+      "size": 2273,
+      "mtimeMs": 1785712754357.5952,
+      "updatedAt": "2026-08-02T23:20:06.508Z",
+      "source": "scan"
+    },
+    "obj/project.nuget.cache": {
+      "description": "",
+      "tokens": 52,
+      "hash": "aecc8b5cea3e8a40",
+      "size": 194,
+      "mtimeMs": 1785712754361.5952,
+      "updatedAt": "2026-08-02T23:20:06.508Z",
+      "source": "scan"
+    },
+    "obj/Release/net8.0-windows/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs": {
+      "description": "<autogenerated />",
+      "tokens": 52,
+      "hash": "ae41ca1e67556e4b",
+      "size": 194,
+      "mtimeMs": 1785712754357.5952,
+      "updatedAt": "2026-08-02T23:20:06.508Z",
+      "source": "scan"
+    },
+    "obj/Release/net8.0-windows/ClientOPreview.assets.cache": {
+      "description": "",
+      "tokens": 62,
+      "hash": "2731ee7bb64f74d2",
+      "size": 232,
+      "mtimeMs": 1785712754357.5952,
+      "updatedAt": "2026-08-02T23:20:06.508Z",
+      "source": "scan"
+    },
+    "obj/Release/net8.0-windows/ClientOPreview.csproj.FileListAbsolute.txt": {
+      "description": "",
+      "tokens": 775,
+      "hash": "f0680c712dacd8d0",
+      "size": 3099,
+      "mtimeMs": 1785712754357.5952,
+      "updatedAt": "2026-08-02T23:20:06.509Z",
+      "source": "scan"
+    },
+    "obj/Release/net8.0-windows/ClientOPreview.GlobalUsings.g.cs": {
+      "description": "<auto-generated/>",
+      "tokens": 80,
+      "hash": "5fc2dc5eaabaebd7",
+      "size": 297,
+      "mtimeMs": 1785712754357.5952,
+      "updatedAt": "2026-08-02T23:20:06.509Z",
+      "source": "scan"
+    },
+    "README.md": {
+      "description": "Project documentation",
+      "tokens": 839,
+      "hash": "2fde8d36651fee50",
+      "size": 3414,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.509Z",
+      "source": "scan"
+    },
+    "Services/WindowEnumerator.cs": {
+      "description": "Class: WindowEnumerator",
+      "tokens": 361,
+      "hash": "c5268d7622efc1ad",
+      "size": 1353,
+      "mtimeMs": 1785712754341.5952,
+      "updatedAt": "2026-08-02T23:20:06.509Z",
+      "source": "scan"
+    },
+    "StreamWindow.xaml": {
+      "description": "",
+      "tokens": 333,
+      "hash": "aad3244955daf15a",
+      "size": 1249,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.509Z",
+      "source": "scan"
+    },
+    "StreamWindow.xaml.cs": {
+      "description": "StreamWindow: SetOpacity, SetTitleFontSize, SetHighlightColor, SetActiveState + 3 more",
+      "tokens": 2155,
+      "hash": "c04e2b448a4d0063",
+      "size": 8081,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.510Z",
+      "source": "scan"
+    },
+    "TrayHelper.cs": {
+      "description": "TrayHelper: Ensure, MinimizeToTray",
+      "tokens": 406,
+      "hash": "2bd7ac50a010ad5f",
+      "size": 1522,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.510Z",
+      "source": "scan"
+    },
+    "Views/AboutPage.xaml": {
+      "description": "Declares or",
+      "tokens": 142,
+      "hash": "a6fd921424abb9ce",
+      "size": 531,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.510Z",
+      "source": "scan"
+    },
+    "Views/AboutPage.xaml.cs": {
+      "description": "Class: AboutPage",
+      "tokens": 51,
+      "hash": "6080f01b92b7cecb",
+      "size": 188,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.511Z",
+      "source": "scan"
+    },
+    "Views/ClientsPage.xaml": {
+      "description": "",
+      "tokens": 306,
+      "hash": "59eae6d58af2ce5e",
+      "size": 1146,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.511Z",
+      "source": "scan"
+    },
+    "Views/ClientsPage.xaml.cs": {
+      "description": "ClientsPage: SetWindows",
+      "tokens": 323,
+      "hash": "b094e9915c10c79c",
+      "size": 1209,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.511Z",
+      "source": "scan"
+    },
+    "Views/GeneralPage.xaml": {
+      "description": "",
+      "tokens": 469,
+      "hash": "38842abb3bf396e8",
+      "size": 1757,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.511Z",
+      "source": "scan"
+    },
+    "Views/GeneralPage.xaml.cs": {
+      "description": "GeneralPage: LoadFrom",
+      "tokens": 479,
+      "hash": "e2053d9c14b3911d",
+      "size": 1794,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.511Z",
+      "source": "scan"
+    },
+    "Views/HotkeysPage.xaml": {
+      "description": "",
+      "tokens": 1633,
+      "hash": "20857bf242b563af",
+      "size": 6125,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.512Z",
+      "source": "scan"
+    },
+    "Views/HotkeysPage.xaml.cs": {
+      "description": "ThumbnailOption: LoadFrom, UpdateOpenThumbnails",
+      "tokens": 2348,
+      "hash": "f0c8a4fbe6ba043d",
+      "size": 8805,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.512Z",
+      "source": "scan"
+    },
+    "Views/OverlayPage.xaml": {
+      "description": "",
+      "tokens": 94,
+      "hash": "194543dd638c48a5",
+      "size": 349,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.512Z",
+      "source": "scan"
+    },
+    "Views/OverlayPage.xaml.cs": {
+      "description": "Class: OverlayPage",
+      "tokens": 52,
+      "hash": "6dc2b87a8896ec92",
+      "size": 192,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.512Z",
+      "source": "scan"
+    },
+    "Views/ThumbnailPage.xaml": {
+      "description": "",
+      "tokens": 762,
+      "hash": "68c12b63569b0a45",
+      "size": 2855,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.512Z",
+      "source": "scan"
+    },
+    "Views/ThumbnailPage.xaml.cs": {
+      "description": "ThumbnailPage: ThumbnailArgs, LoadFrom",
+      "tokens": 752,
+      "hash": "ebc09fed42b6fe75",
+      "size": 2819,
+      "mtimeMs": 1785712754345.5952,
+      "updatedAt": "2026-08-02T23:20:06.513Z",
+      "source": "scan"
+    },
+    "Views/ZoomPage.xaml": {
+      "description": "",
+      "tokens": 630,
+      "hash": "9a665f74ec514814",
+      "size": 2361,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.513Z",
+      "source": "scan"
+    },
+    "Views/ZoomPage.xaml.cs": {
+      "description": "ZoomPage: LoadFrom",
+      "tokens": 331,
+      "hash": "4126c444b0215fca",
+      "size": 1240,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.513Z",
+      "source": "scan"
+    },
+    "WARP.md": {
+      "description": "WARP.md",
+      "tokens": 257,
+      "hash": "b1e7840554d5c27a",
+      "size": 1039,
+      "mtimeMs": 1785712754349.5952,
+      "updatedAt": "2026-08-02T23:20:06.513Z",
+      "source": "scan"
+    }
+  }
+}
