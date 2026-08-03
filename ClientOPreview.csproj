@@ -7,5 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Single source of truth for the version: the About page reads it from the assembly. -->
+    <Version>0.6.0</Version>
   </PropertyGroup>
 </Project>
