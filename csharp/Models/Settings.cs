@@ -8,8 +8,68 @@ public class SettingsData
     public Thumbnail Thumbnail { get; set; } = new();
     public Hotkeys Hotkeys { get; set; } = new();
     public Zoom Zoom { get; set; } = new();
+    public RegionSettings Regions { get; set; } = new();
     public Dictionary<string, string> Layouts { get; set; } = new();
     public List<string> LastOpenWindows { get; set; } = new();
+}
+
+// A named crop of the source window, stored normalized (0.0 - 1.0) so it survives
+// resolution changes of the monitored client.
+public class RegionPreset
+{
+    public string Name { get; set; } = string.Empty;
+    public double X { get; set; } = 0.0;
+    public double Y { get; set; } = 0.0;
+    public double W { get; set; } = 1.0;
+    public double H { get; set; } = 1.0;
+    // Letterbox the preview so the crop keeps its original proportions.
+    public bool LockAspect { get; set; } = true;
+
+    public RegionPreset Clone() => new()
+    {
+        Name = Name, X = X, Y = Y, W = W, H = H, LockAspect = LockAspect
+    };
+}
+
+public class RegionSettings
+{
+    public List<RegionPreset> Presets { get; set; } = new();
+    // Layout key of a stream (title:occurrence:title) -> preset name
+    public Dictionary<string, string> Assignments { get; set; } = new();
+
+    public RegionPreset? FindPreset(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        foreach (var p in Presets)
+        {
+            if (string.Equals(p.Name, name, System.StringComparison.OrdinalIgnoreCase)) return p;
+        }
+        return null;
+    }
+
+    public void UpsertPreset(RegionPreset preset)
+    {
+        for (int i = 0; i < Presets.Count; i++)
+        {
+            if (string.Equals(Presets[i].Name, preset.Name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                Presets[i] = preset;
+                return;
+            }
+        }
+        Presets.Add(preset);
+    }
+
+    public void RemovePreset(string name)
+    {
+        Presets.RemoveAll(p => string.Equals(p.Name, name, System.StringComparison.OrdinalIgnoreCase));
+        var orphans = new List<string>();
+        foreach (var kv in Assignments)
+        {
+            if (string.Equals(kv.Value, name, System.StringComparison.OrdinalIgnoreCase)) orphans.Add(kv.Key);
+        }
+        foreach (var key in orphans) Assignments.Remove(key);
+    }
 }
 
 public class Zoom
