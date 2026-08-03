@@ -89,6 +89,31 @@ public class SettingsService
                     data.Zoom.OffsetX = zm.TryGetProperty("offset_x", out var ox) ? ox.GetDouble() : 0.5;
                     data.Zoom.OffsetY = zm.TryGetProperty("offset_y", out var oy) ? oy.GetDouble() : 0.5;
                 }
+                if (doc.RootElement.TryGetProperty("regions", out var rg) && rg.ValueKind == JsonValueKind.Object)
+                {
+                    if (rg.TryGetProperty("presets", out var presets) && presets.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var p in presets.EnumerateArray())
+                        {
+                            var name = p.TryGetProperty("name", out var pn) ? pn.GetString() ?? "" : "";
+                            if (string.IsNullOrWhiteSpace(name)) continue;
+                            data.Regions.Presets.Add(new RegionPreset
+                            {
+                                Name = name,
+                                X = p.TryGetProperty("x", out var px) ? px.GetDouble() : 0.0,
+                                Y = p.TryGetProperty("y", out var py) ? py.GetDouble() : 0.0,
+                                W = p.TryGetProperty("w", out var pw) ? pw.GetDouble() : 1.0,
+                                H = p.TryGetProperty("h", out var ph) ? ph.GetDouble() : 1.0,
+                                LockAspect = !p.TryGetProperty("lock_aspect", out var pl) || pl.GetBoolean()
+                            });
+                        }
+                    }
+                    if (rg.TryGetProperty("assignments", out var assign) && assign.ValueKind == JsonValueKind.Object)
+                    {
+                        foreach (var prop in assign.EnumerateObject())
+                            data.Regions.Assignments[prop.Name] = prop.Value.GetString() ?? string.Empty;
+                    }
+                }
                 if (doc.RootElement.TryGetProperty("layouts", out var layouts) && layouts.ValueKind == JsonValueKind.Object)
                 {
                     foreach (var prop in layouts.EnumerateObject())
@@ -165,6 +190,31 @@ public class SettingsService
             writer.WriteNumber("magnification", _settings.Zoom.Magnification);
             writer.WriteNumber("offset_x", _settings.Zoom.OffsetX);
             writer.WriteNumber("offset_y", _settings.Zoom.OffsetY);
+            writer.WriteEndObject();
+
+            writer.WritePropertyName("regions");
+            writer.WriteStartObject();
+            writer.WritePropertyName("presets");
+            writer.WriteStartArray();
+            foreach (var p in _settings.Regions.Presets)
+            {
+                writer.WriteStartObject();
+                writer.WriteString("name", p.Name);
+                writer.WriteNumber("x", p.X);
+                writer.WriteNumber("y", p.Y);
+                writer.WriteNumber("w", p.W);
+                writer.WriteNumber("h", p.H);
+                writer.WriteBoolean("lock_aspect", p.LockAspect);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WritePropertyName("assignments");
+            writer.WriteStartObject();
+            foreach (var kv in _settings.Regions.Assignments)
+            {
+                writer.WriteString(kv.Key, kv.Value);
+            }
+            writer.WriteEndObject();
             writer.WriteEndObject();
 
             writer.WritePropertyName("layouts");

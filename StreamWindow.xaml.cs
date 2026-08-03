@@ -18,8 +18,10 @@ public partial class StreamWindow : Window
     private double _originalHeight = 0;
     private bool _snapToGrid = false;
     private int _gridSize = 20;
+    private RegionPreset? _region;
 
     public string WindowTitle => _item.Title;
+    public IntPtr SourceHwnd => _item.HWnd;
     public int OccurrenceIndex { get; set; } = 0;
 
     public StreamWindow(MainWindow owner, WindowItem item)
@@ -100,10 +102,10 @@ public partial class StreamWindow : Window
         if (_thumb == IntPtr.Zero) return;
         var dpi = VisualTreeHelper.GetDpi(this);
         int w = Math.Max(1, (int)Math.Round(ActualWidth * dpi.DpiScaleX));
-        
+
         int titleOffset = (int)Math.Round(TitleBar.ActualHeight * dpi.DpiScaleY);
-        int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - titleOffset); 
-        
+        int h = Math.Max(1, (int)Math.Round(ActualHeight * dpi.DpiScaleY) - titleOffset);
+
         var props = new DWM_THUMBNAIL_PROPERTIES
         {
             dwFlags = DWM_TNP_RECTDESTINATION | DWM_TNP_VISIBLE | DWM_TNP_OPACITY,
@@ -113,25 +115,97 @@ public partial class StreamWindow : Window
             fSourceClientAreaOnly = false
         };
 
-        if (zoomed && _zoomSettings.InternalZoom)
+        bool internalZoom = zoomed && _zoomSettings.InternalZoom;
+        bool cropped = _region != null && !IsFullWindow(_region);
+
+        if ((cropped || internalZoom) && DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) == 0
+            && srcSize.cx > 0 && srcSize.cy > 0)
         {
-            if (DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) == 0)
+            // Region first (it defines "what part of the client we watch"),
+            // then the hover zoom magnifies inside that region.
+            double left = srcSize.cx * (_region?.X ?? 0.0);
+            double top = srcSize.cy * (_region?.Y ?? 0.0);
+            double cw = Math.Max(1.0, srcSize.cx * (_region?.W ?? 1.0));
+            double ch = Math.Max(1.0, srcSize.cy * (_region?.H ?? 1.0));
+
+            if (internalZoom)
             {
                 double mag = Math.Max(1.0, _zoomSettings.Magnification);
-                int sw = srcSize.cx;
-                int sh = srcSize.cy;
-                int zw = (int)(sw / mag);
-                int zh = (int)(sh / mag);
-
-                int left = (int)((sw - zw) * _zoomSettings.OffsetX);
-                int top = (int)((sh - zh) * _zoomSettings.OffsetY);
-                
-                props.dwFlags |= DWM_TNP_RECTSOURCE;
-                props.rcSource = new RECT { Left = left, Top = top, Right = left + zw, Bottom = top + zh };
+                double zw = cw / mag;
+                double zh = ch / mag;
+                left += (cw - zw) * _zoomSettings.OffsetX;
+                top += (ch - zh) * _zoomSettings.OffsetY;
+                cw = zw; ch = zh;
             }
+
+            int sl = Clamp((int)Math.Round(left), 0, srcSize.cx - 1);
+            int st = Clamp((int)Math.Round(top), 0, srcSize.cy - 1);
+            int sr = Clamp(sl + (int)Math.Round(cw), sl + 1, srcSize.cx);
+            int sb = Clamp(st + (int)Math.Round(ch), st + 1, srcSize.cy);
+
+            props.dwFlags |= DWM_TNP_RECTSOURCE;
+            props.rcSource = new RECT { Left = sl, Top = st, Right = sr, Bottom = sb };
+
+            if (cropped && _region!.LockAspect)
+                props.rcDestination = Letterbox(props.rcDestination, sr - sl, sb - st);
         }
 
         DwmUpdateThumbnailProperties(_thumb, ref props);
+    }
+
+    private static int Clamp(int value, int min, int max) => value < min ? min : (value > max ? max : value);
+
+    private static bool IsFullWindow(RegionPreset r)
+        => r.X <= 0.0001 && r.Y <= 0.0001 && r.W >= 0.9999 && r.H >= 0.9999;
+
+    // Keeps the crop proportions instead of stretching it over the whole preview.
+    private static RECT Letterbox(RECT dest, int srcW, int srcH)
+    {
+        int dw = dest.Right - dest.Left;
+        int dh = dest.Bottom - dest.Top;
+        if (dw <= 0 || dh <= 0 || srcW <= 0 || srcH <= 0) return dest;
+
+        double scale = Math.Min((double)dw / srcW, (double)dh / srcH);
+        int nw = Math.Max(1, (int)Math.Round(srcW * scale));
+        int nh = Math.Max(1, (int)Math.Round(srcH * scale));
+        int ox = dest.Left + (dw - nw) / 2;
+        int oy = dest.Top + (dh - nh) / 2;
+        return new RECT { Left = ox, Top = oy, Right = ox + nw, Bottom = oy + nh };
+    }
+
+    public void ApplyRegion(RegionPreset? region)
+    {
+        _region = region;
+        UpdateRegionBadge();
+        UpdateThumbnailRect(_isZoomed);
+    }
+
+    private void UpdateRegionBadge()
+    {
+        bool active = _region != null && !IsFullWindow(_region);
+        TxtRegion.Text = active ? $"▣ {_region!.Name}" : string.Empty;
+        TxtRegion.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // Reshapes the preview so the cropped area fills it without black bars.
+    public void FitToRegion()
+    {
+        if (_region == null || IsFullWindow(_region)) return;
+        if (_thumb == IntPtr.Zero) return;
+        if (DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) != 0) return;
+        if (srcSize.cx <= 0 || srcSize.cy <= 0) return;
+
+        double cw = Math.Max(1.0, srcSize.cx * _region.W);
+        double ch = Math.Max(1.0, srcSize.cy * _region.H);
+
+        double titleH = TitleBar.ActualHeight > 0 ? TitleBar.ActualHeight : 24;
+        double contentW = Math.Max(60, ActualWidth > 0 ? ActualWidth : Width);
+        Height = Math.Max(90, contentW * (ch / cw) + titleH);
+    }
+
+    private void BtnRegion_Click(object sender, RoutedEventArgs e)
+    {
+        _owner.OpenRegionPickerFor(this);
     }
 
     private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

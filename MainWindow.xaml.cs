@@ -22,6 +22,7 @@ public partial class MainWindow : Window
     private Views.ThumbnailPage _thumbnailPage = null!;
     private Views.HotkeysPage _hotkeysPage = null!;
     private Views.ZoomPage _zoomPage = null!;
+    private Views.RegionPage _regionPage = null!;
     private Views.OverlayPage _overlayPage = null!;
     private Views.ClientsPage _clientsPage = null!;
     private Views.AboutPage _aboutPage = null!;
@@ -47,6 +48,7 @@ public partial class MainWindow : Window
     private string _activeHighlightColor = "#2864C8";
 
     private bool _isExplicitExit = false;
+    private RegionPickerWindow? _regionPicker;
 
     private int _staggerCount = 0;
     private readonly DispatcherTimer _fgTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
@@ -82,6 +84,7 @@ public partial class MainWindow : Window
             {
                 // Real exit: close everything and clean up tray
                 TrayHelper.Ensure(this, false);
+                _regionPicker?.Close();
                 CloseAllStreams();
             }
         };
@@ -105,6 +108,7 @@ public partial class MainWindow : Window
         _hotkeysPage.LoadFrom(_settings.Hotkeys);
         _zoomPage = new Views.ZoomPage();
         _zoomPage.LoadFrom(_settings.Zoom);
+        _regionPage = new Views.RegionPage();
         _overlayPage = new Views.OverlayPage();
         _clientsPage = new Views.ClientsPage();
         _aboutPage = new Views.AboutPage();
@@ -130,6 +134,30 @@ public partial class MainWindow : Window
             _settingsSvc.SaveSettings();
             // Trigger update to any active thumbnails if needed
             UpdateZoomSettings();
+        };
+
+        // Wire events (region focus)
+        _regionPage.RefreshRequested += (_, __) => RefreshRegionPage();
+        _regionPage.DefineRequested += (_, entry) =>
+        {
+            if (_streams.TryGetValue(entry.HWnd, out var win)) OpenRegionPickerFor(win);
+        };
+        _regionPage.AssignRequested += (_, args) =>
+        {
+            if (!_streams.TryGetValue(args.Stream.HWnd, out var win)) return;
+            var key = RegionKeyForHwnd(args.Stream.HWnd);
+            if (string.IsNullOrEmpty(args.Preset)) _settings.Regions.Assignments.Remove(key);
+            else _settings.Regions.Assignments[key] = args.Preset;
+            _settingsSvc.SaveSettings();
+            ApplyRegionForStream(args.Stream.HWnd, win, fit: true);
+            RefreshRegionPage();
+        };
+        _regionPage.DeletePresetRequested += (_, name) =>
+        {
+            _settings.Regions.RemovePreset(name);
+            _settingsSvc.SaveSettings();
+            foreach (var kv in _streams) ApplyRegionForStream(kv.Key, kv.Value);
+            RefreshRegionPage();
         };
 
         // Wire events (thumbnail)
@@ -179,6 +207,11 @@ public partial class MainWindow : Window
         ContentHost.Content = _hotkeysPage;
     }
     private void Nav_Zoom(object sender, RoutedEventArgs e) => ContentHost.Content = _zoomPage;
+    private void Nav_Region(object sender, RoutedEventArgs e)
+    {
+        RefreshRegionPage();
+        ContentHost.Content = _regionPage;
+    }
     private void Nav_Overlay(object sender, RoutedEventArgs e) => ContentHost.Content = _overlayPage;
     private void Nav_Clients(object sender, RoutedEventArgs e) => ContentHost.Content = _clientsPage;
     private void Nav_About(object sender, RoutedEventArgs e) => ContentHost.Content = _aboutPage;
@@ -451,6 +484,9 @@ public partial class MainWindow : Window
 
         win.Closed += (_, __) => _streams.Remove(item.HWnd);
         _streams[item.HWnd] = win;
+
+        // Region depends on the occurrence index, so it needs the stream registered first.
+        ApplyRegionForStream(item.HWnd, win);
         win.Show();
     }
 
@@ -574,6 +610,79 @@ public partial class MainWindow : Window
             ActivateSourceWindow(hwnd);
             _currentCycleIndex = index;
         }
+    }
+
+    // ===== Region focus =====
+
+    private string RegionKeyForHwnd(IntPtr hwnd)
+    {
+        var title = GetWindowTitle(hwnd);
+        if (string.IsNullOrEmpty(title)) title = "unknown";
+        int occIndex = _streams.TryGetValue(hwnd, out var sw) ? sw.OccurrenceIndex : 0;
+        return $"title:{occIndex}:{SanitizeLayoutKey(title)}";
+    }
+
+    private void ApplyRegionForStream(IntPtr hwnd, StreamWindow win, bool fit = false)
+    {
+        var key = RegionKeyForHwnd(hwnd);
+        var name = _settings.Regions.Assignments.TryGetValue(key, out var n) ? n : null;
+        var preset = _settings.Regions.FindPreset(name);
+        win.ApplyRegion(preset);
+        if (fit && preset != null) win.FitToRegion();
+    }
+
+    internal void OpenRegionPickerFor(StreamWindow win)
+    {
+        if (_regionPicker != null)
+        {
+            _regionPicker.Activate();
+            return;
+        }
+
+        var hwnd = win.SourceHwnd;
+        var key = RegionKeyForHwnd(hwnd);
+        var assigned = _settings.Regions.Assignments.TryGetValue(key, out var n) ? n : null;
+        var existing = _settings.Regions.FindPreset(assigned);
+        var title = GetWindowTitle(hwnd);
+        if (string.IsNullOrEmpty(title)) title = win.WindowTitle;
+
+        var picker = new RegionPickerWindow(hwnd, title, existing);
+        picker.RegionSaved += (_, result) =>
+        {
+            _settings.Regions.UpsertPreset(result.Preset);
+            _settings.Regions.Assignments[key] = result.Preset.Name;
+            _settingsSvc.SaveSettings();
+
+            win.ApplyRegion(result.Preset);
+            if (result.FitPreview) win.FitToRegion();
+            RefreshRegionPage();
+        };
+        picker.Closed += (_, __) => _regionPicker = null;
+        _regionPicker = picker;
+        picker.Show();
+    }
+
+    private void RefreshRegionPage()
+    {
+        var entries = new List<Views.StreamEntry>();
+        foreach (var kv in _streams)
+        {
+            var key = RegionKeyForHwnd(kv.Key);
+            var title = GetWindowTitle(kv.Key);
+            if (string.IsNullOrEmpty(title)) title = kv.Value.WindowTitle;
+            if (kv.Value.OccurrenceIndex > 0) title = $"{title}  #{kv.Value.OccurrenceIndex + 1}";
+
+            entries.Add(new Views.StreamEntry
+            {
+                HWnd = kv.Key,
+                Key = key,
+                Title = title,
+                AssignedPreset = _settings.Regions.Assignments.TryGetValue(key, out var n) ? n : null
+            });
+        }
+
+        _regionPage.SetPresets(_settings.Regions.Presets);
+        _regionPage.SetStreams(entries);
     }
 
     private void UpdateZoomSettings()

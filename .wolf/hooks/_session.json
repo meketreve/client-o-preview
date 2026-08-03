@@ -1,0 +1,83 @@
+{
+  "session_id": "",
+  "started": "",
+  "files_read": {
+    "/home/meketreve/client-o-preview/csharp/Models/Settings.cs": {
+      "count": 1,
+      "tokens": 510,
+      "first_read": "2026-08-02T23:22:11.601Z"
+    },
+    "/home/meketreve/client-o-preview/Views/ZoomPage.xaml": {
+      "count": 1,
+      "tokens": 630,
+      "first_read": "2026-08-02T23:22:11.748Z"
+    },
+    "/home/meketreve/client-o-preview/StreamWindow.xaml.cs": {
+      "count": 1,
+      "tokens": 2155,
+      "first_read": "2026-08-02T23:22:16.643Z"
+    },
+    "/home/meketreve/client-o-preview/Native/NativeMethods.cs": {
+      "count": 1,
+      "tokens": 1222,
+      "first_read": "2026-08-02T23:22:16.880Z"
+    },
+    "/home/meketreve/client-o-preview/MainWindow.xaml.cs": {
+      "count": 1,
+      "tokens": 5565,
+      "first_read": "2026-08-02T23:22:27.163Z"
+    },
+    "/home/meketreve/client-o-preview/csharp/Services/SettingsService.cs": {
+      "count": 1,
+      "tokens": 2783,
+      "first_read": "2026-08-02T23:22:27.625Z"
+    },
+    "/home/meketreve/client-o-preview/StreamWindow.xaml": {
+      "count": 1,
+      "tokens": 333,
+      "first_read": "2026-08-02T23:22:49.707Z"
+    },
+    "/home/meketreve/client-o-preview/MainWindow.xaml": {
+      "count": 1,
+      "tokens": 311,
+      "first_read": "2026-08-02T23:22:50.175Z"
+    },
+    "/home/meketreve/client-o-preview/Views/ZoomPage.xaml.cs": {
+      "count": 1,
+      "tokens": 331,
+      "first_read": "2026-08-02T23:22:51.116Z"
+    },
+    "/home/meketreve/client-o-preview/Views/ClientsPage.xaml": {
+      "count": 1,
+      "tokens": 306,
+      "first_read": "2026-08-02T23:23:47.296Z"
+    },
+    "/home/meketreve/client-o-preview/Views/ClientsPage.xaml.cs": {
+      "count": 1,
+      "tokens": 323,
+      "first_read": "2026-08-02T23:23:47.789Z"
+    },
+    "/home/meketreve/client-o-preview/Models/WindowItem.cs": {
+      "count": 1,
+      "tokens": 63,
+      "first_read": "2026-08-02T23:23:48.228Z"
+    },
+    "/home/meketreve/client-o-preview/Views/HotkeysPage.xaml": {
+      "count": 1,
+      "tokens": 1633,
+      "first_read": "2026-08-02T23:23:48.750Z"
+    },
+    "/home/meketreve/client-o-preview/.gitignore": {
+      "count": 1,
+      "tokens": 131,
+      "first_read": "2026-08-03T02:28:07.648Z"
+    }
+  },
+  "files_written": [],
+  "edit_counts": {},
+  "anatomy_hits": 13,
+  "anatomy_misses": 0,
+  "repeated_reads_warned": 0,
+  "cerebrum_warnings": 0,
+  "stop_count": 2
+}

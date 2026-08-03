@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "created_at": "2026-08-02T23:20:05.249Z",
+  "lifetime": {
+    "total_tokens_estimated": 16165,
+    "total_reads": 13,
+    "total_writes": 0,
+    "total_sessions": 0,
+    "anatomy_hits": 12,
+    "anatomy_misses": 0,
+    "repeated_reads_blocked": 0,
+    "estimated_savings_vs_bare_cli": 2400,
+    "real_input_tokens": 109,
+    "real_output_tokens": 65791,
+    "real_cache_read_tokens": 5844046,
+    "real_cache_creation_tokens": 243297,
+    "real_api_calls": 62
+  },
+  "sessions": [
+    {
+      "id": "",
+      "agent": "claude",
+      "started": "",
+      "ended": "2026-08-03T01:57:00.681Z",
+      "reads": [
+        {
+          "file": "/home/meketreve/client-o-preview/csharp/Models/Settings.cs",
+          "tokens_estimated": 510,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Views/ZoomPage.xaml",
+          "tokens_estimated": 630,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/StreamWindow.xaml.cs",
+          "tokens_estimated": 2155,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Native/NativeMethods.cs",
+          "tokens_estimated": 1222,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/MainWindow.xaml.cs",
+          "tokens_estimated": 5565,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/csharp/Services/SettingsService.cs",
+          "tokens_estimated": 2783,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/StreamWindow.xaml",
+          "tokens_estimated": 333,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/MainWindow.xaml",
+          "tokens_estimated": 311,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Views/ZoomPage.xaml.cs",
+          "tokens_estimated": 331,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Views/ClientsPage.xaml",
+          "tokens_estimated": 306,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Views/ClientsPage.xaml.cs",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Models/WindowItem.cs",
+          "tokens_estimated": 63,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/meketreve/client-o-preview/Views/HotkeysPage.xaml",
+          "tokens_estimated": 1633,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 16165,
+        "output_tokens_estimated": 0,
+        "reads_count": 13,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 12
+      },
+      "real_usage": {
+        "input_tokens": 109,
+        "output_tokens": 65791,
+        "cache_read_input_tokens": 5844046,
+        "cache_creation_input_tokens": 243297,
+        "api_calls": 62
+      }
+    }
+  ],
+  "daemon_usage": [],
+  "waste_flags": [],
+  "optimization_report": {
+    "last_generated": null,
+    "patterns": []
+  }
+}

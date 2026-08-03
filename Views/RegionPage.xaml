@@ -1,0 +1,48 @@
+<UserControl x:Class="ClientOPreview.Views.RegionPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,8">
+      <TextBlock Text="Region Focus" FontWeight="SemiBold"/>
+      <TextBlock Text="Show only one part of a client (drone panel, capacitor, minimap) instead of the whole window."
+                 Foreground="Gray" TextWrapping="Wrap" Margin="0,4,0,0"/>
+    </StackPanel>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="240"/>
+      </Grid.ColumnDefinitions>
+
+      <DockPanel Grid.Column="0" Margin="0,0,10,0">
+        <TextBlock DockPanel.Dock="Top" Text="Open previews:" Margin="0,0,0,4"/>
+        <ListBox x:Name="ListStreams" DisplayMemberPath="Display" SelectionChanged="OnStreamSelected"/>
+      </DockPanel>
+
+      <StackPanel Grid.Column="1">
+        <Button Content="Refresh list" Height="26" Margin="0,0,0,10" Click="OnRefresh"/>
+
+        <TextBlock Text="Region of the selected preview:" Margin="0,0,0,4"/>
+        <ComboBox x:Name="CmbPresets" Height="24" Margin="0,0,0,6" SelectionChanged="OnPresetSelected"/>
+        <Button Content="Define region…" Height="28" Margin="0,0,0,6" Click="OnDefine"/>
+        <Button Content="Clear region" Height="26" Margin="0,0,0,16" Click="OnClear"/>
+
+        <TextBlock Text="Saved presets:" Margin="0,0,0,4"/>
+        <ListBox x:Name="ListPresets" Height="120" DisplayMemberPath="Display" Margin="0,0,0,6"/>
+        <Button Content="Delete preset" Height="26" Click="OnDeletePreset"/>
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Grid.Row="2" Foreground="Gray" TextWrapping="Wrap" Margin="0,10,0,0"
+               Text="Presets are saved by name (e.g. the pilot name) and reused on any preview. The ▣ button on a preview title bar opens the same picker."/>
+  </Grid>
+</UserControl>

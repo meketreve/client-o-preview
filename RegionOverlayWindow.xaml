@@ -1,0 +1,19 @@
+<Window x:Class="ClientOPreview.RegionOverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Region selection" Width="200" Height="200"
+        WindowStyle="None" AllowsTransparency="True" Background="#01000000"
+        ShowInTaskbar="False" ResizeMode="NoResize" Topmost="True"
+        SizeChanged="Window_SizeChanged">
+    <Canvas x:Name="Root" ClipToBounds="True" Background="Transparent"
+            MouseLeftButtonDown="Root_MouseDown"
+            MouseMove="Root_MouseMove"
+            MouseLeftButtonUp="Root_MouseUp"
+            MouseLeave="Root_MouseLeave">
+        <Rectangle x:Name="DimTop" Fill="#99000000" IsHitTestVisible="False"/>
+        <Rectangle x:Name="DimBottom" Fill="#99000000" IsHitTestVisible="False"/>
+        <Rectangle x:Name="DimLeft" Fill="#99000000" IsHitTestVisible="False"/>
+        <Rectangle x:Name="DimRight" Fill="#99000000" IsHitTestVisible="False"/>
+        <Rectangle x:Name="SelBorder" Stroke="#FF4FC3F7" StrokeThickness="2" IsHitTestVisible="False"/>
+    </Canvas>
+</Window>
