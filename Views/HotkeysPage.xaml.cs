@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ClientOPreview.Localization;
 using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
@@ -13,6 +14,8 @@ namespace ClientOPreview.Views;
 public class ThumbnailOption
 {
     public string Title { get; set; } = "";
+    // The "(None)" entry is translated, so it cannot be recognized by its text.
+    public bool IsNone { get; set; }
 }
 
 public class DirectKeyItem : INotifyPropertyChanged
@@ -57,6 +60,12 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
     public HotkeysPage()
     {
         InitializeComponent();
+        Loc.LanguageChanged += (_, __) =>
+        {
+            foreach (var item in _directKeyItems)
+                item.Label = Loc.Format("HotkeysItemLabel", item.Index + 1);
+            RefreshDirectKeysList();
+        };
     }
 
     public void LoadFrom(Hotkeys hotkeys)
@@ -84,7 +93,7 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
             _directKeyItems.Add(new DirectKeyItem
             {
                 Index = i,
-                Label = $"Hotkey {i + 1}:",
+                Label = Loc.Format("HotkeysItemLabel", i + 1),
                 Key = i < hotkeys.DirectKeys.Count ? hotkeys.DirectKeys[i] : ""
             });
         }
@@ -126,8 +135,8 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
     {
         _loading = true;
         
-        // Create thumbnail options with "(None)" option
-        var options = new List<ThumbnailOption> { new ThumbnailOption { Title = "(None)" } };
+        // Create thumbnail options with the "(None)" option
+        var options = new List<ThumbnailOption> { new ThumbnailOption { Title = Loc.Get("HotkeysNone"), IsNone = true } };
         options.AddRange(_availableTitles.Select(t => new ThumbnailOption { Title = t }));
         
         foreach (var item in _directKeyItems)
@@ -158,7 +167,7 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
         if (sender is System.Windows.Controls.ComboBox cb && cb.Tag is int index)
         {
             var selected = cb.SelectedItem as ThumbnailOption;
-            if (selected != null && selected.Title != "(None)")
+            if (selected != null && !selected.IsNone)
             {
                 _hotkeys.DirectKeyMappings[index] = selected.Title;
             }

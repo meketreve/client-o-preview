@@ -7,26 +7,27 @@ namespace ClientOPreview.Views;
 
 public record ThumbnailArgs(int Width, int Height, int OpacityPct, int TitleFontSize, string ActiveColor);
 
+// Single settings page: preview look/behaviour plus everything that used to live in the
+// old "General" tab.
 public partial class ThumbnailPage : System.Windows.Controls.UserControl
 {
     public event EventHandler<ThumbnailArgs>? ThumbnailChanged;
     public event EventHandler<bool>? TopmostChanged;
+    public event EventHandler<bool>? TopmostOnlyWhenClientFocusedChanged;
+    public event EventHandler<bool>? MinimizeToTrayChanged;
+    public event EventHandler<bool>? TrackLocationsChanged;
+    public event EventHandler<bool>? UniqueLayoutChanged;
+    public event EventHandler<bool>? SnapToGridChanged;
+    public event EventHandler<int>? GridSizeChanged;
+
     private bool _loading = false;
 
-    public ThumbnailPage(int width, int height, int opacityPct, int titleFontSize, string activeColor, bool topmost = true)
+    public ThumbnailPage()
     {
-        _loading = true;
         InitializeComponent();
-        TxtWidth.Text = width.ToString();
-        TxtHeight.Text = height.ToString();
-        SldOpacity.Value = opacityPct;
-        SldFontSize.Value = titleFontSize;
-        TxtActiveColor.Text = activeColor;
-        ChkTopmost.IsChecked = topmost;
-        _loading = false;
     }
 
-    public void LoadFrom(Thumbnail thumb)
+    public void LoadFrom(Thumbnail thumb, General gen)
     {
         _loading = true;
         TxtWidth.Text = thumb.Width.ToString();
@@ -34,14 +35,16 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         SldOpacity.Value = thumb.OpacityPct;
         SldFontSize.Value = thumb.TitleFontSize;
         TxtActiveColor.Text = thumb.ActiveHighlightColor;
-        _loading = false;
-    }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
-    {
+        ChkTopmost.IsChecked = gen.PreviewsTopmost;
+        ChkTopmostOnlyFocused.IsChecked = gen.TopmostOnlyWhenClientFocused;
+        ChkMinimizeToTray.IsChecked = gen.MinimizeToTray;
+        ChkTrackLocations.IsChecked = gen.TrackLocations;
+        ChkUniqueLayout.IsChecked = gen.UniqueLayout;
+        ChkSnapToGrid.IsChecked = gen.SnapToGrid;
+        SliderGridSize.Value = gen.GridSize;
+        _loading = false;
         UpdateLabels();
-        SldOpacity.ValueChanged += OnChanged;
-        SldFontSize.ValueChanged += OnChanged;
     }
 
     private void UpdateLabels()
@@ -50,7 +53,7 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
         if (LblFontSize != null) LblFontSize.Text = $"{(int)SldFontSize.Value}px";
     }
 
-    private void OnChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void OnSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         UpdateLabels();
     }
@@ -78,6 +81,28 @@ public partial class ThumbnailPage : System.Windows.Controls.UserControl
 
     private void OnTopmostChanged(object sender, RoutedEventArgs e)
     {
+        if (_loading) return;
         TopmostChanged?.Invoke(this, ChkTopmost.IsChecked == true);
+    }
+
+    private void OnGeneralChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        if (sender == ChkTopmostOnlyFocused)
+            TopmostOnlyWhenClientFocusedChanged?.Invoke(this, ChkTopmostOnlyFocused.IsChecked == true);
+        else if (sender == ChkMinimizeToTray)
+            MinimizeToTrayChanged?.Invoke(this, ChkMinimizeToTray.IsChecked == true);
+        else if (sender == ChkTrackLocations)
+            TrackLocationsChanged?.Invoke(this, ChkTrackLocations.IsChecked == true);
+        else if (sender == ChkUniqueLayout)
+            UniqueLayoutChanged?.Invoke(this, ChkUniqueLayout.IsChecked == true);
+        else if (sender == ChkSnapToGrid)
+            SnapToGridChanged?.Invoke(this, ChkSnapToGrid.IsChecked == true);
+    }
+
+    private void OnGridSizeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_loading) return;
+        GridSizeChanged?.Invoke(this, (int)SliderGridSize.Value);
     }
 }

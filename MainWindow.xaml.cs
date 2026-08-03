@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using ClientOPreview.Localization;
 using ClientOPreview.Models;
 using ClientOPreview.Services;
 using static ClientOPreview.Native.NativeMethods;
@@ -18,13 +19,13 @@ public partial class MainWindow : Window
     private readonly Dictionary<IntPtr, StreamWindow> _streams = new();
 
     // UI pages
-    private Views.GeneralPage _generalPage = null!;
     private Views.ThumbnailPage _thumbnailPage = null!;
     private Views.HotkeysPage _hotkeysPage = null!;
     private Views.ZoomPage _zoomPage = null!;
     private Views.RegionPage _regionPage = null!;
     private Views.OverlayPage _overlayPage = null!;
     private Views.ClientsPage _clientsPage = null!;
+    private Views.LanguagePage _languagePage = null!;
     private Views.AboutPage _aboutPage = null!;
 
     // Hotkey state
@@ -50,6 +51,14 @@ public partial class MainWindow : Window
     private bool _isExplicitExit = false;
     private RegionPickerWindow? _regionPicker;
 
+    // Previews are currently pushed behind other windows because no client is focused.
+    private bool _topmostSuspended = false;
+
+    // Region assigned to a live preview, keyed by the source window handle. The persisted
+    // assignment is keyed by window title, which drifts (login screen -> pilot name) and used
+    // to make the selection "not stick"; this in-session map always wins while the preview lives.
+    private readonly Dictionary<IntPtr, string?> _liveRegions = new();
+
     private int _staggerCount = 0;
     private readonly DispatcherTimer _fgTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
@@ -61,6 +70,12 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+        // The language has to be known before InitializeComponent binds the first string.
+        _settings = _settingsSvc.GetSettings();
+        if (string.IsNullOrWhiteSpace(_settings.Language))
+            _settings.Language = Loc.SystemDefault();
+        Loc.SetLanguage(_settings.Language);
+
         InitializeComponent();
 
         this.StateChanged += (_, __) =>
@@ -89,7 +104,6 @@ public partial class MainWindow : Window
             }
         };
 
-        _settings = _settingsSvc.GetSettings();
         var g = _settings.General;
         var t = _settings.Thumbnail;
         _previewsTopmost = g.PreviewsTopmost;
@@ -100,10 +114,8 @@ public partial class MainWindow : Window
         _activeHighlightColor = t.ActiveHighlightColor;
 
         // Instantiate pages
-        _generalPage = new Views.GeneralPage();
-        _generalPage.LoadFrom(g);
-        _thumbnailPage = new Views.ThumbnailPage(_thumbWidth, _thumbHeight, _opacityPct, _titleFontSize, _activeHighlightColor, _previewsTopmost);
-        _thumbnailPage.LoadFrom(t);
+        _thumbnailPage = new Views.ThumbnailPage();
+        _thumbnailPage.LoadFrom(t, g);
         _hotkeysPage = new Views.HotkeysPage();
         _hotkeysPage.LoadFrom(_settings.Hotkeys);
         _zoomPage = new Views.ZoomPage();
@@ -111,6 +123,7 @@ public partial class MainWindow : Window
         _regionPage = new Views.RegionPage();
         _overlayPage = new Views.OverlayPage();
         _clientsPage = new Views.ClientsPage();
+        _languagePage = new Views.LanguagePage();
         _aboutPage = new Views.AboutPage();
 
         // Wire events (clients)
@@ -119,13 +132,27 @@ public partial class MainWindow : Window
         _clientsPage.CloseSelectedRequested += (_, __) => CloseSelectedStreams();
         _clientsPage.CloseAllRequested += (_, __) => CloseAllStreams();
 
-        // Wire events (general)
-        _generalPage.PreviewsTopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.SaveSettings(); };
-        _generalPage.TrackLocationsChanged += (_, v) => { _trackLocations = v; _settings.General.TrackLocations = v; _settingsSvc.SaveSettings(); };
-        _generalPage.UniqueLayoutChanged += (_, v) => { _uniqueLayout = v; _settings.General.UniqueLayout = v; _settingsSvc.SaveSettings(); };
-        _generalPage.SnapToGridChanged += (_, v) => { _settings.General.SnapToGrid = v; _settingsSvc.SaveSettings(); UpdateGridSettings(); };
-        _generalPage.GridSizeChanged += (_, v) => { _settings.General.GridSize = v; _settingsSvc.SaveSettings(); UpdateGridSettings(); };
-        _generalPage.MinimizeToTrayChanged += (_, v) => { _settings.General.MinimizeToTray = v; _settingsSvc.SaveSettings(); };
+        // Wire events (settings that used to live on the General page)
+        _thumbnailPage.TrackLocationsChanged += (_, v) => { _trackLocations = v; _settings.General.TrackLocations = v; _settingsSvc.SaveSettings(); };
+        _thumbnailPage.UniqueLayoutChanged += (_, v) => { _uniqueLayout = v; _settings.General.UniqueLayout = v; _settingsSvc.SaveSettings(); };
+        _thumbnailPage.SnapToGridChanged += (_, v) => { _settings.General.SnapToGrid = v; _settingsSvc.SaveSettings(); UpdateGridSettings(); };
+        _thumbnailPage.GridSizeChanged += (_, v) => { _settings.General.GridSize = v; _settingsSvc.SaveSettings(); UpdateGridSettings(); };
+        _thumbnailPage.MinimizeToTrayChanged += (_, v) => { _settings.General.MinimizeToTray = v; _settingsSvc.SaveSettings(); };
+        _thumbnailPage.TopmostOnlyWhenClientFocusedChanged += (_, v) =>
+        {
+            _settings.General.TopmostOnlyWhenClientFocused = v;
+            _settingsSvc.SaveSettings();
+            if (!v) { _topmostSuspended = false; ApplyGlobalTopmost(); }
+            else CheckForeground();
+        };
+
+        // Wire events (language)
+        _languagePage.LanguageSelected += (_, code) =>
+        {
+            _settings.Language = Loc.Normalize(code);
+            Loc.SetLanguage(_settings.Language);
+            _settingsSvc.SaveSettings();
+        };
 
         // Wire events (zoom)
         _zoomPage.ZoomChanged += (_, z) =>
@@ -142,19 +169,25 @@ public partial class MainWindow : Window
         {
             if (_streams.TryGetValue(entry.HWnd, out var win)) OpenRegionPickerFor(win);
         };
+        // Build a preset from an example preview without touching the existing ones.
+        _regionPage.NewPresetRequested += (_, entry) =>
+        {
+            if (entry != null && _streams.TryGetValue(entry.HWnd, out var win)) OpenRegionPickerFor(win, newPreset: true);
+        };
         _regionPage.AssignRequested += (_, args) =>
         {
             if (!_streams.TryGetValue(args.Stream.HWnd, out var win)) return;
-            var key = RegionKeyForHwnd(args.Stream.HWnd);
-            if (string.IsNullOrEmpty(args.Preset)) _settings.Regions.Assignments.Remove(key);
-            else _settings.Regions.Assignments[key] = args.Preset;
-            _settingsSvc.SaveSettings();
-            ApplyRegionForStream(args.Stream.HWnd, win, fit: true);
+            AssignRegion(args.Stream.HWnd, win, args.Preset, fit: true);
             RefreshRegionPage();
         };
         _regionPage.DeletePresetRequested += (_, name) =>
         {
             _settings.Regions.RemovePreset(name);
+            foreach (var hwnd in _liveRegions.Keys.ToList())
+            {
+                if (string.Equals(_liveRegions[hwnd], name, StringComparison.OrdinalIgnoreCase))
+                    _liveRegions[hwnd] = null;
+            }
             _settingsSvc.SaveSettings();
             foreach (var kv in _streams) ApplyRegionForStream(kv.Key, kv.Value);
             RefreshRegionPage();
@@ -172,7 +205,14 @@ public partial class MainWindow : Window
             ApplyThumbnailToStreams();
             _settingsSvc.SaveSettings();
         };
-        _thumbnailPage.TopmostChanged += (_, v) => { _previewsTopmost = v; _settings.General.PreviewsTopmost = v; ApplyGlobalTopmost(); _settingsSvc.SaveSettings(); };
+        _thumbnailPage.TopmostChanged += (_, v) =>
+        {
+            _previewsTopmost = v;
+            _settings.General.PreviewsTopmost = v;
+            _topmostSuspended = false;
+            ApplyGlobalTopmost();
+            _settingsSvc.SaveSettings();
+        };
 
         // Wire events (hotkeys)
         _hotkeysPage.HotkeysChanged += (_, hk) =>
@@ -199,7 +239,6 @@ public partial class MainWindow : Window
     }
 
     // Navigation handlers
-    private void Nav_General(object sender, RoutedEventArgs e) => ContentHost.Content = _generalPage;
     private void Nav_Thumbnail(object sender, RoutedEventArgs e) => ContentHost.Content = _thumbnailPage;
     private void Nav_Hotkeys(object sender, RoutedEventArgs e)
     {
@@ -214,6 +253,11 @@ public partial class MainWindow : Window
     }
     private void Nav_Overlay(object sender, RoutedEventArgs e) => ContentHost.Content = _overlayPage;
     private void Nav_Clients(object sender, RoutedEventArgs e) => ContentHost.Content = _clientsPage;
+    private void Nav_Language(object sender, RoutedEventArgs e)
+    {
+        _languagePage.LoadFrom(Loc.CurrentLanguage);
+        ContentHost.Content = _languagePage;
+    }
     private void Nav_About(object sender, RoutedEventArgs e) => ContentHost.Content = _aboutPage;
 
     private void RefreshHotkeysOpenThumbnails()
@@ -253,10 +297,46 @@ public partial class MainWindow : Window
 
     private void ApplyGlobalTopmost()
     {
+        var topmost = _previewsTopmost && !_topmostSuspended;
         foreach (var w in _streams.Values)
         {
-            w.Topmost = _previewsTopmost;
+            w.Topmost = topmost;
         }
+    }
+
+    // With "only on top while a client is in focus", the previews sink behind other windows as
+    // soon as the user alt-tabs to something that is neither a client nor part of this app.
+    private void UpdateTopmostForFocus(IntPtr fg)
+    {
+        if (!_previewsTopmost)
+        {
+            _topmostSuspended = false;
+            return;
+        }
+        if (!_settings.General.TopmostOnlyWhenClientFocused)
+        {
+            if (_topmostSuspended)
+            {
+                _topmostSuspended = false;
+                ApplyGlobalTopmost();
+            }
+            return;
+        }
+
+        var focused = _streams.ContainsKey(fg) || IsOwnAppWindow(fg);
+        if (focused != _topmostSuspended) return;   // already in the right state
+        _topmostSuspended = !focused;
+        ApplyGlobalTopmost();
+    }
+
+    private bool IsOwnAppWindow(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero) return false;
+        foreach (Window w in System.Windows.Application.Current.Windows)
+        {
+            if (new WindowInteropHelper(w).Handle == hwnd) return true;
+        }
+        return false;
     }
 
     private void ApplyThumbnailToStreams()
@@ -294,14 +374,14 @@ public partial class MainWindow : Window
             }
 
             var fg = GetForegroundWindow();
-            var tracked = new HashSet<IntPtr>(_streams.Keys);
-            var thisHwnd = new WindowInteropHelper(this).Handle;
 
             // Always update active state for highlighting
             foreach (var kv in _streams)
             {
                 kv.Value.SetActiveState(kv.Key == fg);
             }
+
+            UpdateTopmostForFocus(fg);
         }
         catch { }
     }
@@ -467,7 +547,7 @@ public partial class MainWindow : Window
 
         var win = new StreamWindow(this, item)
         {
-            Topmost = _previewsTopmost,
+            Topmost = _previewsTopmost && !_topmostSuspended,
             OccurrenceIndex = occIndex
         };
 
@@ -482,7 +562,7 @@ public partial class MainWindow : Window
         // Then apply saved geometry (might override size/position if title matches)
         ApplySavedGeometry(item.HWnd, win, occIndex);
 
-        win.Closed += (_, __) => _streams.Remove(item.HWnd);
+        win.Closed += (_, __) => { _streams.Remove(item.HWnd); _liveRegions.Remove(item.HWnd); };
         _streams[item.HWnd] = win;
 
         // Region depends on the occurrence index, so it needs the stream registered first.
@@ -622,16 +702,33 @@ public partial class MainWindow : Window
         return $"title:{occIndex}:{SanitizeLayoutKey(title)}";
     }
 
+    /// <summary>Preset assigned to a live preview: the in-session map wins over the title key.</summary>
+    private string? ResolveRegionName(IntPtr hwnd)
+    {
+        if (_liveRegions.TryGetValue(hwnd, out var live)) return live;
+        return _settings.Regions.Assignments.TryGetValue(RegionKeyForHwnd(hwnd), out var n) ? n : null;
+    }
+
+    private void AssignRegion(IntPtr hwnd, StreamWindow win, string? presetName, bool fit)
+    {
+        _liveRegions[hwnd] = string.IsNullOrEmpty(presetName) ? null : presetName;
+
+        var key = RegionKeyForHwnd(hwnd);
+        if (string.IsNullOrEmpty(presetName)) _settings.Regions.Assignments.Remove(key);
+        else _settings.Regions.Assignments[key] = presetName;
+        _settingsSvc.SaveSettings();
+
+        ApplyRegionForStream(hwnd, win, fit);
+    }
+
     private void ApplyRegionForStream(IntPtr hwnd, StreamWindow win, bool fit = false)
     {
-        var key = RegionKeyForHwnd(hwnd);
-        var name = _settings.Regions.Assignments.TryGetValue(key, out var n) ? n : null;
-        var preset = _settings.Regions.FindPreset(name);
+        var preset = _settings.Regions.FindPreset(ResolveRegionName(hwnd));
         win.ApplyRegion(preset);
         if (fit && preset != null) win.FitToRegion();
     }
 
-    internal void OpenRegionPickerFor(StreamWindow win)
+    internal void OpenRegionPickerFor(StreamWindow win, bool newPreset = false)
     {
         if (_regionPicker != null)
         {
@@ -640,21 +737,21 @@ public partial class MainWindow : Window
         }
 
         var hwnd = win.SourceHwnd;
-        var key = RegionKeyForHwnd(hwnd);
-        var assigned = _settings.Regions.Assignments.TryGetValue(key, out var n) ? n : null;
-        var existing = _settings.Regions.FindPreset(assigned);
+        // A new preset starts from a blank name so an existing one can never be overwritten.
+        var existing = newPreset ? null : _settings.Regions.FindPreset(ResolveRegionName(hwnd));
         var title = GetWindowTitle(hwnd);
         if (string.IsNullOrEmpty(title)) title = win.WindowTitle;
 
-        var picker = new RegionPickerWindow(hwnd, title, existing);
+        var picker = new RegionPickerWindow(hwnd, title, existing, suggestNameFromTitle: !newPreset)
+        {
+            IsNameTaken = name =>
+                !string.Equals(name, existing?.Name, StringComparison.OrdinalIgnoreCase)
+                && _settings.Regions.FindPreset(name) != null
+        };
         picker.RegionSaved += (_, result) =>
         {
             _settings.Regions.UpsertPreset(result.Preset);
-            _settings.Regions.Assignments[key] = result.Preset.Name;
-            _settingsSvc.SaveSettings();
-
-            win.ApplyRegion(result.Preset);
-            if (result.FitPreview) win.FitToRegion();
+            AssignRegion(hwnd, win, result.Preset.Name, fit: result.FitPreview);
             RefreshRegionPage();
         };
         picker.Closed += (_, __) => _regionPicker = null;
@@ -677,7 +774,7 @@ public partial class MainWindow : Window
                 HWnd = kv.Key,
                 Key = key,
                 Title = title,
-                AssignedPreset = _settings.Regions.Assignments.TryGetValue(key, out var n) ? n : null
+                AssignedPreset = ResolveRegionName(kv.Key)
             });
         }
 

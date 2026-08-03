@@ -9,6 +9,8 @@ public class SettingsData
     public Hotkeys Hotkeys { get; set; } = new();
     public Zoom Zoom { get; set; } = new();
     public RegionSettings Regions { get; set; } = new();
+    // UI language: "en" or "pt-BR". Empty means "not chosen yet" -> follow the system.
+    public string Language { get; set; } = string.Empty;
     public Dictionary<string, string> Layouts { get; set; } = new();
     public List<string> LastOpenWindows { get; set; } = new();
 }
@@ -87,6 +89,9 @@ public class General
     public bool MinimizeToTray { get; set; } = false;
     public bool TrackLocations { get; set; } = true;
     public bool PreviewsTopmost { get; set; } = true;
+    // Only keep the previews on top while a monitored client (or this app) is the foreground
+    // window; otherwise they sink behind whatever the user is doing.
+    public bool TopmostOnlyWhenClientFocused { get; set; } = false;
     public bool UniqueLayout { get; set; } = true;
     public bool SnapToGrid { get; set; } = false;
     public int GridSize { get; set; } = 20;

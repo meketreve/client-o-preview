@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using ClientOPreview.Localization;
 using ClientOPreview.Models;
 
 namespace ClientOPreview.Views;
@@ -27,24 +28,32 @@ public class PresetEntry
 
 public partial class RegionPage : System.Windows.Controls.UserControl
 {
-    private const string NoneLabel = "— none (full window) —";
-
     private bool _loading;
+
+    // Kept so the lists can be rebuilt when the language changes.
+    private IList<StreamEntry> _streams = new List<StreamEntry>();
+    private IList<RegionPreset> _presets = new List<RegionPreset>();
 
     public event EventHandler? RefreshRequested;
     public event EventHandler<StreamEntry>? DefineRequested;
+    public event EventHandler<StreamEntry?>? NewPresetRequested;
     public event EventHandler<(StreamEntry Stream, string? Preset)>? AssignRequested;
     public event EventHandler<string>? DeletePresetRequested;
 
     public RegionPage()
     {
         InitializeComponent();
+        Loc.LanguageChanged += (_, __) => { SetPresets(_presets); SetStreams(_streams); };
     }
+
+    private static string NoneLabel => Loc.Get("RegionNone");
 
     public void SetStreams(IList<StreamEntry> streams)
     {
         _loading = true;
+        _streams = streams;
         var previousKey = (ListStreams.SelectedItem as StreamEntry)?.Key;
+        ListStreams.ItemsSource = null;
         ListStreams.ItemsSource = streams;
         if (previousKey != null)
             ListStreams.SelectedItem = streams.FirstOrDefault(s => s.Key == previousKey);
@@ -57,7 +66,12 @@ public partial class RegionPage : System.Windows.Controls.UserControl
     public void SetPresets(IList<RegionPreset> presets)
     {
         _loading = true;
-        ListPresets.ItemsSource = presets.Select(p => new PresetEntry { Preset = p }).ToList();
+        _presets = presets;
+        var previousPreset = ListPresets.SelectedItem as PresetEntry;
+        var entries = presets.Select(p => new PresetEntry { Preset = p }).ToList();
+        ListPresets.ItemsSource = entries;
+        if (previousPreset != null)
+            ListPresets.SelectedItem = entries.FirstOrDefault(p => p.Preset.Name == previousPreset.Preset.Name);
 
         var items = new List<string> { NoneLabel };
         items.AddRange(presets.Select(p => p.Name));
@@ -91,12 +105,21 @@ public partial class RegionPage : System.Windows.Controls.UserControl
 
     private void OnRefresh(object sender, RoutedEventArgs e) => RefreshRequested?.Invoke(this, EventArgs.Empty);
 
+    private void OnNewPreset(object sender, RoutedEventArgs e)
+    {
+        if (ListStreams.SelectedItem is StreamEntry stream)
+            NewPresetRequested?.Invoke(this, stream);
+        else
+            System.Windows.MessageBox.Show(Loc.Get("RegionNoExample"), Loc.Get("RegionTitle"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
     private void OnDefine(object sender, RoutedEventArgs e)
     {
         if (ListStreams.SelectedItem is StreamEntry stream)
             DefineRequested?.Invoke(this, stream);
         else
-            System.Windows.MessageBox.Show("Select an open preview first.", "Region Focus",
+            System.Windows.MessageBox.Show(Loc.Get("RegionSelectFirst"), Loc.Get("RegionTitle"),
                 MessageBoxButton.OK, MessageBoxImage.Information);
     }
 

@@ -42,6 +42,7 @@ public class SettingsService
                     data.General.MinimizeToTray = gen.TryGetProperty("minimize_to_tray", out var v1) && v1.GetBoolean();
                     data.General.TrackLocations = !gen.TryGetProperty("track_locations", out var v2) || v2.GetBoolean();
                     data.General.PreviewsTopmost = !gen.TryGetProperty("previews_topmost", out var v6) || v6.GetBoolean();
+                    data.General.TopmostOnlyWhenClientFocused = gen.TryGetProperty("topmost_only_when_client_focused", out var v7) && v7.GetBoolean();
                     data.General.UniqueLayout = !gen.TryGetProperty("unique_layout", out var v8) || v8.GetBoolean();
                     data.General.SnapToGrid = gen.TryGetProperty("snap_to_grid", out var v9) && v9.GetBoolean();
                     data.General.GridSize = gen.TryGetProperty("grid_size", out var v10) ? v10.GetInt32() : 20;
@@ -114,6 +115,10 @@ public class SettingsService
                             data.Regions.Assignments[prop.Name] = prop.Value.GetString() ?? string.Empty;
                     }
                 }
+                if (doc.RootElement.TryGetProperty("language", out var lang) && lang.ValueKind == JsonValueKind.String)
+                {
+                    data.Language = lang.GetString() ?? string.Empty;
+                }
                 if (doc.RootElement.TryGetProperty("layouts", out var layouts) && layouts.ValueKind == JsonValueKind.Object)
                 {
                     foreach (var prop in layouts.EnumerateObject())
@@ -147,6 +152,7 @@ public class SettingsService
             writer.WriteBoolean("minimize_to_tray", _settings.General.MinimizeToTray);
             writer.WriteBoolean("track_locations", _settings.General.TrackLocations);
             writer.WriteBoolean("previews_topmost", _settings.General.PreviewsTopmost);
+            writer.WriteBoolean("topmost_only_when_client_focused", _settings.General.TopmostOnlyWhenClientFocused);
             writer.WriteBoolean("unique_layout", _settings.General.UniqueLayout);
             writer.WriteBoolean("snap_to_grid", _settings.General.SnapToGrid);
             writer.WriteNumber("grid_size", _settings.General.GridSize);
@@ -216,6 +222,8 @@ public class SettingsService
             }
             writer.WriteEndObject();
             writer.WriteEndObject();
+
+            writer.WriteString("language", _settings.Language);
 
             writer.WritePropertyName("layouts");
             writer.WriteStartObject();

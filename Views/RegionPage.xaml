@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="clr-namespace:ClientOPreview.Localization"
              mc:Ignorable="d">
   <Grid Margin="10">
     <Grid.RowDefinitions>
@@ -12,37 +13,43 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,8">
-      <TextBlock Text="Region Focus" FontWeight="SemiBold"/>
-      <TextBlock Text="Show only one part of a client (drone panel, capacitor, minimap) instead of the whole window."
+      <TextBlock Text="{loc:Tr RegionTitle}" FontWeight="SemiBold"/>
+      <TextBlock Text="{loc:Tr RegionDesc}"
                  Foreground="Gray" TextWrapping="Wrap" Margin="0,4,0,0"/>
     </StackPanel>
 
     <Grid Grid.Row="1">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="240"/>
+        <ColumnDefinition Width="260"/>
       </Grid.ColumnDefinitions>
 
       <DockPanel Grid.Column="0" Margin="0,0,10,0">
-        <TextBlock DockPanel.Dock="Top" Text="Open previews:" Margin="0,0,0,4"/>
+        <TextBlock DockPanel.Dock="Top" Text="{loc:Tr RegionOpenPreviews}" Margin="0,0,0,4"/>
+        <Button DockPanel.Dock="Bottom" Content="{loc:Tr RegionRefresh}" Height="26" Margin="0,6,0,0" Click="OnRefresh"/>
         <ListBox x:Name="ListStreams" DisplayMemberPath="Display" SelectionChanged="OnStreamSelected"/>
       </DockPanel>
 
       <StackPanel Grid.Column="1">
-        <Button Content="Refresh list" Height="26" Margin="0,0,0,10" Click="OnRefresh"/>
+        <!-- Step 1: build the preset once, on any example screen. -->
+        <TextBlock Text="{loc:Tr RegionCreateStep}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <Button Content="{loc:Tr RegionNewPreset}" Height="28" Margin="0,0,0,4" Click="OnNewPreset"/>
+        <TextBlock Text="{loc:Tr RegionNewPresetHint}" Foreground="Gray" FontSize="11"
+                   TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-        <TextBlock Text="Region of the selected preview:" Margin="0,0,0,4"/>
+        <TextBlock Text="{loc:Tr RegionSavedPresets}" Margin="0,0,0,4"/>
+        <ListBox x:Name="ListPresets" Height="110" DisplayMemberPath="Display" Margin="0,0,0,6"/>
+        <Button Content="{loc:Tr RegionDeletePreset}" Height="26" Margin="0,0,0,14" Click="OnDeletePreset"/>
+
+        <!-- Step 2: reuse it on every other client. -->
+        <TextBlock Text="{loc:Tr RegionApplyStep}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
         <ComboBox x:Name="CmbPresets" Height="24" Margin="0,0,0,6" SelectionChanged="OnPresetSelected"/>
-        <Button Content="Define region…" Height="28" Margin="0,0,0,6" Click="OnDefine"/>
-        <Button Content="Clear region" Height="26" Margin="0,0,0,16" Click="OnClear"/>
-
-        <TextBlock Text="Saved presets:" Margin="0,0,0,4"/>
-        <ListBox x:Name="ListPresets" Height="120" DisplayMemberPath="Display" Margin="0,0,0,6"/>
-        <Button Content="Delete preset" Height="26" Click="OnDeletePreset"/>
+        <Button Content="{loc:Tr RegionDefine}" Height="26" Margin="0,0,0,6" Click="OnDefine"/>
+        <Button Content="{loc:Tr RegionClear}" Height="26" Click="OnClear"/>
       </StackPanel>
     </Grid>
 
     <TextBlock Grid.Row="2" Foreground="Gray" TextWrapping="Wrap" Margin="0,10,0,0"
-               Text="Presets are saved by name (e.g. the pilot name) and reused on any preview. The ▣ button on a preview title bar opens the same picker."/>
+               Text="{loc:Tr RegionFooter}"/>
   </Grid>
 </UserControl>

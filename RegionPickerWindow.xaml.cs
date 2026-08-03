@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using ClientOPreview.Localization;
 using ClientOPreview.Models;
 using static ClientOPreview.Native.NativeMethods;
 // WinForms is enabled in this project, so pin the WPF types.
@@ -32,7 +33,10 @@ public partial class RegionPickerWindow : Window
 
     public event EventHandler<RegionPickerResult>? RegionSaved;
 
-    public RegionPickerWindow(IntPtr source, string sourceTitle, RegionPreset? existing)
+    /// <summary>Returns true when the typed name belongs to another, already saved preset.</summary>
+    public Func<string, bool>? IsNameTaken { get; set; }
+
+    public RegionPickerWindow(IntPtr source, string sourceTitle, RegionPreset? existing, bool suggestNameFromTitle = true)
     {
         _source = source;
         InitializeComponent();
@@ -44,7 +48,7 @@ public partial class RegionPickerWindow : Window
             ChkLockAspect.IsChecked = existing.LockAspect;
             _sel = new Rect(existing.X, existing.Y, Math.Max(0.01, existing.W), Math.Max(0.01, existing.H));
         }
-        else
+        else if (suggestNameFromTitle)
         {
             TxtName.Text = sourceTitle.Length > 40 ? sourceTitle[..40] : sourceTitle;
         }
@@ -184,7 +188,7 @@ public partial class RegionPickerWindow : Window
     {
         var src = SourceRect();
         TxtReadout.Text = $"X {_sel.X:P0} · Y {_sel.Y:P0} · W {_sel.Width:P0} · H {_sel.Height:P0}" +
-                          $"\n{src.Right - src.Left} × {src.Bottom - src.Top} px of {_srcSize.cx} × {_srcSize.cy}";
+                          $"\n{src.Right - src.Left} × {src.Bottom - src.Top} px {Loc.Get("PickerReadoutOf")} {_srcSize.cx} × {_srcSize.cy}";
     }
 
     // ===== Events =====
@@ -232,9 +236,19 @@ public partial class RegionPickerWindow : Window
         var name = TxtName.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            System.Windows.MessageBox.Show(this, "Give the preset a name (e.g. the pilot name).",
-                "Region Focus", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show(this, Loc.Get("PickerNameRequired"),
+                Loc.Get("PickerTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
             TxtName.Focus();
+            return;
+        }
+
+        // Saved presets are immutable: only the preset this picker was opened on can be rewritten.
+        if (IsNameTaken != null && IsNameTaken(name))
+        {
+            System.Windows.MessageBox.Show(this, Loc.Format("RegionNameTaken", name),
+                Loc.Get("PickerTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+            TxtName.Focus();
+            TxtName.SelectAll();
             return;
         }
 
