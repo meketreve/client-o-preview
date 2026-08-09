@@ -2,11 +2,16 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-08
+> Last updated: 2026-08-09
 
 ---
 
 ## ✅ Done
+
+### Release v0.8.0 (2026-08-09)
+- Refactor **validado in-game** pelo usuário; branch `refactor/maintainability` mergeada na `main`.
+- `<Version>` 0.8.0, tag `v0.8.0`, release com o `.exe` single-file.
+- **Solta com regressão conhecida documentada** (README → "Problemas conhecidos"): a hotkey de ciclar entre clientes parou de funcionar. Ver **bug-006**.
 
 ### Refactor para manutenção / vibecode (2026-08-08) — fases 0 a 4, todas entregues
 Build: **Build succeeded, 0 warnings**. Testes: **39 passed, 0 failed**. Nada mudou de comportamento
@@ -60,37 +65,40 @@ para o usuário, exceto as 4 correções de bug abaixo.
 
 ---
 
-## 🚀 Próxima fase — validar in-game e soltar a v0.8.0
+## 🚀 Próxima fase — corrigir a hotkey de ciclar (bug-006) e soltar a v0.8.1
 
-**Goal:** _o refactor foi validado só por compilador e testes; falta o teste que importa, com vários clientes abertos._
+**Goal:** _regressão do refactor: `SetForegroundWindow` de um app em background é recusado pelo Windows; a v0.7.0 escapava porque chamava a sequência de ativação duas vezes por acionamento._
 
-### Acceptance criteria (roteiro do teste)
-1. Abrir 3+ previews, incluindo **dois clientes com o mesmo título** → cada uma reabre na própria posição depois de fechar o app (bug-003).
-2. Mudar largura/altura/opacidade/fonte na aba Miniatura → **fechar e reabrir o app**: os valores continuam lá (bug-002).
-3. Preset de região continua pegando depois de horas com clientes abrindo/fechando.
-4. Topmost por foco sem "piscar" ao alternar rápido entre clientes.
-5. Hotkeys (cycle + diretas) funcionam e sobrevivem a mudar a configuração.
-6. Trocar idioma em runtime; minimizar para bandeja e restaurar.
-7. `%APPDATA%\client-o-preview\error.log` — conferir se apareceu algo inesperado depois da sessão.
+**Comece por aqui:** `.wolf/buglog.json` → **bug-006** tem a hipótese completa e o plano de correção.
+O código a mexer é `StreamManager.Focus` (`Services/StreamManager.cs`), 4 linhas.
+
+### Acceptance criteria
+1. Alt+Tab (hotkey de cycle) traz o próximo cliente para frente, com 3+ previews abertas.
+2. Hotkeys diretas (Alt+NumPad) idem — **verificar também**, usam o mesmo `Focus` e podem estar quebradas sem relato.
+3. Funciona com o cliente minimizado (restaura) e com ele atrás de outra janela.
+4. Clicar na miniatura continua focando (não regredir o caminho que funciona hoje).
+5. README: remover a seção "Problemas conhecidos" quando fechar.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| edit | `ClientOPreview.csproj` | `<Version>` 0.7.0 → 0.8.0 depois do teste aprovado |
-| edit | `README.md` | nota de release: nada muda na UI; correções de persistência + log em %APPDATA% |
+| edit | `Services/StreamManager.cs` | `Focus()`: ativação robusta (repetir a sequência; se não bastar, `AttachThreadInput` na thread do foreground atual) |
+| edit | `Native/NativeMethods.cs` | possivelmente `AttachThreadInput` (`GetWindowThreadProcessId` já existe) |
+| edit | `README.md` | tirar "Problemas conhecidos" |
+| edit | `ClientOPreview.csproj` | `<Version>` 0.8.0 → 0.8.1 |
 
 ### Closed decisions
 - Refactor por extração de colaborador, não MVVM: preserva o padrão "página emite `event` → MainWindow aplica".
 - `SettingsService` via `JsonSerializer` + `SnakeCaseLower` mantendo os mesmos nomes JSON.
 - Testes em `net8.0` com source link, para rodarem no WSL; o app segue `net8.0-windows`.
-- Trabalho ficou no branch `refactor/maintainability` — merge em `main` só depois do teste in-game.
+- v0.8.0 saiu **com** a regressão documentada, a pedido do usuário — o ganho de manutenção e os 4 bugs corrigidos valiam mais que segurar a release.
 
 ### Open decisions
+- Vale um teste para o caminho de foco? Exige janela real → provavelmente não; cobrir por checklist manual.
 - CI no GitHub Actions rodando `dotnet build` + `dotnet test` no push?
 - Terceiro idioma (es?) — a string table aguenta, é só mais um dicionário + rádio.
 - Hotkey para alternar região ↔ janela inteira?
 - Presets globais por jogo (perfil) além do preset por piloto?
-- Vale extrair um projeto `Core` sem WPF (hoje o source link resolve sem custo de build)?
 
 ---
 

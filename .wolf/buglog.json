@@ -103,6 +103,26 @@
       ],
       "occurrences": 0,
       "last_seen": "2026-08-08T00:00:00Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-08-09T00:00:00Z",
+      "error_message": "usuário: \"a hotkey de ciclar entre os clientes não está funcionando\" — apertar Alt+Tab (hotkey de cycle) não traz o próximo cliente para frente. Regressão introduzida no refactor da v0.8.0; funcionava na v0.7.0.",
+      "file": "Services/StreamManager.cs",
+      "root_cause": "HIPÓTESE (não confirmada em runtime). Na v0.7.0 o caminho da hotkey era `CycleToNextThumbnail -> ActivateSourceWindow`, e `ActivateSourceWindow` fazia IsIconic/ShowWindow/SetForegroundWindow e AINDA chamava `OnPreviewClicked`, que repetia a mesma sequência — ou seja, dois `SetForegroundWindow` seguidos por acionamento. O refactor unificou isso em `StreamManager.Focus`, que chama uma vez só. O Windows recusa `SetForegroundWindow` vindo de um processo que não está em primeiro plano; a chamada dupla é o workaround clássico (a primeira concede direito de ativação, a segunda efetiva). Clicar na miniatura continua funcionando porque nesse instante o app TEM direito de foreground — o que combina com o sintoma. Como as hotkeys diretas usam o mesmo `Focus`, elas provavelmente estão afetadas também, mesmo sem relato.",
+      "fix": "PENDENTE (próxima sessão). Plano: (1) confirmar reproduzindo com log em `Focus` (retorno de SetForegroundWindow + GetForegroundWindow depois); (2) restaurar a ativação robusta — repetir a sequência, e se não bastar usar o padrão AttachThreadInput (anexar a thread do foreground atual, SetForegroundWindow, desanexar) ou o truque de ALT sintético. (3) Testar in-game com Alt+Tab, que é o default e ainda por cima é hotkey de sistema. Verificar as hotkeys diretas no mesmo teste.",
+      "tags": [
+        "hotkey",
+        "regression",
+        "setforegroundwindow",
+        "focus",
+        "win32",
+        "v0.8.0",
+        "open"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-09T00:00:00Z"
     }
   ]
 }

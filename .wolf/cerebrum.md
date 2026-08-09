@@ -106,6 +106,7 @@ Onde mexer para cada tipo de mudança (**atualizado depois do refactor de 2026-0
 - [2026-08-08] Não escrever leitor/escritor de JSON à mão no `SettingsService`. O model **é** o formato; um campo novo já nasce persistido.
 - [2026-08-08] Não usar contagem posicional para identificar preview (`Count(w => w.Title == t)`): fechar uma do meio faz a próxima colidir com uma viva. Menor índice livre (`StreamManager.AllocateOccurrence`).
 - [2026-08-08] Não deixar `catch { }`. Logar com `AppLog` — debug sem log custou horas nesta base.
+- [2026-08-09] Ao "limpar" duplicação em código Win32, **não presumir que a repetição é acidental**. `ActivateSourceWindow` chamava `SetForegroundWindow` duas vezes; parecia copiar-e-colar mal feito, mas a chamada dupla é o workaround do bloqueio de foreground do Windows. Unificar em uma chamada quebrou as hotkeys (bug-006). Antes de remover repetição em P/Invoke, perguntar "isso é bug ou é workaround?" — e testar o caminho, que compilador e teste unitário não pegam.
 
 ## Sessão 2026-08-08 (parte 2) — refactor executado
 
@@ -124,6 +125,7 @@ Onde mexer para cada tipo de mudança (**atualizado depois do refactor de 2026-0
 
 ### Decision Log
 
+- [2026-08-09] v0.8.0 saiu **com** a regressão da hotkey de ciclar documentada no README, a pedido do usuário, em vez de segurar a release. Preferência dele: entregar o ganho e listar o problema conhecido.
 - [2026-08-08] Testes por **source link** em vez de `ProjectReference`, e alvo `net8.0` em vez de `net8.0-windows`: torna `dotnet test` executável no WSL, que é onde o desenvolvimento acontece. O custo é manter a lista de arquivos no csproj de teste.
 - [2026-08-08] Geometria e chaves saíram de dentro das janelas para `Services/ThumbnailGeometry.cs` e `Services/LayoutKey.cs`. O critério de corte foi "dá para testar sem abrir uma janela", não "é bonito".
 - [2026-08-08] O refactor ficou em `refactor/maintainability`, não direto na `main`: não dá para rodar WPF no WSL, então merge só depois do teste in-game.

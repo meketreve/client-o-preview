@@ -95,3 +95,25 @@ Usuário mandou "pode executar tudo" → as 5 fases do roadmap foram entregues.
 
 **Estado:** branch `refactor/maintainability`. Compila com 0 warnings e passa nos testes, mas **não rodou no Windows** — WPF não executa no WSL.
 **Próximo passo:** teste in-game seguindo o roteiro de 7 itens no STATUS.md → merge em main → v0.8.0.
+
+## Session: 2026-08-09 — Release v0.8.0
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Usuário testou in-game: aprovado, exceto a hotkey de ciclar | — | refactor validado; 1 regressão | ~1k |
+| — | Causa da regressão rastreada no git (v0.7.0 chamava a ativação 2x por acionamento) | Services/StreamManager.cs | hipótese sólida registrada em bug-006 | ~2k |
+| — | Merge do branch + bump de versão + problema conhecido no README | ClientOPreview.csproj, README.md | v0.8.0 na main | ~2k |
+| — | bug-006 logado com plano de correção; STATUS aponta para ele | .wolf/buglog.json, .wolf/STATUS.md, .wolf/cerebrum.md | próxima sessão começa pela correção | ~3k |
+| — | Publish + tag + release | bin/.../ClientOPreview.exe (285 KB) | tag v0.8.0 no GitHub | ~1k |
+
+### Resumo da sessão (2026-08-09)
+v0.8.0 solta com o refactor inteiro (fases 0–4). Usuário validou in-game e pediu para lançar mesmo
+com a hotkey de ciclar quebrada, listando como problema conhecido.
+
+**Lição principal:** o refactor unificou `ActivateSourceWindow` + `OnPreviewClicked` em um
+`StreamManager.Focus` só. A duplicação parecia acidental, mas o `SetForegroundWindow` duplicado era
+o workaround do bloqueio de foreground do Windows — daí a regressão (bug-006). Compilador e 39
+testes não pegam esse tipo de coisa; só o teste in-game pegou.
+
+**Próximo passo:** corrigir bug-006 em `StreamManager.Focus` (~4 linhas), verificar também as
+hotkeys diretas, tirar "Problemas conhecidos" do README, soltar v0.8.1.

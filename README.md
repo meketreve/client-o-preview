@@ -87,6 +87,14 @@ Aba **Idioma**: alterna a interface entre **Português (Brasil)** e **English**.
 Todas as suas preferências, posições de janelas e hotkeys são salvas automaticamente em:
 `%APPDATA%/client-o-preview/settings.json`
 
+Se algo der errado, o motivo fica registrado em `%APPDATA%/client-o-preview/error.log`.
+
+## 🐞 Problemas conhecidos (v0.8.0)
+- **A hotkey de ciclar entre os clientes (Alt+Tab por padrão) não está funcionando.**
+  As hotkeys diretas (Alt + NumPad) podem estar afetadas pelo mesmo motivo — a
+  investigação está em aberto. Clicar na miniatura continua focando o cliente
+  normalmente. Correção prevista para a próxima versão.
+
 ## 📺 Tutorial em Vídeo
 Confira o funcionamento básico aqui: [YouTube - Como usar client-o-preview](https://youtu.be/sjbJxVLL4h4)
 
