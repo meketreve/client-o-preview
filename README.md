@@ -67,11 +67,12 @@ Na aba **Hotkeys**, você pode configurar uma tecla para alternar entre as janel
 *   **Cycle Hotkey**: escolha uma combinação (padrão: `Ctrl + Tab`).
 *   **Hotkeys diretas**: `Alt + NumPad 1..0` focam um cliente específico, opcionalmente amarrado a um título de janela.
 *   Ao pressionar a hotkey, o app trará a janela correspondente para o primeiro plano — mesmo minimizada.
+*   **Ordem do ciclo**: arraste os nomes na lista **Previews abertas**, à direita, para escolher em que ordem a hotkey percorre os clientes. A ordem fica salva e vale também para as hotkeys diretas por posição.
 
-**Sempre use um modificador (Ctrl/Alt/Shift).** Duas armadilhas do Windows:
+**Evite `Alt + Tab`:** é um combo **reservado pelo Windows** — o registro é recusado e o atalho nunca dispara. O app avisa em laranja na própria aba quando isso acontece (o motivo, com o código de erro do Windows, também vai para o `error.log`).
 
-*   `Alt + Tab` é **reservado pelo sistema** — o Windows recusa o registro e o atalho nunca dispara. O app agora avisa em laranja na própria aba quando um combo é recusado (o motivo também vai para o `error.log`).
-*   Uma **tecla sem modificador** (só `Tab`, só `F1`) pode ser engolida pelo jogo antes de virar hotkey, dependendo de como o cliente lê o teclado. Nesse caso o atalho funciona fora do jogo e "não funciona" dentro dele.
+### 🛡️ Por que o app pede permissão de administrador
+Clientes de jogo costumam rodar como administrador. O Windows **não deixa** um programa comum trazer para frente a janela de um programa com privilégio maior — a hotkey seria registrada e mesmo assim nada aconteceria enquanto o cliente estivesse em foco. Por isso o app pede elevação ao abrir. Ele continua sem tocar no jogo: só lê a miniatura e pede o foco da janela.
 
 ### 6. Miniatura (Thumbnail)
 A antiga aba **General** foi incorporada aqui — todas as opções de preview ficam em um lugar só.

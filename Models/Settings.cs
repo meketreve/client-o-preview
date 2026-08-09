@@ -120,4 +120,8 @@ public class Hotkeys
     };
     // Maps hotkey index (0-9) to window title
     public Dictionary<int, string> DirectKeyMappings { get; set; } = new();
+
+    // Preview keys (same form as the layout keys) in the order the cycle hotkey walks them.
+    // Previews absent from this list open at the end.
+    public List<string> CycleOrder { get; set; } = new();
 }

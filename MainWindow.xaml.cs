@@ -137,6 +137,12 @@ public partial class MainWindow : Window
             _hotkeysPage.ShowRegistrationResult(_hotkeys.FailedCombos);
         };
 
+        _hotkeysPage.CycleOrderChanged += (_, handles) =>
+        {
+            _streams.SetCycleOrder(handles);
+            _settingsSvc.SaveSettings();
+        };
+
         _zoomPage.ZoomChanged += (_, zoom) =>
         {
             _settings.Zoom = zoom;
@@ -208,7 +214,9 @@ public partial class MainWindow : Window
     private void Nav_Hotkeys(object sender, RoutedEventArgs e)
     {
         _hotkeysPage.UpdateOpenThumbnails(
-            _streams.Handles.Select(WindowEnumerator.GetTitle).Where(t => !string.IsNullOrEmpty(t)));
+            _streams.Handles
+                .Select(h => (Handle: h, Title: WindowEnumerator.GetTitle(h)))
+                .Where(p => !string.IsNullOrEmpty(p.Title)));
         ContentHost.Content = _hotkeysPage;
     }
 

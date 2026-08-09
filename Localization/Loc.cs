@@ -91,6 +91,7 @@ public sealed class Loc : INotifyPropertyChanged
         // Hotkeys page
         ["HotkeysTitle"] = "Hotkeys",
         ["HotkeysEnable"] = "Enable global hotkeys",
+        ["HotkeysReorderHint"] = "Drag to change the order the cycle hotkey follows.",
         ["HotkeysRegisterFailed"] = "Windows refused these shortcuts — the system or another app already owns them: {0}. Pick another combination.",
         ["HotkeysCycleTitle"] = "Cycle Hotkey",
         ["HotkeysCycleDesc"] = "Press this hotkey to cycle through open thumbnails",
@@ -211,6 +212,7 @@ public sealed class Loc : INotifyPropertyChanged
         // Página de atalhos
         ["HotkeysTitle"] = "Atalhos",
         ["HotkeysEnable"] = "Ativar atalhos globais",
+        ["HotkeysReorderHint"] = "Arraste para mudar a ordem em que a hotkey de ciclo percorre as previews.",
         ["HotkeysRegisterFailed"] = "O Windows recusou estes atalhos — o sistema ou outro app já usa: {0}. Escolha outra combinação.",
         ["HotkeysCycleTitle"] = "Atalho de ciclo",
         ["HotkeysCycleDesc"] = "Pressione este atalho para alternar entre as previews abertas",

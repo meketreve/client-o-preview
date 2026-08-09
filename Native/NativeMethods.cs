@@ -21,8 +21,9 @@ internal static class NativeMethods
     [DllImport("user32.dll")] internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     [DllImport("user32.dll")] internal static extern bool IsWindow(IntPtr hWnd);
     [DllImport("user32.dll")] internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-    [DllImport("user32.dll")] internal static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+    [DllImport("user32.dll", SetLastError=true)] internal static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
     [DllImport("user32.dll")] internal static extern bool BringWindowToTop(IntPtr hWnd);
+    [DllImport("user32.dll")] internal static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
     [DllImport("kernel32.dll")] internal static extern uint GetCurrentThreadId();
     internal const int SW_RESTORE = 9;
     internal const int SW_MINIMIZE = 6;

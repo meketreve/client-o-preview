@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -19,6 +20,11 @@ public sealed class StreamManager
     private readonly MainWindow _owner;
     private readonly SettingsData _settings;
     private readonly Dictionary<IntPtr, StreamWindow> _streams = new();
+
+    // Cycle order, kept apart from _streams because the user can rearrange it and a dictionary
+    // has no order to promise. Every handle in here is a live key of _streams, and vice versa.
+    private readonly List<IntPtr> _order = new();
+
     private readonly DispatcherTimer _foreground = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
     private bool _topmostSuspended;
@@ -38,7 +44,8 @@ public sealed class StreamManager
 
     public int Count => _streams.Count;
 
-    public IEnumerable<IntPtr> Handles => _streams.Keys.ToList();
+    /// <summary>Live previews in cycle order.</summary>
+    public IEnumerable<IntPtr> Handles => _order.ToList();
 
     public IEnumerable<StreamWindow> Windows => _streams.Values.ToList();
 
@@ -75,9 +82,11 @@ public sealed class StreamManager
         win.Closed += (_, __) =>
         {
             _streams.Remove(item.HWnd);
+            _order.Remove(item.HWnd);
             StreamClosed?.Invoke(this, item.HWnd);
         };
         _streams[item.HWnd] = win;
+        InsertInCycleOrder(item.HWnd, win);
 
         // Layout and region both key off the occurrence index, so the stream has to be
         // registered before anyone gets a say.
@@ -97,7 +106,58 @@ public sealed class StreamManager
     {
         foreach (var win in _streams.Values.ToList()) win.Close();
         _streams.Clear();
+        _order.Clear();
     }
+
+    // ===== Cycle order =====
+
+    /// <summary>
+    /// Rearranges the cycle, in the order the user dragged the list into. Handles that are no
+    /// longer open are dropped and open previews the caller forgot are kept at the end, so a
+    /// stale list can never make a preview unreachable. The order is remembered per preview
+    /// (same key as the saved layout), so it survives a restart.
+    /// </summary>
+    public void SetCycleOrder(IEnumerable<IntPtr> handles)
+    {
+        var current = _order.ToList();
+        var focused = _cycleIndex >= 0 && _cycleIndex < current.Count ? current[_cycleIndex] : IntPtr.Zero;
+
+        var reordered = handles.Where(h => _streams.ContainsKey(h)).Distinct().ToList();
+        foreach (var hwnd in current)
+        {
+            if (!reordered.Contains(hwnd)) reordered.Add(hwnd);
+        }
+
+        _order.Clear();
+        _order.AddRange(reordered);
+
+        // Keep pointing at the same client, so the next press continues from where it was.
+        _cycleIndex = focused == IntPtr.Zero ? -1 : _order.IndexOf(focused);
+
+        _settings.Hotkeys.CycleOrder = _order.Select(CycleKeyOf).Where(k => k.Length > 0).ToList();
+    }
+
+    /// <summary>Places a fresh preview where the saved order says it belongs, or last when it is new.</summary>
+    private void InsertInCycleOrder(IntPtr hwnd, StreamWindow win)
+    {
+        var rank = SavedRankOf(LayoutKey.For(win.WindowTitle, win.OccurrenceIndex));
+        int at = _order.Count;
+        for (int i = 0; i < _order.Count; i++)
+        {
+            if (SavedRankOf(CycleKeyOf(_order[i])) > rank) { at = i; break; }
+        }
+        _order.Insert(at, hwnd);
+    }
+
+    private int SavedRankOf(string key)
+    {
+        var saved = _settings.Hotkeys.CycleOrder;
+        var rank = key.Length == 0 ? -1 : saved.IndexOf(key);
+        return rank < 0 ? int.MaxValue : rank;
+    }
+
+    private string CycleKeyOf(IntPtr hwnd) =>
+        _streams.TryGetValue(hwnd, out var win) ? LayoutKey.For(win.WindowTitle, win.OccurrenceIndex) : "";
 
     /// <summary>
     /// Smallest index not in use by another live preview with the same title. Reusing the
@@ -176,20 +236,37 @@ public sealed class StreamManager
         uint ourThread = GetCurrentThreadId();
         uint fgThread = fg == IntPtr.Zero ? 0 : GetWindowThreadProcessId(fg, out _);
 
-        if (fgThread != 0 && fgThread != ourThread && AttachThreadInput(ourThread, fgThread, true))
+        if (fgThread != 0 && fgThread != ourThread)
         {
-            try
+            if (AttachThreadInput(ourThread, fgThread, true))
             {
-                BringWindowToTop(hwnd);
-                if (TryForeground(hwnd)) return;
+                try
+                {
+                    BringWindowToTop(hwnd);
+                    if (TryForeground(hwnd)) return;
+                }
+                finally
+                {
+                    AttachThreadInput(ourThread, fgThread, false);
+                }
             }
-            finally
+            else
             {
-                AttachThreadInput(ourThread, fgThread, false);
+                // Error 5 means the foreground window runs at a higher integrity level than we do
+                // (client started as administrator): UIPI blocks the attach, and no API gets around it.
+                var err = Marshal.GetLastWin32Error();
+                AppLog.Warn("Focus", err == 5
+                    ? "AttachThreadInput denied (win32 5): the focused window runs elevated and this app does not — run the app as administrator"
+                    : $"AttachThreadInput failed (win32 {err})");
             }
         }
 
-        AppLog.Warn("Focus", $"could not activate 0x{hwnd.ToInt64():X}; foreground is 0x{GetForegroundWindow().ToInt64():X}");
+        // Last resort: the shell's own activation path, which plays by slightly different rules.
+        SwitchToThisWindow(hwnd, true);
+        if (GetForegroundWindow() == hwnd) return;
+
+        AppLog.Warn("Focus", $"could not activate 0x{hwnd.ToInt64():X} '{WindowEnumerator.GetTitle(hwnd)}'; " +
+                             $"foreground stayed 0x{GetForegroundWindow().ToInt64():X} '{WindowEnumerator.GetTitle(GetForegroundWindow())}'");
     }
 
     private static bool TryForeground(IntPtr hwnd)
@@ -200,7 +277,7 @@ public sealed class StreamManager
 
     public void CycleNext()
     {
-        var handles = _streams.Keys.ToList();
+        var handles = _order.ToList();
         if (handles.Count == 0) return;
 
         _cycleIndex = (_cycleIndex + 1) % handles.Count;
@@ -214,7 +291,7 @@ public sealed class StreamManager
         // A hotkey mapped to a specific client wins over the positional order.
         if (_settings.Hotkeys.DirectKeyMappings.TryGetValue(index, out var title) && !string.IsNullOrEmpty(title))
         {
-            foreach (var hwnd in _streams.Keys)
+            foreach (var hwnd in _order)
             {
                 if (WindowEnumerator.GetTitle(hwnd) == title)
                 {
@@ -224,7 +301,7 @@ public sealed class StreamManager
             }
         }
 
-        var handles = _streams.Keys.ToList();
+        var handles = _order.ToList();
         if (index < 0 || index >= handles.Count) return;
         Focus(handles[index]);
         _cycleIndex = index;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -43,7 +44,23 @@ public sealed class HotkeyManager : IDisposable
     {
         _source = HwndSource.FromHwnd(Handle);
         _source?.AddHook(Hook);
+        AppLog.Info("Hotkeys", $"app running elevated: {IsElevated()}");
         Reload(hotkeys);
+    }
+
+    /// <summary>An elevated client cannot be activated by a non-elevated app (UIPI), so this is worth knowing.</summary>
+    private static bool IsElevated()
+    {
+        try
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            return new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Warn("Hotkeys", ex);
+            return false;
+        }
     }
 
     public void Reload(Hotkeys hotkeys)
@@ -107,11 +124,15 @@ public sealed class HotkeyManager : IDisposable
         int id = wParam.ToInt32();
         if (id == IdCycle)
         {
+            // Logged because "nothing happened" has two very different causes: the hotkey never
+            // reached us (the focused app ate the key), or it did and the focus call was refused.
+            AppLog.Info("Hotkeys", "cycle pressed");
             CycleRequested?.Invoke(this, EventArgs.Empty);
             handled = true;
         }
         else if (id >= IdDirectBase && id < IdDirectBase + DirectCount)
         {
+            AppLog.Info("Hotkeys", $"direct[{id - IdDirectBase}] pressed");
             DirectRequested?.Invoke(this, id - IdDirectBase);
             handled = true;
         }

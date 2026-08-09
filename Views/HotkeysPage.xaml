@@ -94,20 +94,45 @@
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
 
-          <TextBlock Text="{loc:Tr HotkeysOpenThumbnails}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+          <StackPanel>
+            <TextBlock Text="{loc:Tr HotkeysOpenThumbnails}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <TextBlock x:Name="TxtReorderHint" Text="{loc:Tr HotkeysReorderHint}" Foreground="Gray"
+                       FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+          </StackPanel>
 
-          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="OpenThumbnailsList">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="{Binding Index}" Width="20" FontWeight="Bold" Foreground="#666"/>
-                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}"/>
-                  </StackPanel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
+          <ListBox x:Name="OpenThumbnailsList" Grid.Row="1"
+                   BorderThickness="0" Background="Transparent"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   AllowDrop="True"
+                   PreviewMouseLeftButtonDown="OnOrderMouseDown"
+                   PreviewMouseMove="OnOrderMouseMove"
+                   DragOver="OnOrderDragOver"
+                   Drop="OnOrderDrop">
+            <ListBox.ItemContainerStyle>
+              <Style TargetType="ListBoxItem">
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Cursor" Value="SizeNS"/>
+                <!-- The drop line: a top border that only the item under the cursor shows. -->
+                <Setter Property="BorderBrush" Value="#1E88E5"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsDropTarget}" Value="True">
+                    <Setter Property="BorderThickness" Value="0,2,0,0"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal" ToolTip="{Binding Title}">
+                  <TextBlock Text="⋮⋮" Foreground="#999" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding Index}" Width="20" FontWeight="Bold" Foreground="#666"/>
+                  <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
 
           <TextBlock x:Name="TxtNoThumbnails" Grid.Row="1" Text="{loc:Tr HotkeysNoThumbnails}"
                      Foreground="Gray" FontStyle="Italic"

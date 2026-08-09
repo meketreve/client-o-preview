@@ -8,7 +8,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Single source of truth for the version: the About page reads it from the assembly. -->
-    <Version>0.8.1</Version>
+    <Version>0.9.0</Version>
+    <!-- requireAdministrator: focusing an elevated game client needs equal integrity (bug-008). -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
