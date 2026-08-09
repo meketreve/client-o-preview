@@ -1,8 +1,0 @@
-<UserControl x:Class="ClientOPreview.Views.OverlayPage"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ClientOPreview.Localization">
-  <Grid>
-    <TextBlock Text="{loc:Tr OverlayComingSoon}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-  </Grid>
-</UserControl>

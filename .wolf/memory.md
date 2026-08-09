@@ -42,3 +42,56 @@ Pacote de 4 pedidos do usuário, todos entregues e compilando (0 warnings):
 **Próximo passo:** feedback do teste in-game → ajustar termos pt-BR → tirar o sufixo `-dev` do csproj → commit + release v0.7.0.
 | 06:00 | Teste in-game aprovado pelo usuário → versão final | ClientOPreview.csproj (0.7.0-dev → 0.7.0) | publish refeito, 284 KB | ~1k |
 | 06:15 | Commit + push + release v0.7.0 | branch feat/i18n-thumbnail-merge → main | ed79992 na main, tag v0.7.0 com ClientOPreview.exe (284 KB) | ~2k |
+
+## Session: 2026-08-09 21:33
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-08 — Auditoria de manutenibilidade (vibecode)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | `openwolf scan` (anatomy estava stale desde o merge) | .wolf/anatomy-index.json | 45 arquivos indexados em 63 ms | ~1k |
+| — | Leitura integral do código-fonte | 20 arquivos .cs/.xaml + csproj/gitignore/build.bat/WARP.md | mapa completo do fluxo App→MainWindow→StreamWindow→DWM | ~35k |
+| — | Checagem de paridade i18n por script | Localization/Loc.cs | 94 chaves em cada tabela, 0 faltando, 0 duplicada; `RegionOfSelected` órfã | ~1k |
+| — | anatomy.md reescrito com descrições reais | .wolf/anatomy.md | cada arquivo diz o que faz e onde dói (god object, código morto, doc stale) | ~3k |
+| — | cerebrum: Mapa do código + 11 learnings + 3 decisões + 3 do-not-repeat | .wolf/cerebrum.md | próxima sessão sabe "quero mexer em X → abro Y" sem reler nada | ~3k |
+| — | 4 bugs novos logados com root cause + fix | .wolf/buglog.json | bug-002 (miniatura não persiste), 003 (occurrence index), 004 (error.log no CWD), 005 (catch vazio) | ~2k |
+| — | STATUS: quest de refactor em 5 fases | .wolf/STATUS.md | Fase 0 limpeza → 1 bugs → 2 SettingsService → 3 quebrar MainWindow → 4 testes | ~3k |
+
+### Resumo da sessão (2026-08-08)
+Pedido: analisar o projeto todo e popular o OpenWolf, mirando manutenção + edição por vibecode. Nenhum código de app alterado — só a base de conhecimento.
+
+**Achados principais:**
+1. `MainWindow.xaml.cs` com 836 linhas / ~7,6k tokens acumula streams + hotkeys + layout + região + foreground + wiring. Toda tarefa paga esse arquivo inteiro.
+2. Estado duplicado (8 campos-espelho de settings) → **bug-002**: largura/altura/opacidade/fonte da miniatura não persistem entre execuções. Bug real, presente na v0.7.0.
+3. Adicionar uma config custa 5 edições porque o `SettingsService` escreve JSON à mão.
+4. `obj/` (15 arquivos) e `__pycache__/*.pyc` versionados apesar do `.gitignore` — origem do ritual `git checkout -- obj/`.
+5. `Views/OverlayPage.*` é inalcançável (sem botão na sidebar); `WARP.md` aponta para pasta que não existe.
+6. Todo `catch` é vazio; nenhum teste; i18n saudável (94/94).
+
+**Próximo passo:** executar a Fase 0 (limpeza, risco zero) e a Fase 1 (bugs 002–005).
+
+## Session: 2026-08-08 (parte 2) — Refactor executado (fases 0–4)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Fase 0: destrackear obj/ e __pycache__, csharp/ → raiz, matar OverlayPage, reescrever WARP.md | .gitignore-tracked files, Models/, Services/, Views/OverlayPage.*, WARP.md, Loc.cs | 1 raiz de código; ritual `git checkout -- obj/` extinto | ~4k |
+| — | Fase 2 (antes da 1, p/ não reescrever 2x): AppLog + SettingsService declarativo | Services/AppLog.cs (novo), Services/SettingsService.cs | JsonSerializer + SnakeCaseLower; 250 → 158 linhas; .bak + escrita atômica | ~5k |
+| — | Fase 1: bug-004 (error.log em %APPDATA%) e bug-005 (catch vazio) | App.xaml.cs, SettingsService.cs, StreamWindow.xaml.cs, WindowEnumerator.cs | falha de I/O deixou de ser invisível | ~2k |
+| — | Helpers puros extraídos + Loc livre de WPF | Services/LayoutKey.cs, Services/ThumbnailGeometry.cs, Localization/TrExtension.cs | núcleo testável fora do Windows | ~4k |
+| — | Fase 3: MainWindow quebrada em 4 colaboradores (bug-002 e bug-003 caem junto) | Services/StreamManager.cs, RegionCoordinator.cs, HotkeyManager.cs, LayoutStore.cs, MainWindow.xaml.cs | 836 → 261 linhas; nenhum arquivo passa de 311 | ~12k |
+| — | Fase 4: projeto de testes net8.0 com source link | tests/ClientOPreview.Tests/* (5 arquivos), ClientOPreview.csproj | 39 testes, rodam no WSL | ~6k |
+| — | Build + testes | — | Build succeeded, 0 warnings; 39 passed / 0 failed | ~1k |
+| — | OpenWolf atualizado (anatomy, STATUS, cerebrum, buglog) | .wolf/* | bug-002..005 marcados como corrigidos | ~5k |
+
+### Resumo da sessão (2026-08-08, parte 2)
+Usuário mandou "pode executar tudo" → as 5 fases do roadmap foram entregues.
+
+**Números:** `MainWindow.xaml.cs` 836 → 261 linhas; `SettingsService` 250 → 158; maior arquivo do projeto agora é `StreamWindow.xaml.cs` com 311. Adicionar uma config caiu de 5 pontos de edição para 2. 39 testes onde antes havia zero, executáveis no WSL.
+
+**4 bugs corrigidos:** 002 (miniatura não persistia), 003 (occurrence index trocava layouts), 004 (error.log no CWD), 005 (catch vazio comendo settings corrompido).
+
+**Estado:** branch `refactor/maintainability`. Compila com 0 warnings e passa nos testes, mas **não rodou no Windows** — WPF não executa no WSL.
+**Próximo passo:** teste in-game seguindo o roteiro de 7 itens no STATUS.md → merge em main → v0.8.0.

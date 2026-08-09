@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Windows.Markup;
-// WinForms is enabled in this project, so pin the WPF type.
-using Binding = System.Windows.Data.Binding;
-using BindingMode = System.Windows.Data.BindingMode;
 
 namespace ClientOPreview.Localization;
 
@@ -29,6 +25,9 @@ public sealed class Loc : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    /// <summary>WPF's Binding.IndexerName, inlined so this file needs no WPF reference.</summary>
+    private const string IndexerName = "Item[]";
+
     public string this[string key] => Get(key);
 
     public static string Get(string key)
@@ -46,7 +45,7 @@ public sealed class Loc : INotifyPropertyChanged
         var normalized = Normalize(code);
         if (normalized == _lang) return;
         _lang = normalized;
-        Instance.PropertyChanged?.Invoke(Instance, new PropertyChangedEventArgs(Binding.IndexerName));
+        Instance.PropertyChanged?.Invoke(Instance, new PropertyChangedEventArgs(IndexerName));
         LanguageChanged?.Invoke(null, EventArgs.Empty);
     }
 
@@ -120,7 +119,6 @@ public sealed class Loc : INotifyPropertyChanged
         ["RegionDesc"] = "Show only one part of a client (drone panel, capacitor, minimap) instead of the whole window.",
         ["RegionOpenPreviews"] = "Open previews:",
         ["RegionRefresh"] = "Refresh list",
-        ["RegionOfSelected"] = "Region of the selected preview:",
         ["RegionDefine"] = "Edit this region…",
         ["RegionClear"] = "Clear region",
         ["RegionSavedPresets"] = "Saved presets:",
@@ -149,9 +147,6 @@ public sealed class Loc : INotifyPropertyChanged
         // About page
         ["AboutTitle"] = "About",
         ["AboutDisclaimer"] = "This program does NOT modify game interface or broadcast inputs. It only shows live previews.",
-
-        // Overlay page
-        ["OverlayComingSoon"] = "Overlay settings (coming soon)",
 
         // Stream window
         ["StreamRegionTooltip"] = "Focus a region of this window",
@@ -243,7 +238,6 @@ public sealed class Loc : INotifyPropertyChanged
         ["RegionDesc"] = "Mostre só uma parte do cliente (painel de drones, capacitor, minimapa) em vez da janela inteira.",
         ["RegionOpenPreviews"] = "Previews abertas:",
         ["RegionRefresh"] = "Atualizar lista",
-        ["RegionOfSelected"] = "Região da preview selecionada:",
         ["RegionDefine"] = "Editar esta região…",
         ["RegionClear"] = "Limpar região",
         ["RegionSavedPresets"] = "Presets salvos:",
@@ -273,9 +267,6 @@ public sealed class Loc : INotifyPropertyChanged
         ["AboutTitle"] = "Sobre",
         ["AboutDisclaimer"] = "Este programa NÃO modifica a interface do jogo nem replica comandos. Ele apenas mostra previews ao vivo.",
 
-        // Página de overlay
-        ["OverlayComingSoon"] = "Configurações de overlay (em breve)",
-
         // Janela de preview
         ["StreamRegionTooltip"] = "Focar uma região desta janela",
 
@@ -304,25 +295,4 @@ public sealed class Loc : INotifyPropertyChanged
         ["ErrorUnhandled"] = "Exceção não tratada",
         ["ErrorStartup"] = "Erro na inicialização",
     };
-}
-
-// {loc:Tr KeyName} — binds a control to the string table so it follows language changes.
-[MarkupExtensionReturnType(typeof(object))]
-public class TrExtension : MarkupExtension
-{
-    public TrExtension() { }
-
-    public TrExtension(string key) => Key = key;
-
-    public string Key { get; set; } = string.Empty;
-
-    public override object ProvideValue(IServiceProvider serviceProvider)
-    {
-        var binding = new Binding($"[{Key}]")
-        {
-            Source = Loc.Instance,
-            Mode = BindingMode.OneWay
-        };
-        return binding.ProvideValue(serviceProvider);
-    }
 }

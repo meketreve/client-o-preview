@@ -2,93 +2,114 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-03
+> Last updated: 2026-08-08
 
 ---
 
 ## ✅ Done
 
+### Refactor para manutenção / vibecode (2026-08-08) — fases 0 a 4, todas entregues
+Build: **Build succeeded, 0 warnings**. Testes: **39 passed, 0 failed**. Nada mudou de comportamento
+para o usuário, exceto as 4 correções de bug abaixo.
+
+**Fase 0 — limpeza**
+- `obj/` (15 arquivos) e `__pycache__/*.pyc` **destrackeados** → acabou o ritual `git checkout -- obj/` depois de todo build no WSL.
+- `csharp/Models` e `csharp/Services` movidos para `Models/` e `Services/` na raiz; pasta `csharp/` extinta. Uma raiz de código só.
+- `Views/OverlayPage.*` (inalcançável), `Nav_Overlay` e as chaves `OverlayComingSoon`/`RegionOfSelected` do `Loc.cs` apagados.
+- `WARP.md` reescrito (apontava para `csharp/ClientOPreview/`, pasta inexistente).
+
+**Fase 1 — bugs achados na auditoria** (detalhe em `.wolf/buglog.json`)
+- **bug-002**: tamanho/opacidade/fonte da miniatura não persistiam. Campos-espelho apagados, tudo lê e escreve no model.
+- **bug-003**: occurrence index posicional trocava layouts entre clientes de mesmo título. Agora é o menor índice livre entre as previews vivas.
+- **bug-004**: `error.log` ia para o CWD. Novo `Services/AppLog.cs` grava em `%APPDATA%/client-o-preview/`.
+- **bug-005**: catch vazio comia settings corrompido. Log + `settings.json.bak` + gravação atômica.
+
+**Fase 2 — `SettingsService` declarativo**
+- `JsonSerializer` + `PropertyNamingPolicy = SnakeCaseLower`: 250 → 158 linhas, e o **model virou a fonte única do formato**.
+- Compatibilidade verificada por teste com um `settings.json` da v0.7.0 (inclusive o legado `zoom_on_hover`).
+- Novo `RemoveLayout` (o TODO "or some way to delete" morreu).
+
+**Fase 3 — `MainWindow` quebrada: 836 → 261 linhas**
+- `Services/StreamManager.cs` (253) — previews abertas, occurrence index, timer de foreground, topmost por foco.
+- `Services/RegionCoordinator.cs` (139) — recorte por preview, mapa por HWND, picker, linhas da página.
+- `Services/HotkeyManager.cs` (128) — RegisterHotKey, hook WM_HOTKEY, string→virtual key.
+- `Services/LayoutStore.cs` (91) — geometria salva, migração de chave legada, previews a reabrir.
+- `Services/LayoutKey.cs` (74) e `Services/ThumbnailGeometry.cs` (64) — **puros**, sem WPF nem Win32.
+- `Localization/Loc.cs` ficou livre de WPF (o `{loc:Tr}` foi para `Localization/TrExtension.cs`).
+- `StreamWindow` parou de alocar um brush por tick do timer de 400 ms.
+
+**Fase 4 — rede de segurança**
+- `tests/ClientOPreview.Tests/` em **net8.0** (não `-windows`): faz *source link* dos arquivos sem WPF, então `dotnet test` **roda no WSL**, não só no Windows.
+- 39 testes: geometria do recorte/letterbox, chaves e geometria de layout, paridade en↔pt-BR, round-trip de settings (incl. arquivo da v0.7.0 e arquivo corrompido).
+
+### Auditoria de manutenibilidade (2026-08-08)
+- Projeto inteiro lido; resultado em `.wolf/anatomy.md` (descrição real por arquivo), `.wolf/cerebrum.md` (Mapa do código) e `.wolf/buglog.json` (4 bugs novos).
+
 ### i18n pt-BR / en (2026-08-03)
-- `Localization/Loc.cs`: string table (~110 chaves) + `{loc:Tr Key}` (MarkupExtension → Binding no indexer). Troca de idioma **em runtime**, sem restart.
-- Aba **Idioma** nova (`Views/LanguagePage.*`), rádio Português (Brasil) / English; persistido em `settings.json` → `"language"`. Primeira execução segue o idioma do Windows (`Loc.SystemDefault()`).
-- Todo texto visível traduzido: sidebar, 7 páginas, StreamWindow (tooltip ▣), RegionPickerWindow, menu da bandeja, MessageBox de erro do App.
-- Strings montadas em código seguem `Loc.LanguageChanged` (labels dos hotkeys, "(None)", combo "— nenhuma —").
+- `Localization/Loc.cs`: string table (94 chaves por idioma) + `{loc:Tr Key}`. Troca de idioma **em runtime**, sem restart.
+- Aba **Idioma** (`Views/LanguagePage.*`), persistida em `settings.json` → `"language"`. Primeira execução segue o idioma do Windows.
 
 ### Aba General fundida na Thumbnail (2026-08-03)
-- `Views/GeneralPage.*` **deletado**; tudo migrou para `ThumbnailPage` (seções "Previews" e "Geral"). Duplicata de "Previews always on top" removida — sobrou uma só.
-- Sidebar: 7 botões (Miniatura, Atalhos, Zoom, Foco de Região, Clientes Ativos, Idioma, Sobre).
-- Novo: **"Só no topo enquanto um cliente estiver em foco"** (`General.TopmostOnlyWhenClientFocused`, JSON `topmost_only_when_client_focused`). Implementado em `UpdateTopmostForFocus()`, dentro do timer de foreground de 400ms que já existia.
+- `Views/GeneralPage.*` deletado; sidebar com 7 botões. Nova opção **"Só no topo enquanto um cliente estiver em foco"**.
 
 ### Release v0.7.0 (2026-08-03)
-- Build testada in-game pelo usuário e aprovada.
-- `<Version>` 0.7.0 no csproj (sem sufixo), tag `v0.7.0` + release com o `.exe` single-file.
+- Build testada in-game e aprovada. Tag `v0.7.0` + release com o `.exe` single-file.
 
-### Region Focus — confiabilidade + fluxo de preset (2026-08-03)
-- **bug-001 corrigido**: seleção de preset que "às vezes não altera". Assignment agora resolvido por HWND (`_liveRegions`) enquanto a preview vive; chave por título só como persistência/fallback (o título do cliente muda em runtime).
-- Fluxo em 2 passos na página: **1. Novo preset…** (desenha uma vez numa preview de exemplo) → **2. escolhe o preset salvo** em cada outra conta.
-- Presets **imutáveis**: o picker recusa salvar por cima de um nome já existente (`IsNameTaken`), exceto ao editar aquele mesmo preset.
-- README atualizado (seções 4, 6 e 7).
-
-### Region Focus (crop de região da janela monitorada)
-- `RegionPreset` / `RegionSettings` em `csharp/Models/Settings.cs` — crop normalizado (0–1) + presets nomeados + assignments por stream.
-- Persistência do bloco `regions` em `csharp/Services/SettingsService.cs` (`%APPDATA%/client-o-preview/settings.json`).
-- `StreamWindow` aplica o crop via `rcSource` do DWM, com letterbox opcional (`LockAspect`), badge `▣ nome` na barra de título, botão `▣` e `FitToRegion()`.
-- `RegionPickerWindow` + `RegionOverlayWindow`: seletor com thumbnail ao vivo, retângulo arrastável/redimensionável, 9 quick anchors, slider de tamanho e preview "Result" do recorte ao vivo.
-- `Views/RegionPage` + nav "Region Focus" no `MainWindow`: aplicar/limpar/apagar presets nas previews abertas.
-- Região reaplicada automaticamente ao reabrir previews (`OpenStreamForItem`).
-- README: seção 4 "Foco de Região" (numeração das seções seguintes corrigida).
-- Build validado: `dotnet build` → **Build succeeded**, 0 warnings.
-
-### Versão / release
-- `<Version>0.6.0</Version>` no `ClientOPreview.csproj` virou **fonte única**; `Views/AboutPage.xaml.cs` lê do assembly (antes era texto chumbado no XAML e já estava defasado em 0.5.0). Bumpar = editar 1 linha do csproj.
-- Tag `v0.6.0` + release publicada com o `.exe`: https://github.com/meketreve/client-o-preview/releases/tag/v0.6.0
-- Merge feito em `main` (`2338678`), commit da versão `03916ec`.
-
-### Infra do repo
-- `.wolf/`, `.claude/` e `CLAUDE.md` versionados. Fora do git: `.wolf/dashboard-token` (credencial do dashboard local), `.claude/settings.local.json`, `.wolf/backups/` e o estado de runtime (`.wolf/hooks/_session.json`, `.wolf/token-ledger.json`) que era reescrito a cada sessão.
-- `.wolf/config.json`: `bin`, `obj`, `publish` adicionados aos `exclude_patterns` — sem isso o scan indexava 181 arquivos de build em vez de 44 de código.
+### Region Focus (2026-08-02/03)
+- Crop normalizado (0–1) via `rcSource` do DWM, presets nomeados imutáveis, fluxo "cria uma vez → seleciona nas outras contas", **bug-001** corrigido por mapa HWND.
 
 ---
 
-## 🚀 Next phase
+## 🚀 Próxima fase — validar in-game e soltar a v0.8.0
 
-**Goal:** _colher o uso real da v0.7.0 (idioma + topmost por foco + fluxo novo de preset de região) e decidir o próximo recurso._
+**Goal:** _o refactor foi validado só por compilador e testes; falta o teste que importa, com vários clientes abertos._
 
-### Acceptance criteria
-1. Nenhum texto sobrando em inglês com o app em pt-BR (e vice-versa) — inclusive telas que só aparecem em erro.
-2. Topmost por foco sem "piscar" quando o usuário alterna rápido entre clientes.
-3. Preset de região continua pegando depois de horas com vários clientes abrindo/fechando.
+### Acceptance criteria (roteiro do teste)
+1. Abrir 3+ previews, incluindo **dois clientes com o mesmo título** → cada uma reabre na própria posição depois de fechar o app (bug-003).
+2. Mudar largura/altura/opacidade/fonte na aba Miniatura → **fechar e reabrir o app**: os valores continuam lá (bug-002).
+3. Preset de região continua pegando depois de horas com clientes abrindo/fechando.
+4. Topmost por foco sem "piscar" ao alternar rápido entre clientes.
+5. Hotkeys (cycle + diretas) funcionam e sobrevivem a mudar a configuração.
+6. Trocar idioma em runtime; minimizar para bandeja e restaurar.
+7. `%APPDATA%\client-o-preview\error.log` — conferir se apareceu algo inesperado depois da sessão.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| edit | `Localization/Loc.cs` | ajustar termos pt-BR que soarem estranhos in-game; novas chaves seguem o padrão PascalCase sem ponto |
+| edit | `ClientOPreview.csproj` | `<Version>` 0.7.0 → 0.8.0 depois do teste aprovado |
+| edit | `README.md` | nota de release: nada muda na UI; correções de persistência + log em %APPDATA% |
 
 ### Closed decisions
-- String table em C# (não `.resx`): 2 idiomas, app single-file, troca em runtime sem build extra.
-- `General` continua existindo no model/JSON mesmo sem a aba — não quebra `settings.json` de quem já usa.
-- Topmost por foco reaproveita o timer de 400ms; sem hook global novo.
-- Assignment de região resolvido por HWND em sessão, título só como persistência.
+- Refactor por extração de colaborador, não MVVM: preserva o padrão "página emite `event` → MainWindow aplica".
+- `SettingsService` via `JsonSerializer` + `SnakeCaseLower` mantendo os mesmos nomes JSON.
+- Testes em `net8.0` com source link, para rodarem no WSL; o app segue `net8.0-windows`.
+- Trabalho ficou no branch `refactor/maintainability` — merge em `main` só depois do teste in-game.
 
 ### Open decisions
+- CI no GitHub Actions rodando `dotnet build` + `dotnet test` no push?
 - Terceiro idioma (es?) — a string table aguenta, é só mais um dicionário + rádio.
 - Hotkey para alternar região ↔ janela inteira?
 - Presets globais por jogo (perfil) além do preset por piloto?
-- `.wolf/_scan-state.json` e `.wolf/cron-state.json` também mudam a cada scan/heartbeat — ignorar também?
+- Vale extrair um projeto `Core` sem WPF (hoje o source link resolve sem custo de build)?
 
 ---
 
 ## 📁 Active architecture
 
-- **Stack:** C# / .NET 8 / WPF (`net8.0-windows`, `UseWPF` + `UseWindowsForms`), DWM Thumbnails API.
-- **Key modules:** `MainWindow` (orquestra streams/hotkeys/settings/idioma), `StreamWindow` (1 preview = 1 thumbnail DWM), `Views/*Page` (UserControls de config), `csharp/Services/SettingsService` (JSON em `%APPDATA%`), `Native/NativeMethods` (P/Invoke), `Localization/Loc.cs` (string table pt-BR/en + `{loc:Tr}`).
-- **Patterns:** páginas expõem `event` + `LoadFrom(...)`; `MainWindow` faz o wiring e salva settings; nenhuma page toca em settings direto.
+- **Stack:** C# / .NET 8 / WPF (`net8.0-windows`, `UseWPF` + `UseWindowsForms`), DWM Thumbnails API. Zero dependência NuGet no app.
+- **Fluxo:** `App` → `MainWindow` (lê settings, resolve idioma, cria os 4 colaboradores, faz o wiring) → `StreamManager` abre uma `StreamWindow` por cliente → `ThumbnailGeometry` traduz região + zoom em `rcSource`/`rcDestination`.
+- **Colaboradores:** `StreamManager` (previews + foco), `RegionCoordinator` (recortes), `LayoutStore` (posições), `HotkeyManager` (atalhos globais). A `MainWindow` só liga os fios.
+- **Padrão:** páginas expõem `event` + `LoadFrom(...)`; a `MainWindow` aplica e salva; **nenhuma page toca em settings direto**.
+- **Persistência:** `SettingsService` → `%APPDATA%/client-o-preview/settings.json`. O **model é o formato** — adicionar config = editar `Models/Settings.cs` + a UI.
+- **Diagnóstico:** `AppLog` → `%APPDATA%/client-o-preview/error.log`.
+- **Onde mexer para cada tipo de mudança:** tabela no `.wolf/cerebrum.md`, seção "Mapa do código".
 
 ---
 
 ## ⚠️ External blockers (don't block coding)
 
-- Build/execução real só no Windows (WPF). No WSL há SDK em `~/.dotnet/dotnet` que compila com `EnableWindowsTargeting`.
+- Executar a app só no Windows (WPF). No WSL, `~/.dotnet/dotnet build` compila e `dotnet test` roda (os testes são `net8.0`).
+- O refactor **ainda não rodou no Windows** — é a próxima fase.
 
 ---
 
@@ -96,16 +117,17 @@
 
 ```bash
 ~/.dotnet/dotnet build                      # compila no WSL (validação de sintaxe/tipos)
+~/.dotnet/dotnet test tests/ClientOPreview.Tests    # 39 testes, rodam no WSL
 ~/.dotnet/dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained false
-git checkout -- obj/                        # SEMPRE após build no WSL: obj/ é versionado e recebe paths Linux
 dotnet run                                  # dev, no Windows
 gh release create vX.Y.Z <exe> --title ... --notes ...
+openwolf scan                               # regenera .wolf/anatomy.md
 ```
 
 ---
 
 ## 📚 References (read IF needed)
 
-- `.wolf/cerebrum.md` — User Preferences + Do-Not-Repeat + Decision Log
-- `.wolf/anatomy.md` — token-efficient file index
-- `.wolf/buglog.json` — known bugs + fixes
+- `.wolf/cerebrum.md` — **Mapa do código** + User Preferences + Do-Not-Repeat + Decision Log
+- `.wolf/anatomy.md` — índice de arquivos com o que cada um faz
+- `.wolf/buglog.json` — bug-001 a bug-005, todos corrigidos
