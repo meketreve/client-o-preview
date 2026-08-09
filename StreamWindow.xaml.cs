@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using ClientOPreview.Models;
+using ClientOPreview.Services;
 using static ClientOPreview.Native.NativeMethods;
 
 namespace ClientOPreview;
@@ -33,7 +34,15 @@ public partial class StreamWindow : Window
         TxtTitle.Text = $"{_item.Title}  (0x{_item.HWnd.ToInt64():X})";
     }
 
-    private System.Windows.Media.Brush _activeColorBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 100, 200));
+    private static readonly System.Windows.Media.Brush IdleBrush =
+        new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(32, 32, 32));
+
+    private System.Windows.Media.Brush _activeColorBrush =
+        new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 100, 200));
+
+    // The foreground timer calls SetActiveState 2.5x a second per preview; without this
+    // the title bar allocated a fresh brush on every tick.
+    private bool? _isActive;
 
     public void SetOpacity(double alpha) => Opacity = alpha;
 
@@ -48,15 +57,19 @@ public partial class StreamWindow : Window
         {
             var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
             _activeColorBrush = new System.Windows.Media.SolidColorBrush(color);
+            if (_isActive == true) TitleBar.Background = _activeColorBrush;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            AppLog.Warn($"invalid highlight colour '{hex}'", ex);
+        }
     }
 
     public void SetActiveState(bool active)
     {
-        TitleBar.Background = active 
-            ? _activeColorBrush
-            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(32, 32, 32));  // Default dark
+        if (_isActive == active) return;
+        _isActive = active;
+        TitleBar.Background = active ? _activeColorBrush : IdleBrush;
     }
     public void SetSize(int w, int h)
     {
@@ -92,8 +105,9 @@ public partial class StreamWindow : Window
         var hr = DwmRegisterThumbnail(dest, _item.HWnd, out _thumb);
         if (hr != 0)
         {
-            // falha silenciosa, mantém janela sem preview
+            // The window stays up without a preview; the source probably died mid-open.
             _thumb = IntPtr.Zero;
+            AppLog.Warn($"DwmRegisterThumbnail failed for '{_item.Title}'", $"hr=0x{hr:X8}");
         }
     }
 
@@ -116,61 +130,22 @@ public partial class StreamWindow : Window
         };
 
         bool internalZoom = zoomed && _zoomSettings.InternalZoom;
-        bool cropped = _region != null && !IsFullWindow(_region);
+        bool cropped = ThumbnailGeometry.NeedsCrop(_region);
 
         if ((cropped || internalZoom) && DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) == 0
             && srcSize.cx > 0 && srcSize.cy > 0)
         {
-            // Region first (it defines "what part of the client we watch"),
-            // then the hover zoom magnifies inside that region.
-            double left = srcSize.cx * (_region?.X ?? 0.0);
-            double top = srcSize.cy * (_region?.Y ?? 0.0);
-            double cw = Math.Max(1.0, srcSize.cx * (_region?.W ?? 1.0));
-            double ch = Math.Max(1.0, srcSize.cy * (_region?.H ?? 1.0));
-
-            if (internalZoom)
-            {
-                double mag = Math.Max(1.0, _zoomSettings.Magnification);
-                double zw = cw / mag;
-                double zh = ch / mag;
-                left += (cw - zw) * _zoomSettings.OffsetX;
-                top += (ch - zh) * _zoomSettings.OffsetY;
-                cw = zw; ch = zh;
-            }
-
-            int sl = Clamp((int)Math.Round(left), 0, srcSize.cx - 1);
-            int st = Clamp((int)Math.Round(top), 0, srcSize.cy - 1);
-            int sr = Clamp(sl + (int)Math.Round(cw), sl + 1, srcSize.cx);
-            int sb = Clamp(st + (int)Math.Round(ch), st + 1, srcSize.cy);
+            var source = ThumbnailGeometry.CropSource(srcSize, _region, internalZoom, _zoomSettings);
 
             props.dwFlags |= DWM_TNP_RECTSOURCE;
-            props.rcSource = new RECT { Left = sl, Top = st, Right = sr, Bottom = sb };
+            props.rcSource = source;
 
             if (cropped && _region!.LockAspect)
-                props.rcDestination = Letterbox(props.rcDestination, sr - sl, sb - st);
+                props.rcDestination = ThumbnailGeometry.Letterbox(
+                    props.rcDestination, source.Right - source.Left, source.Bottom - source.Top);
         }
 
         DwmUpdateThumbnailProperties(_thumb, ref props);
-    }
-
-    private static int Clamp(int value, int min, int max) => value < min ? min : (value > max ? max : value);
-
-    private static bool IsFullWindow(RegionPreset r)
-        => r.X <= 0.0001 && r.Y <= 0.0001 && r.W >= 0.9999 && r.H >= 0.9999;
-
-    // Keeps the crop proportions instead of stretching it over the whole preview.
-    private static RECT Letterbox(RECT dest, int srcW, int srcH)
-    {
-        int dw = dest.Right - dest.Left;
-        int dh = dest.Bottom - dest.Top;
-        if (dw <= 0 || dh <= 0 || srcW <= 0 || srcH <= 0) return dest;
-
-        double scale = Math.Min((double)dw / srcW, (double)dh / srcH);
-        int nw = Math.Max(1, (int)Math.Round(srcW * scale));
-        int nh = Math.Max(1, (int)Math.Round(srcH * scale));
-        int ox = dest.Left + (dw - nw) / 2;
-        int oy = dest.Top + (dh - nh) / 2;
-        return new RECT { Left = ox, Top = oy, Right = ox + nw, Bottom = oy + nh };
     }
 
     public void ApplyRegion(RegionPreset? region)
@@ -182,7 +157,7 @@ public partial class StreamWindow : Window
 
     private void UpdateRegionBadge()
     {
-        bool active = _region != null && !IsFullWindow(_region);
+        bool active = ThumbnailGeometry.NeedsCrop(_region);
         TxtRegion.Text = active ? $"▣ {_region!.Name}" : string.Empty;
         TxtRegion.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -190,7 +165,7 @@ public partial class StreamWindow : Window
     // Reshapes the preview so the cropped area fills it without black bars.
     public void FitToRegion()
     {
-        if (_region == null || IsFullWindow(_region)) return;
+        if (_region == null || !ThumbnailGeometry.NeedsCrop(_region)) return;
         if (_thumb == IntPtr.Zero) return;
         if (DwmQueryThumbnailSourceSize(_thumb, out SIZE srcSize) != 0) return;
         if (srcSize.cx <= 0 || srcSize.cy <= 0) return;
@@ -211,7 +186,7 @@ public partial class StreamWindow : Window
     private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateThumbnailRect(_isZoomed);
-        _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
+        _owner.SaveLayoutFor(this);
     }
 
     protected override void OnLocationChanged(EventArgs e)
@@ -230,7 +205,7 @@ public partial class StreamWindow : Window
         }
 
         base.OnLocationChanged(e);
-        _owner.SaveLayoutForHwnd(_item.HWnd, Left, Top, Width, Height);
+        _owner.SaveLayoutFor(this);
     }
 
     public void ApplyGridSettings(bool enabled, int size)

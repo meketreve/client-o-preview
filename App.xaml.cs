@@ -1,5 +1,7 @@
+using System;
 using System.Windows;
 using ClientOPreview.Localization;
+using ClientOPreview.Services;
 
 namespace ClientOPreview;
 
@@ -9,8 +11,7 @@ public partial class App : System.Windows.Application
     {
         this.DispatcherUnhandledException += (s, e) =>
         {
-            try { System.IO.File.WriteAllText("error.log", e.Exception.ToString()); } catch { }
-            System.Windows.MessageBox.Show(e.Exception.ToString(), Loc.Get("ErrorUnhandled"));
+            Report(e.Exception, Loc.Get("ErrorUnhandled"));
             e.Handled = true;
         };
     }
@@ -24,9 +25,15 @@ public partial class App : System.Windows.Application
         }
         catch (Exception ex)
         {
-            try { System.IO.File.WriteAllText("error.log", ex.ToString()); } catch { }
-            System.Windows.MessageBox.Show(ex.ToString(), Loc.Get("ErrorStartup"));
+            Report(ex, Loc.Get("ErrorStartup"));
             Shutdown(-1);
         }
+    }
+
+    private static void Report(Exception ex, string caption)
+    {
+        AppLog.Error(caption, ex);
+        // Point at the log instead of leaving the user with a wall of stack trace and no file.
+        System.Windows.MessageBox.Show($"{ex}\n\n{AppLog.LogPath}", caption);
     }
 }

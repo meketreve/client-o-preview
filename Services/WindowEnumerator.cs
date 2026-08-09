@@ -1,16 +1,18 @@
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Text;
+using ClientOPreview.Models;
 using static ClientOPreview.Native.NativeMethods;
 
 namespace ClientOPreview.Services;
 
 public static class WindowEnumerator
 {
-    public static System.Collections.Generic.List<ClientOPreview.Models.WindowItem> GetTopLevelWindows(IntPtr? excludeWindow = null)
+    /// <summary>Visible, not minimized, no owner, with a title — the windows worth previewing.</summary>
+    public static List<WindowItem> GetTopLevelWindows(IntPtr? excludeWindow = null)
     {
-        var list = new System.Collections.Generic.List<ClientOPreview.Models.WindowItem>();
-        var seen = new System.Collections.Generic.HashSet<IntPtr>();
+        var list = new List<WindowItem>();
+        var seen = new HashSet<IntPtr>();
 
         EnumWindows((hWnd, lParam) =>
         {
@@ -18,20 +20,33 @@ public static class WindowEnumerator
             if (!IsWindowVisible(hWnd)) return true;
             if (IsIconic(hWnd)) return true;
             if (GetWindow(hWnd, GW_OWNER) != IntPtr.Zero) return true;
-            int len = GetWindowTextLength(hWnd);
-            if (len <= 0) return true;
-            var sb = new StringBuilder(len + 1);
-            GetWindowText(hWnd, sb, sb.Capacity);
-            var title = sb.ToString().Trim();
+
+            var title = GetTitle(hWnd);
             if (title.Length == 0) return true;
-            if (!seen.Contains(hWnd))
-            {
-                seen.Add(hWnd);
-                list.Add(new ClientOPreview.Models.WindowItem { HWnd = hWnd, Title = title });
-            }
+
+            if (seen.Add(hWnd)) list.Add(new WindowItem { HWnd = hWnd, Title = title });
             return true;
         }, IntPtr.Zero);
 
         return list;
+    }
+
+    /// <summary>Current title of a window. Empty when it has none or the handle is gone.</summary>
+    public static string GetTitle(IntPtr hWnd)
+    {
+        try
+        {
+            int len = GetWindowTextLength(hWnd);
+            if (len <= 0) return string.Empty;
+
+            var sb = new StringBuilder(len + 1);
+            GetWindowText(hWnd, sb, sb.Capacity);
+            return sb.ToString().Trim();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Warn("could not read a window title", ex);
+            return string.Empty;
+        }
     }
 }

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- net8.0, not net8.0-windows: the tests only touch the WPF-free part of the app, so
+         they run on Linux/WSL too. The app itself still only builds and runs on Windows. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>ClientOPreview.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Source-linked instead of a ProjectReference: referencing the WPF assembly would
+         drag in Microsoft.WindowsDesktop.App, which does not exist off Windows. -->
+    <Compile Include="../../Models/Settings.cs" Link="src/Settings.cs" />
+    <Compile Include="../../Native/NativeMethods.cs" Link="src/NativeMethods.cs" />
+    <Compile Include="../../Localization/Loc.cs" Link="src/Loc.cs" />
+    <Compile Include="../../Services/AppLog.cs" Link="src/AppLog.cs" />
+    <Compile Include="../../Services/LayoutKey.cs" Link="src/LayoutKey.cs" />
+    <Compile Include="../../Services/SettingsService.cs" Link="src/SettingsService.cs" />
+    <Compile Include="../../Services/ThumbnailGeometry.cs" Link="src/ThumbnailGeometry.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

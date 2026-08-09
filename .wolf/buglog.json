@@ -8,10 +8,101 @@
       "file": "MainWindow.xaml.cs",
       "root_cause": "A associação preview ↔ preset era resolvida SÓ pela chave persistida `title:<occurrence>:<title>`. O título do cliente EVE muda em runtime (tela de login → nome do piloto) e o occurrence index muda quando uma preview com título repetido é fechada/reaberta, então a chave gravada no clique deixava de bater com a chave lida no ApplyRegionForStream.",
       "fix": "Adicionado `_liveRegions: Dictionary<IntPtr,string?>` em MainWindow: enquanto a preview está aberta, o preset atribuído é resolvido pelo HWND (ResolveRegionName), com a chave por título só como fallback/persistência. AssignRegion() grava nos dois. Entrada removida no Closed da StreamWindow e zerada no delete do preset.",
-      "tags": ["region-focus", "wpf", "assignment", "hwnd", "title-drift", "settings"],
-      "related_bugs": [],
+      "tags": [
+        "region-focus",
+        "wpf",
+        "assignment",
+        "hwnd",
+        "title-drift",
+        "settings"
+      ],
+      "related_bugs": [
+        "bug-003"
+      ],
       "occurrences": 1,
       "last_seen": "2026-08-03T00:00:00Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-08-08T00:00:00Z",
+      "error_message": "usuário: largura, altura, opacidade e tamanho da fonte da miniatura voltavam ao padrão depois de fechar e reabrir o app. Só a cor ativa persistia.",
+      "file": "MainWindow.xaml.cs",
+      "root_cause": "O handler de `_thumbnailPage.ThumbnailChanged` copia os valores para os campos-espelho `_thumbWidth/_thumbHeight/_opacityPct/_titleFontSize`, escreve SÓ `_settings.Thumbnail.ActiveHighlightColor` no model e chama SaveSettings(). Como o SettingsService serializa a partir do model, os outros 4 campos são gravados com o valor antigo. O estado duplicado (campos-espelho vs `_settings.Thumbnail`) é a causa raiz — não existe uma fonte da verdade só.",
+      "fix": "CORRIGIDO. Os 8 campos-espelho da MainWindow foram apagados; o handler de ThumbnailChanged agora escreve os 5 valores em `_settings.Thumbnail` e tudo passou a ler direto do model. Coberto por SettingsRoundTripTests.Every_setting_the_ui_can_change_survives_a_restart.",
+      "tags": [
+        "settings",
+        "persistence",
+        "thumbnail",
+        "duplicated-state",
+        "fixed"
+      ],
+      "related_bugs": [
+        "bug-005"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-08T00:00:00Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-08-08T00:00:00Z",
+      "error_message": "com dois clientes de mesmo título, fechar a preview do meio e reabrir trocava as posições salvas das janelas entre si.",
+      "file": "MainWindow.xaml.cs",
+      "root_cause": "`OpenStreamForItem` calcula `occIndex = _streams.Values.Count(w => w.WindowTitle == item.Title)` na hora de abrir. O índice é posicional, não estável: fechar a preview de índice 0 faz a próxima a abrir reusar o 0 e herdar o layout da outra. O bug-001 resolveu isso só para região (mapa por HWND); layout (`LayoutKeyForHwnd`, `ApplySavedGeometry`) continua no esquema antigo.",
+      "fix": "CORRIGIDO. `StreamManager.AllocateOccurrence` passou a escolher o menor índice livre entre as previews vivas de mesmo título, em vez de usar a contagem. Duas previews abertas não podem mais compartilhar chave de layout/região.",
+      "tags": [
+        "layout",
+        "occurrence-index",
+        "hwnd",
+        "title-drift",
+        "settings",
+        "fixed"
+      ],
+      "related_bugs": [
+        "bug-001"
+      ],
+      "occurrences": 0,
+      "last_seen": "2026-08-08T00:00:00Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-08-08T00:00:00Z",
+      "error_message": "quando o app quebrava, o error.log podia não aparecer em lugar nenhum.",
+      "file": "App.xaml.cs",
+      "root_cause": "`File.WriteAllText(\"error.log\", ...)` grava no working directory. Num .exe single-file aberto por atalho, o CWD pode ser C:\\Windows\\System32 ou outra pasta sem permissão de escrita — e o catch em volta é vazio, então a falha some.",
+      "fix": "CORRIGIDO. Novo `Services/AppLog.cs` grava em %APPDATA%/client-o-preview/error.log (mesma pasta do settings.json), com corte em 256 KB; o MessageBox de erro mostra o caminho do log.",
+      "tags": [
+        "logging",
+        "crash",
+        "appdata",
+        "silent-catch",
+        "fixed"
+      ],
+      "related_bugs": [
+        "bug-005"
+      ],
+      "occurrences": 0,
+      "last_seen": "2026-08-08T00:00:00Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-08-08T00:00:00Z",
+      "error_message": "settings.json corrompido ou disco cheio fazia o app voltar silenciosamente para os defaults, sem nenhum aviso.",
+      "file": "csharp/Services/SettingsService.cs",
+      "root_cause": "`Load()` e `Save()` terminam em `catch { }`. Load engole a exceção e devolve `new SettingsData()` — o usuário perde tudo e não sabe por quê; Save engole a falha de escrita e o app segue como se tivesse salvado. Mesmo padrão em CheckForeground, ApplySavedGeometry, GetWindowTitle, SetHighlightColor e EnsureThumbnail.",
+      "fix": "CORRIGIDO. SettingsService loga leitura/parse/gravação com AppLog, preserva o arquivo ruim como settings.json.bak antes de cair no default e grava de forma atômica (.tmp + move). Os demais catch vazios (foreground, título de janela, cor de destaque, DwmRegisterThumbnail) também logam. Coberto por A_corrupt_file_falls_back_to_defaults_and_is_kept_as_bak.",
+      "tags": [
+        "settings",
+        "silent-catch",
+        "error-handling",
+        "diagnostics",
+        "fixed"
+      ],
+      "related_bugs": [
+        "bug-002",
+        "bug-004"
+      ],
+      "occurrences": 0,
+      "last_seen": "2026-08-08T00:00:00Z"
     }
   ]
 }
