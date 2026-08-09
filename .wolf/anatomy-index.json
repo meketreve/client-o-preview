@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-09T01:13:18.894Z",
+    "lastScanned": "2026-08-09T18:41:41.218Z",
     "fileCount": 56,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "79db33afb5952a323322f7c1112e53cbd9767d9d3be9e341a4d008e153b1c8d1",
-    "storeUpdatedAt": "2026-08-09T01:13:18.895Z"
+    "renderedHash": "66cf20ac4c84a292bdc8df66d922a599a6111e5f2b8bc8bc6b7725cc11b0ebdb",
+    "storeUpdatedAt": "2026-08-09T18:41:41.222Z"
   },
   "files": {
     ".claude/commands/reframe.md": {
@@ -15,7 +15,7 @@
       "hash": "17a75695be5d4629",
       "size": 2221,
       "mtimeMs": 1785725496121.4773,
-      "updatedAt": "2026-08-09T01:13:18.868Z",
+      "updatedAt": "2026-08-09T18:41:41.177Z",
       "source": "scan"
     },
     ".claude/commands/security-audit.md": {
@@ -24,7 +24,7 @@
       "hash": "e6f7e0b7337c9c86",
       "size": 2060,
       "mtimeMs": 1785725496121.4773,
-      "updatedAt": "2026-08-09T01:13:18.869Z",
+      "updatedAt": "2026-08-09T18:41:41.178Z",
       "source": "scan"
     },
     ".claude/rules/openwolf.md": {
@@ -33,7 +33,7 @@
       "hash": "6d735b2c1c54a916",
       "size": 1323,
       "mtimeMs": 1785725496105.4773,
-      "updatedAt": "2026-08-09T01:13:18.870Z",
+      "updatedAt": "2026-08-09T18:41:41.180Z",
       "source": "scan"
     },
     ".claude/settings.json": {
@@ -42,7 +42,7 @@
       "hash": "f68759bb50af5ee4",
       "size": 1799,
       "mtimeMs": 1785725496101.4773,
-      "updatedAt": "2026-08-09T01:13:18.870Z",
+      "updatedAt": "2026-08-09T18:41:41.180Z",
       "source": "scan"
     },
     ".claude/settings.local.json": {
@@ -51,7 +51,7 @@
       "hash": "d636c3ebb0bec638",
       "size": 97,
       "mtimeMs": 1785712816569.5955,
-      "updatedAt": "2026-08-09T01:13:18.871Z",
+      "updatedAt": "2026-08-09T18:41:41.180Z",
       "source": "scan"
     },
     ".gitattributes": {
@@ -60,34 +60,34 @@
       "hash": "1a1dbe176bc233b4",
       "size": 66,
       "mtimeMs": 1785712754341.5952,
-      "updatedAt": "2026-08-09T01:13:18.871Z",
+      "updatedAt": "2026-08-09T18:41:41.181Z",
       "source": "scan"
     },
     ".gitignore": {
-      "description": "ignora bin/obj/publish, .wolf runtime, .pyc legado. ATENÇÃO: obj/ e __pycache__/ ainda estão TRACKED",
+      "description": "ignora bin/obj/publish, .wolf runtime, .pyc legado",
       "tokens": 203,
       "hash": "0316d16da98f9078",
       "size": 759,
       "mtimeMs": 1785726287725.4768,
-      "updatedAt": "2026-08-09T01:13:18.871Z",
+      "updatedAt": "2026-08-09T18:41:41.181Z",
       "source": "scan"
     },
     "App.xaml": {
-      "description": "resources vazios; StartupUri não usado, o startup é o handler OnStartup",
+      "description": "resources vazios; o startup é o handler OnStartup",
       "tokens": 72,
       "hash": "195ca38cda79525a",
       "size": 267,
       "mtimeMs": 1785712754341.5952,
-      "updatedAt": "2026-08-09T01:13:18.871Z",
+      "updatedAt": "2026-08-09T18:41:41.182Z",
       "source": "scan"
     },
     "App.xaml.cs": {
-      "description": "App: handler global de DispatcherUnhandledException + cria a MainWindow. Grava error.log no CWD (deveria ser %APPDATA%)",
+      "description": "handler global de exceção: loga via AppLog e mostra o caminho do error.log no MessageBox",
       "tokens": 257,
       "hash": "eeb79f3a1a107b47",
       "size": 961,
-      "mtimeMs": 1786237515488.4167,
-      "updatedAt": "2026-08-09T01:13:18.872Z",
+      "mtimeMs": 1786290572825.449,
+      "updatedAt": "2026-08-09T18:41:41.183Z",
       "source": "scan"
     },
     "build.bat": {
@@ -96,7 +96,7 @@
       "hash": "0e8a116d096276d6",
       "size": 731,
       "mtimeMs": 1785712754349.5952,
-      "updatedAt": "2026-08-09T01:13:18.874Z",
+      "updatedAt": "2026-08-09T18:41:41.184Z",
       "source": "scan"
     },
     "CLAUDE.md": {
@@ -105,88 +105,88 @@
       "hash": "b1ca356fa9d5f3a6",
       "size": 225,
       "mtimeMs": 1785724186569.475,
-      "updatedAt": "2026-08-09T01:13:18.875Z",
+      "updatedAt": "2026-08-09T18:41:41.185Z",
       "source": "scan"
     },
     "ClientOPreview.csproj": {
-      "description": "net8.0-windows, UseWPF+UseWindowsForms, EnableWindowsTargeting. `<Version>` = fonte única da versão",
+      "description": "net8.0-windows, UseWPF+UseWindowsForms, EnableWindowsTargeting. `<Version>` = fonte única da versão; exclui tests/ do globbing",
       "tokens": 182,
-      "hash": "4dd352096b5f5ddd",
+      "hash": "e572b8c8e610b594",
       "size": 679,
-      "mtimeMs": 1786237861492.416,
-      "updatedAt": "2026-08-09T01:13:18.875Z",
+      "mtimeMs": 1786300697133.4453,
+      "updatedAt": "2026-08-09T18:41:41.185Z",
       "source": "scan"
     },
     "Localization/Loc.cs": {
-      "description": "string table en/pt-BR (94 chaves cada, paridade OK) + MarkupExtension `{loc:Tr Key}`. Chaves SEM ponto. Get() cai no nome da chave se faltar",
-      "tokens": 3728,
-      "hash": "276a24ad9cb68e1c",
-      "size": 14070,
-      "mtimeMs": 1786237610520.417,
-      "updatedAt": "2026-08-09T01:13:18.876Z",
+      "description": "string table en/pt-BR (94 chaves cada, paridade coberta por teste). Chaves SEM ponto. LIVRE de WPF → testável",
+      "tokens": 3804,
+      "hash": "0181c2bf48c2d0e6",
+      "size": 14361,
+      "mtimeMs": 1786294707793.446,
+      "updatedAt": "2026-08-09T18:41:41.186Z",
       "source": "scan"
     },
     "Localization/TrExtension.cs": {
-      "description": "{loc:Tr KeyName} — binds a control to the string table so it follows language changes. Kept apart from <see cref=\"Loc\"/> so the table itself stays ...",
+      "description": "`{loc:Tr Chave}`: MarkupExtension que devolve Binding no indexer de Loc. Separado para Loc.cs não depender de WPF",
       "tokens": 257,
       "hash": "9f50d4b239770fec",
       "size": 965,
-      "mtimeMs": 1786237601108.417,
-      "updatedAt": "2026-08-09T01:13:18.876Z",
+      "mtimeMs": 1786290572829.449,
+      "updatedAt": "2026-08-09T18:41:41.186Z",
       "source": "scan"
     },
     "MainWindow.xaml": {
-      "description": "sidebar de 7 botões + ContentHost. Não existe botão para OverlayPage (Nav_Overlay é morto)",
+      "description": "sidebar de 7 botões + ContentHost",
       "tokens": 369,
       "hash": "3900f5494e627412",
       "size": 1382,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.877Z",
+      "updatedAt": "2026-08-09T18:41:41.186Z",
       "source": "scan"
     },
     "MainWindow.xaml.cs": {
-      "description": "GOD OBJECT (836 linhas): dict de streams, hotkeys globais, chaves de layout, região por HWND, timer de foreground 400ms, wiring de todas as páginas e espelho de settings. Alvo #1 de refactor",
-      "tokens": 2479,
-      "hash": "3b4a7f28a178c6dd",
-      "size": 9295,
-      "mtimeMs": 1786237805396.416,
-      "updatedAt": "2026-08-09T01:13:18.877Z",
+      "description": "SÓ wiring (261 linhas): cria os 4 colaboradores, liga evento de página → efeito + save, navegação. Sem estado de settings próprio",
+      "tokens": 2517,
+      "hash": "63aa73bb7e003fc1",
+      "size": 9439,
+      "mtimeMs": 1786294774809.4453,
+      "updatedAt": "2026-08-09T18:41:41.187Z",
       "source": "scan"
     },
     "Models/Settings.cs": {
-      "description": "SettingsData: Clone, UpsertPreset, RemovePreset",
-      "tokens": 1145,
-      "hash": "d12c28a859bbe72d",
-      "size": 4293,
-      "mtimeMs": 1785730004285.4758,
-      "updatedAt": "2026-08-09T01:13:18.878Z",
+      "description": "SettingsData + General/Thumbnail/Hotkeys/Zoom/RegionSettings/RegionPreset. Fonte ÚNICA do formato JSON: nome do campo → snake_case automático",
+      "tokens": 1171,
+      "hash": "fc67f6db8df2944d",
+      "size": 4390,
+      "mtimeMs": 1786294711805.446,
+      "updatedAt": "2026-08-09T18:41:41.188Z",
       "source": "scan"
     },
     "Models/WindowItem.cs": {
-      "description": "HWnd + Title + Display de uma janela listável. Namespace ClientOPreview.Models, IGUAL ao de csharp/Models",
+      "description": "HWnd + Title + Display de uma janela listável",
       "tokens": 63,
       "hash": "938b2c0a22edcbd3",
       "size": 233,
       "mtimeMs": 1785712754341.5952,
-      "updatedAt": "2026-08-09T01:13:18.878Z",
+      "updatedAt": "2026-08-09T18:41:41.188Z",
       "source": "scan"
     },
     "Native/NativeMethods.cs": {
-      "description": "todo o P/Invoke: user32 (enum/foreground/hotkey/GWL_EXSTYLE) + dwmapi (Register/Update/QuerySize) + structs RECT/SIZE/DWM_THUMBNAIL_PROPERTIES",
-      "tokens": 1222,
-      "hash": "8ff94f32f2b0f36a",
-      "size": 4582,
-      "mtimeMs": 1785712754341.5952,
-      "updatedAt": "2026-08-09T01:13:18.878Z",
+      "description": "Class: NativeMethods",
+      "tokens": 1301,
+      "hash": "6736d8e552d7c403",
+      "size": 4876,
+      "mtimeMs": 1786291182173.441,
+      "updatedAt": "2026-08-09T18:41:41.188Z",
       "source": "scan"
     },
     "README.md": {
-      "description": "manual do usuário em pt-BR (build, release, 7 seções de uso, persistência). Não descreve a arquitetura",
-      "tokens": 1454,
-      "hash": "beb836e4dff81468",
-      "size": 5946,
-      "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.879Z",
+      "description": "manual do usuário em pt-BR (build, release, 7 seções de uso, persistência)",
+      "tokens": 1598,
+      "hash": "bf0b164fd362b6e4",
+      "size": 6536,
+      "mtimeMs": 1786300711509.4453,
+      "updatedAt": "2026-08-09T18:41:41.188Z",
       "source": "scan"
     },
     "RegionOverlayWindow.xaml": {
@@ -195,7 +195,7 @@
       "hash": "fe71e4fe350675ce",
       "size": 1129,
       "mtimeMs": 1785724186573.475,
-      "updatedAt": "2026-08-09T01:13:18.879Z",
+      "updatedAt": "2026-08-09T18:41:41.189Z",
       "source": "scan"
     },
     "RegionOverlayWindow.xaml.cs": {
@@ -204,7 +204,7 @@
       "hash": "5512f84e35e08d96",
       "size": 8618,
       "mtimeMs": 1785724186573.475,
-      "updatedAt": "2026-08-09T01:13:18.880Z",
+      "updatedAt": "2026-08-09T18:41:41.189Z",
       "source": "scan"
     },
     "RegionPickerWindow.xaml": {
@@ -213,7 +213,7 @@
       "hash": "e7e23e872781f633",
       "size": 4594,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.880Z",
+      "updatedAt": "2026-08-09T18:41:41.190Z",
       "source": "scan"
     },
     "RegionPickerWindow.xaml.cs": {
@@ -222,88 +222,88 @@
       "hash": "4448f1fa7bc97366",
       "size": 9899,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.882Z",
+      "updatedAt": "2026-08-09T18:41:41.192Z",
       "source": "scan"
     },
     "Services/AppLog.cs": {
-      "description": "File diagnostics for everything that used to be swallowed by an empty catch. Writes next to settings.json (%APPDATA%/client-o-preview/) instead of ...",
-      "tokens": 566,
-      "hash": "a5843cc874b21b4f",
-      "size": 2122,
-      "mtimeMs": 1786237489512.417,
-      "updatedAt": "2026-08-09T01:13:18.882Z",
+      "description": "logger de arquivo em %APPDATA%/client-o-preview/error.log, com corte em 256 KB. Substituiu os catch vazios",
+      "tokens": 592,
+      "hash": "9127a0bcfbe25a3e",
+      "size": 2219,
+      "mtimeMs": 1786294516297.4465,
+      "updatedAt": "2026-08-09T18:41:41.192Z",
       "source": "scan"
     },
     "Services/HotkeyManager.cs": {
-      "description": "Owns the global hotkeys: registration with Windows, the WM_HOTKEY hook and the translation from the strings stored in settings to virtual key codes...",
-      "tokens": 1074,
-      "hash": "54b44f7fddc79fb0",
-      "size": 4024,
-      "mtimeMs": 1786237701248.416,
-      "updatedAt": "2026-08-09T01:13:18.882Z",
+      "description": "hotkeys globais: RegisterHotKey, hook de WM_HOTKEY, string→virtual key. Emite CycleRequested/DirectRequested",
+      "tokens": 1504,
+      "hash": "4038c72141d7e85d",
+      "size": 5639,
+      "mtimeMs": 1786294750965.4456,
+      "updatedAt": "2026-08-09T18:41:41.192Z",
       "source": "scan"
     },
     "Services/LayoutKey.cs": {
-      "description": "Keys and geometry strings used to persist where each preview lives. Free of WPF and of Win32 so it can be unit tested on any OS.",
+      "description": "PURO: sanitiza título, monta `title:occ:titulo`, formata/parseia `WxH+L+T`. Sem WPF nem Win32 → testado",
       "tokens": 758,
       "hash": "8f5a6b32265d497a",
       "size": 2839,
-      "mtimeMs": 1786237528460.4165,
-      "updatedAt": "2026-08-09T01:13:18.882Z",
+      "mtimeMs": 1786290572833.449,
+      "updatedAt": "2026-08-09T18:41:41.193Z",
       "source": "scan"
     },
     "Services/LayoutStore.cs": {
-      "description": "Where each preview reopens: geometry per window plus the list of previews that were open when the app last closed. Key building and parsing live in...",
+      "description": "onde cada preview reabre: aplica geometria salva (ou escalona), migra chave legada, lembra as previews abertas",
       "tokens": 854,
       "hash": "da5d04fc83a22853",
       "size": 3203,
-      "mtimeMs": 1786237714988.4163,
-      "updatedAt": "2026-08-09T01:13:18.882Z",
+      "mtimeMs": 1786290572833.449,
+      "updatedAt": "2026-08-09T18:41:41.193Z",
       "source": "scan"
     },
     "Services/RegionCoordinator.cs": {
-      "description": "Which crop each preview shows. The persisted assignment is keyed by window title, which drifts at runtime (login screen -> pilot name), so while a ...",
+      "description": "qual recorte cada preview mostra. Mapa por HWND vence a chave por título (bug-001). Abre o picker, apaga preset, monta as linhas da página",
       "tokens": 1291,
       "hash": "307dcb3cc544c12f",
       "size": 4840,
-      "mtimeMs": 1786237762092.4163,
-      "updatedAt": "2026-08-09T01:13:18.883Z",
+      "mtimeMs": 1786290572833.449,
+      "updatedAt": "2026-08-09T18:41:41.194Z",
       "source": "scan"
     },
     "Services/SettingsService.cs": {
-      "description": "Reads and writes %APPDATA%/client-o-preview/settings.json. The JSON shape is derived from <see cref=\"SettingsData\"/> by the snake_case naming polic...",
+      "description": "JsonSerializer + SnakeCaseLower ⇒ o model É o formato. Escrita atômica (.tmp→move), .bak quando o JSON está corrompido",
       "tokens": 1238,
       "hash": "33ad78991d1683ee",
       "size": 4642,
-      "mtimeMs": 1786237625192.4167,
-      "updatedAt": "2026-08-09T01:13:18.883Z",
+      "mtimeMs": 1786290572833.449,
+      "updatedAt": "2026-08-09T18:41:41.195Z",
       "source": "scan"
     },
     "Services/StreamManager.cs": {
-      "description": "Owns the open previews: one <see cref=\"StreamWindow\"/> per monitored client. Also runs the foreground poll that highlights the active client, reaps...",
-      "tokens": 2067,
-      "hash": "32f888961563bed3",
-      "size": 7749,
-      "mtimeMs": 1786237743556.4165,
-      "updatedAt": "2026-08-09T01:13:18.883Z",
+      "description": "dono das previews abertas: abre/fecha, aloca occurrence index estável, timer de foreground 400 ms, topmost por foco",
+      "tokens": 2434,
+      "hash": "2ba41a302ed16420",
+      "size": 9128,
+      "mtimeMs": 1786291191361.4417,
+      "updatedAt": "2026-08-09T18:41:41.195Z",
       "source": "scan"
     },
     "Services/ThumbnailGeometry.cs": {
-      "description": "Turns a region preset plus the hover zoom into the rectangles DWM expects. Pure math, no WPF and no Win32 calls, so it is unit tested on any OS.",
+      "description": "PURO: região+zoom → rcSource, letterbox → rcDestination. Sem WPF nem Win32 → testado",
       "tokens": 720,
       "hash": "46fb6853a5054f79",
       "size": 2700,
-      "mtimeMs": 1786237548008.417,
-      "updatedAt": "2026-08-09T01:13:18.883Z",
+      "mtimeMs": 1786290572837.449,
+      "updatedAt": "2026-08-09T18:41:41.195Z",
       "source": "scan"
     },
     "Services/WindowEnumerator.cs": {
-      "description": "EnumWindows filtrando: visível, não minimizada, sem owner, com título. Namespace igual ao de csharp/Services",
+      "description": "EnumWindows filtrando (visível, não minimizada, sem owner, com título) + GetTitle(hwnd)",
       "tokens": 437,
       "hash": "bcbfcedbe5b48414",
       "size": 1639,
-      "mtimeMs": 1786237771568.4163,
-      "updatedAt": "2026-08-09T01:13:18.883Z",
+      "mtimeMs": 1786290572837.449,
+      "updatedAt": "2026-08-09T18:41:41.196Z",
       "source": "scan"
     },
     "StreamWindow.xaml": {
@@ -312,61 +312,61 @@
       "hash": "8deab4a5a8ba266e",
       "size": 1892,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.883Z",
+      "updatedAt": "2026-08-09T18:41:41.196Z",
       "source": "scan"
     },
     "StreamWindow.xaml.cs": {
-      "description": "matemática do DWM (rcSource = região→zoom, letterbox), snap-to-grid, drag, zoom no hover, esconde do Alt+Tab",
+      "description": "1 thumbnail DWM: chama ThumbnailGeometry para rcSource/letterbox, snap-to-grid, drag, zoom no hover, esconde do Alt+Tab",
       "tokens": 2651,
       "hash": "962a330a592d5584",
       "size": 9942,
-      "mtimeMs": 1786237812444.416,
-      "updatedAt": "2026-08-09T01:13:18.884Z",
+      "mtimeMs": 1786290572837.449,
+      "updatedAt": "2026-08-09T18:41:41.197Z",
       "source": "scan"
     },
     "tests/ClientOPreview.Tests/ClientOPreview.Tests.csproj": {
-      "description": "",
+      "description": "xUnit em net8.0; faz source link dos arquivos sem WPF ⇒ `dotnet test` roda no WSL também",
       "tokens": 397,
       "hash": "4fb3bfe8bb620782",
       "size": 1488,
-      "mtimeMs": 1786237854712.416,
-      "updatedAt": "2026-08-09T01:13:18.884Z",
+      "mtimeMs": 1786290572837.449,
+      "updatedAt": "2026-08-09T18:41:41.198Z",
       "source": "scan"
     },
     "tests/ClientOPreview.Tests/LayoutKeyTests.cs": {
-      "description": "LayoutKeyTests: Sanitize_strips_characters_that_break_json_keys, For_includes_the_occurrence_so_two_clients_never_share_a_key, For_falls_back_to_th...",
+      "description": "chave por occurrence, chave legada, round-trip de `WxH+L+T`, rejeição de lixo",
       "tokens": 478,
       "hash": "3b1a714963af1bcb",
       "size": 1789,
-      "mtimeMs": 1786237871564.416,
-      "updatedAt": "2026-08-09T01:13:18.884Z",
+      "mtimeMs": 1786290572837.449,
+      "updatedAt": "2026-08-09T18:41:41.198Z",
       "source": "scan"
     },
     "tests/ClientOPreview.Tests/LocTests.cs": {
-      "description": "Guards the acceptance criterion \"no text left in the wrong language\": Loc.Get falls back to the key name when a translation is missing, so a key ad...",
+      "description": "paridade de chaves en↔pt-BR, sem tradução vazia, sem ponto na chave, placeholders iguais, Normalize",
       "tokens": 789,
       "hash": "cd7ac34e16aa4661",
       "size": 2958,
-      "mtimeMs": 1786237957152.416,
-      "updatedAt": "2026-08-09T01:13:18.885Z",
+      "mtimeMs": 1786290572841.449,
+      "updatedAt": "2026-08-09T18:41:41.199Z",
       "source": "scan"
     },
     "tests/ClientOPreview.Tests/SettingsRoundTripTests.cs": {
-      "description": "A round trip is the cheapest guard against bug-002: a setting that the UI can change but that never reaches the file looks fine until the app is re...",
+      "description": "todo campo da UI sobrevive ao restart (guarda do bug-002), nomes snake_case, settings.json da v0.7.0, arquivo corrompido → .bak",
       "tokens": 2160,
       "hash": "13e442c668f68654",
       "size": 8102,
-      "mtimeMs": 1786237959464.416,
-      "updatedAt": "2026-08-09T01:13:18.885Z",
+      "mtimeMs": 1786290572841.449,
+      "updatedAt": "2026-08-09T18:41:41.199Z",
       "source": "scan"
     },
     "tests/ClientOPreview.Tests/ThumbnailGeometryTests.cs": {
-      "description": "ThumbnailGeometryTests: A_preset_covering_the_whole_window_is_not_a_crop, Crop_maps_the_normalized_preset_onto_the_source_pixels, Crop_without_a_pr...",
+      "description": "recorte normalizado→pixels, zoom dentro da região, clamp na borda, letterbox centralizado",
       "tokens": 947,
       "hash": "8e65df8b3be8850b",
       "size": 3551,
-      "mtimeMs": 1786237887108.416,
-      "updatedAt": "2026-08-09T01:13:18.885Z",
+      "mtimeMs": 1786290572841.449,
+      "updatedAt": "2026-08-09T18:41:41.201Z",
       "source": "scan"
     },
     "TrayHelper.cs": {
@@ -375,7 +375,7 @@
       "hash": "72df39009a4aa580",
       "size": 1781,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.885Z",
+      "updatedAt": "2026-08-09T18:41:41.201Z",
       "source": "scan"
     },
     "Views/AboutPage.xaml": {
@@ -384,7 +384,7 @@
       "hash": "bb2c3479120736ee",
       "size": 533,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.885Z",
+      "updatedAt": "2026-08-09T18:41:41.202Z",
       "source": "scan"
     },
     "Views/AboutPage.xaml.cs": {
@@ -393,7 +393,7 @@
       "hash": "e641b3e39a64ca29",
       "size": 871,
       "mtimeMs": 1785725038869.4773,
-      "updatedAt": "2026-08-09T01:13:18.886Z",
+      "updatedAt": "2026-08-09T18:41:41.202Z",
       "source": "scan"
     },
     "Views/ClientsPage.xaml": {
@@ -402,7 +402,7 @@
       "hash": "f5d56a37a3be1851",
       "size": 1356,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.886Z",
+      "updatedAt": "2026-08-09T18:41:41.203Z",
       "source": "scan"
     },
     "Views/ClientsPage.xaml.cs": {
@@ -411,25 +411,25 @@
       "hash": "b094e9915c10c79c",
       "size": 1209,
       "mtimeMs": 1785712754345.5952,
-      "updatedAt": "2026-08-09T01:13:18.886Z",
+      "updatedAt": "2026-08-09T18:41:41.203Z",
       "source": "scan"
     },
     "Views/HotkeysPage.xaml": {
-      "description": "cycle + 10 teclas diretas com combo de thumbnail por tecla",
-      "tokens": 1640,
-      "hash": "fa0e85807f8043f9",
-      "size": 6150,
-      "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.886Z",
+      "description": "",
+      "tokens": 1704,
+      "hash": "2c4e9ee4973612dd",
+      "size": 6389,
+      "mtimeMs": 1786294756877.4456,
+      "updatedAt": "2026-08-09T18:41:41.203Z",
       "source": "scan"
     },
     "Views/HotkeysPage.xaml.cs": {
-      "description": "DirectKeyItem/ThumbnailOption; captura tecla por KeyDown; \"(None)\" identificado por flag IsNone (o texto é traduzido)",
-      "tokens": 2461,
-      "hash": "7ab0ff7d824fbd51",
-      "size": 9227,
-      "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.887Z",
+      "description": "Show which combos Windows refused, so a dead hotkey does not look like a broken app.",
+      "tokens": 2596,
+      "hash": "92620034043d849c",
+      "size": 9735,
+      "mtimeMs": 1786294762741.4456,
+      "updatedAt": "2026-08-09T18:41:41.204Z",
       "source": "scan"
     },
     "Views/LanguagePage.xaml": {
@@ -438,7 +438,7 @@
       "hash": "26577aef9a4147c5",
       "size": 1034,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.887Z",
+      "updatedAt": "2026-08-09T18:41:41.204Z",
       "source": "scan"
     },
     "Views/LanguagePage.xaml.cs": {
@@ -447,7 +447,7 @@
       "hash": "2fe33548549e2b97",
       "size": 913,
       "mtimeMs": 1785730004281.4758,
-      "updatedAt": "2026-08-09T01:13:18.887Z",
+      "updatedAt": "2026-08-09T18:41:41.204Z",
       "source": "scan"
     },
     "Views/RegionPage.xaml": {
@@ -456,7 +456,7 @@
       "hash": "387b3224010f90a5",
       "size": 2815,
       "mtimeMs": 1785730004285.4758,
-      "updatedAt": "2026-08-09T01:13:18.887Z",
+      "updatedAt": "2026-08-09T18:41:41.204Z",
       "source": "scan"
     },
     "Views/RegionPage.xaml.cs": {
@@ -465,7 +465,7 @@
       "hash": "cb57fe1d3801222e",
       "size": 4994,
       "mtimeMs": 1785730004285.4758,
-      "updatedAt": "2026-08-09T01:13:18.888Z",
+      "updatedAt": "2026-08-09T18:41:41.205Z",
       "source": "scan"
     },
     "Views/ThumbnailPage.xaml": {
@@ -474,16 +474,16 @@
       "hash": "46abfd4c5f2dbd3b",
       "size": 4895,
       "mtimeMs": 1785730004285.4758,
-      "updatedAt": "2026-08-09T01:13:18.888Z",
+      "updatedAt": "2026-08-09T18:41:41.205Z",
       "source": "scan"
     },
     "Views/ThumbnailPage.xaml.cs": {
-      "description": "record ThumbnailArgs no Apply + 7 eventos booleanos. Não escreve no model (ver bug-002)",
+      "description": "record ThumbnailArgs no Apply + 7 eventos booleanos; a MainWindow grava no model",
       "tokens": 1105,
       "hash": "58fab39459315615",
       "size": 4141,
       "mtimeMs": 1785730004285.4758,
-      "updatedAt": "2026-08-09T01:13:18.888Z",
+      "updatedAt": "2026-08-09T18:41:41.205Z",
       "source": "scan"
     },
     "Views/ZoomPage.xaml": {
@@ -492,7 +492,7 @@
       "hash": "0f68c155f3dfabea",
       "size": 2355,
       "mtimeMs": 1785730004285.4758,
-      "updatedAt": "2026-08-09T01:13:18.888Z",
+      "updatedAt": "2026-08-09T18:41:41.205Z",
       "source": "scan"
     },
     "Views/ZoomPage.xaml.cs": {
@@ -501,16 +501,16 @@
       "hash": "4126c444b0215fca",
       "size": 1240,
       "mtimeMs": 1785712754349.5952,
-      "updatedAt": "2026-08-09T01:13:18.889Z",
+      "updatedAt": "2026-08-09T18:41:41.206Z",
       "source": "scan"
     },
     "WARP.md": {
-      "description": "DESATUALIZADO: cita `csharp/ClientOPreview/` que não existe mais",
+      "description": "guia para o WARP: estrutura real de pastas, comandos, arquitetura",
       "tokens": 605,
       "hash": "70d77529c97520f5",
       "size": 2446,
-      "mtimeMs": 1786237444976.4175,
-      "updatedAt": "2026-08-09T01:13:18.889Z",
+      "mtimeMs": 1786290572837.449,
+      "updatedAt": "2026-08-09T18:41:41.207Z",
       "source": "scan"
     }
   }

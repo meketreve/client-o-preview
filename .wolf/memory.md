@@ -126,3 +126,5 @@ hotkeys diretas, tirar "Problemas conhecidos" do README, soltar v0.8.1.
 | 13:15 | rc1 testado pelo usuário: Ctrl+Tab cicla → fix de bug-006 CONFIRMADO. Tab sem modificador não cicla → bug-007 | — | fix de foco validado | ~2k |
 | 13:30 | bug-007: instrumentar registro de hotkey — retorno de RegisterHotKey conferido e logado por hotkey, novo `AppLog.Info` | Services/HotkeyManager.cs, Services/AppLog.cs | build 0 warnings; rc2 em Downloads | ~7k |
 | 14:00 | bug-007 fechado: default Alt+Tab (reservado pelo Windows) -> Ctrl+Tab; FailedCombos + aviso na HotkeysPage (i18n HotkeysRegisterFailed) | Models/Settings.cs, Services/HotkeyManager.cs, Views/HotkeysPage.*, MainWindow.xaml.cs, Localization/Loc.cs | build 0 warnings, 39 testes; rc3 em Downloads | ~12k |
+| 14:20 | v0.8.1: bump 0.8.0->0.8.1, README (secao de atalhos reescrita, "Problemas conhecidos" removida), cerebrum + STATUS atualizados | ClientOPreview.csproj, README.md, .wolf/* | build 0 warnings, 39 testes | ~8k |
+| 14:30 | commit 9c52606 + push main + tag v0.8.1 + release no GitHub com o .exe | — | https://github.com/meketreve/client-o-preview/releases/tag/v0.8.1 | ~5k |

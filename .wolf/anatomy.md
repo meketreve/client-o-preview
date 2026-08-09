@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-09T01:13:18.894Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-09T18:41:41.218Z
 > Files: 56 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -13,8 +13,8 @@
 - `CLAUDE.md` — aponta para .wolf/OPENWOLF.md (~57 tok)
 - `ClientOPreview.csproj` — net8.0-windows, UseWPF+UseWindowsForms, EnableWindowsTargeting. `<Version>` = fonte única da versão; exclui tests/ do globbing (~182 tok)
 - `MainWindow.xaml` — sidebar de 7 botões + ContentHost (~369 tok)
-- `MainWindow.xaml.cs` — SÓ wiring (261 linhas): cria os 4 colaboradores, liga evento de página → efeito + save, navegação. Sem estado de settings próprio (~2479 tok)
-- `README.md` — manual do usuário em pt-BR (build, release, 7 seções de uso, persistência) (~1454 tok)
+- `MainWindow.xaml.cs` — SÓ wiring (261 linhas): cria os 4 colaboradores, liga evento de página → efeito + save, navegação. Sem estado de settings próprio (~2517 tok)
+- `README.md` — manual do usuário em pt-BR (build, release, 7 seções de uso, persistência) (~1598 tok)
 - `RegionOverlayWindow.xaml` — camada transparente (AllowsTransparency, #01000000) sobre o thumbnail DWM do picker (~302 tok)
 - `RegionOverlayWindow.xaml.cs` — retângulo de seleção: drag/move/resize por 8 alças, dim ao redor, ESC/ENTER. Fonte da verdade = Rect normalizado 0–1 (~2299 tok)
 - `RegionPickerWindow.xaml` — janela do seletor: preview ao vivo, 9 quick anchors, slider de tamanho, preview "Result", nome do preset (~1221 tok)
@@ -40,27 +40,27 @@
 
 ## Localization/
 
-- `Loc.cs` — string table en/pt-BR (94 chaves cada, paridade coberta por teste). Chaves SEM ponto. LIVRE de WPF → testável (~3728 tok)
+- `Loc.cs` — string table en/pt-BR (94 chaves cada, paridade coberta por teste). Chaves SEM ponto. LIVRE de WPF → testável (~3804 tok)
 - `TrExtension.cs` — `{loc:Tr Chave}`: MarkupExtension que devolve Binding no indexer de Loc. Separado para Loc.cs não depender de WPF (~257 tok)
 
 ## Models/
 
-- `Settings.cs` — SettingsData + General/Thumbnail/Hotkeys/Zoom/RegionSettings/RegionPreset. Fonte ÚNICA do formato JSON: nome do campo → snake_case automático (~1145 tok)
+- `Settings.cs` — SettingsData + General/Thumbnail/Hotkeys/Zoom/RegionSettings/RegionPreset. Fonte ÚNICA do formato JSON: nome do campo → snake_case automático (~1171 tok)
 - `WindowItem.cs` — HWnd + Title + Display de uma janela listável (~63 tok)
 
 ## Native/
 
-- `NativeMethods.cs` — todo o P/Invoke: user32 (enum/foreground/hotkey/GWL_EXSTYLE) + dwmapi (Register/Update/QuerySize) + structs RECT/SIZE/DWM_THUMBNAIL_PROPERTIES (~1222 tok)
+- `NativeMethods.cs` — Class: NativeMethods (~1301 tok)
 
 ## Services/
 
-- `AppLog.cs` — logger de arquivo em %APPDATA%/client-o-preview/error.log, com corte em 256 KB. Substituiu os catch vazios (~566 tok)
-- `HotkeyManager.cs` — hotkeys globais: RegisterHotKey, hook de WM_HOTKEY, string→virtual key. Emite CycleRequested/DirectRequested (~1074 tok)
+- `AppLog.cs` — logger de arquivo em %APPDATA%/client-o-preview/error.log, com corte em 256 KB. Substituiu os catch vazios (~592 tok)
+- `HotkeyManager.cs` — hotkeys globais: RegisterHotKey, hook de WM_HOTKEY, string→virtual key. Emite CycleRequested/DirectRequested (~1504 tok)
 - `LayoutKey.cs` — PURO: sanitiza título, monta `title:occ:titulo`, formata/parseia `WxH+L+T`. Sem WPF nem Win32 → testado (~758 tok)
 - `LayoutStore.cs` — onde cada preview reabre: aplica geometria salva (ou escalona), migra chave legada, lembra as previews abertas (~854 tok)
 - `RegionCoordinator.cs` — qual recorte cada preview mostra. Mapa por HWND vence a chave por título (bug-001). Abre o picker, apaga preset, monta as linhas da página (~1291 tok)
 - `SettingsService.cs` — JsonSerializer + SnakeCaseLower ⇒ o model É o formato. Escrita atômica (.tmp→move), .bak quando o JSON está corrompido (~1238 tok)
-- `StreamManager.cs` — dono das previews abertas: abre/fecha, aloca occurrence index estável, timer de foreground 400 ms, topmost por foco (~2067 tok)
+- `StreamManager.cs` — dono das previews abertas: abre/fecha, aloca occurrence index estável, timer de foreground 400 ms, topmost por foco (~2434 tok)
 - `ThumbnailGeometry.cs` — PURO: região+zoom → rcSource, letterbox → rcDestination. Sem WPF nem Win32 → testado (~720 tok)
 - `WindowEnumerator.cs` — EnumWindows filtrando (visível, não minimizada, sem owner, com título) + GetTitle(hwnd) (~437 tok)
 
@@ -70,8 +70,8 @@
 - `AboutPage.xaml.cs` — lê a versão do AssemblyInformationalVersion (nunca desvia do csproj) (~233 tok)
 - `ClientsPage.xaml` — lista de janelas + 4 botões (~362 tok)
 - `ClientsPage.xaml.cs` — só eventos: Refresh/Open/CloseSelected/CloseAll + SelectedWindows (~323 tok)
-- `HotkeysPage.xaml` — cycle + 10 teclas diretas com combo de thumbnail por tecla (~1640 tok)
-- `HotkeysPage.xaml.cs` — DirectKeyItem/ThumbnailOption; captura tecla por KeyDown; "(None)" identificado por flag IsNone (o texto é traduzido) (~2461 tok)
+- `HotkeysPage.xaml` (~1704 tok)
+- `HotkeysPage.xaml.cs` — Show which combos Windows refused, so a dead hotkey does not look like a broken app. (~2596 tok)
 - `LanguagePage.xaml` — rádio pt-BR / English (~276 tok)
 - `LanguagePage.xaml.cs` — LoadFrom + evento LanguageSelected com o code na Tag do rádio (~244 tok)
 - `RegionPage.xaml` — 2 listas (previews / presets) + combo de atribuição + Novo preset…/Definir/Limpar/Apagar (~751 tok)
