@@ -158,10 +158,44 @@ public sealed class StreamManager
 
     // ===== Focus =====
 
+    /// <summary>
+    /// Brings a client window to the front. Windows refuses <c>SetForegroundWindow</c> from a
+    /// process that is not itself in the foreground, which is exactly the case when a global
+    /// hotkey fires while the game has focus. So: try once, and if the window did not actually
+    /// come up, attach our input queue to the current foreground thread — for the length of that
+    /// attachment the OS treats both threads as one, and the call is allowed.
+    /// </summary>
     public static void Focus(IntPtr hwnd)
     {
+        if (hwnd == IntPtr.Zero || !IsWindow(hwnd)) return;
         if (IsIconic(hwnd)) ShowWindow(hwnd, SW_RESTORE);
+
+        if (TryForeground(hwnd)) return;
+
+        var fg = GetForegroundWindow();
+        uint ourThread = GetCurrentThreadId();
+        uint fgThread = fg == IntPtr.Zero ? 0 : GetWindowThreadProcessId(fg, out _);
+
+        if (fgThread != 0 && fgThread != ourThread && AttachThreadInput(ourThread, fgThread, true))
+        {
+            try
+            {
+                BringWindowToTop(hwnd);
+                if (TryForeground(hwnd)) return;
+            }
+            finally
+            {
+                AttachThreadInput(ourThread, fgThread, false);
+            }
+        }
+
+        AppLog.Warn("Focus", $"could not activate 0x{hwnd.ToInt64():X}; foreground is 0x{GetForegroundWindow().ToInt64():X}");
+    }
+
+    private static bool TryForeground(IntPtr hwnd)
+    {
         SetForegroundWindow(hwnd);
+        return GetForegroundWindow() == hwnd;
     }
 
     public void CycleNext()

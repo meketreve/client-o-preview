@@ -58,6 +58,7 @@ public partial class MainWindow : Window
             RefreshList();
             ReopenLastWindows();
             _hotkeys.Attach(_settings.Hotkeys);
+            _hotkeysPage.ShowRegistrationResult(_hotkeys.FailedCombos);
         };
         Closed += (_, __) => _hotkeys.Dispose();
         StateChanged += (_, __) =>
@@ -133,6 +134,7 @@ public partial class MainWindow : Window
             _settings.Hotkeys = hk;
             _settingsSvc.SaveSettings();
             _hotkeys.Reload(hk);
+            _hotkeysPage.ShowRegistrationResult(_hotkeys.FailedCombos);
         };
 
         _zoomPage.ZoomChanged += (_, zoom) =>

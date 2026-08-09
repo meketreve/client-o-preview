@@ -110,7 +110,7 @@
       "error_message": "usuário: \"a hotkey de ciclar entre os clientes não está funcionando\" — apertar Alt+Tab (hotkey de cycle) não traz o próximo cliente para frente. Regressão introduzida no refactor da v0.8.0; funcionava na v0.7.0.",
       "file": "Services/StreamManager.cs",
       "root_cause": "HIPÓTESE (não confirmada em runtime). Na v0.7.0 o caminho da hotkey era `CycleToNextThumbnail -> ActivateSourceWindow`, e `ActivateSourceWindow` fazia IsIconic/ShowWindow/SetForegroundWindow e AINDA chamava `OnPreviewClicked`, que repetia a mesma sequência — ou seja, dois `SetForegroundWindow` seguidos por acionamento. O refactor unificou isso em `StreamManager.Focus`, que chama uma vez só. O Windows recusa `SetForegroundWindow` vindo de um processo que não está em primeiro plano; a chamada dupla é o workaround clássico (a primeira concede direito de ativação, a segunda efetiva). Clicar na miniatura continua funcionando porque nesse instante o app TEM direito de foreground — o que combina com o sintoma. Como as hotkeys diretas usam o mesmo `Focus`, elas provavelmente estão afetadas também, mesmo sem relato.",
-      "fix": "PENDENTE (próxima sessão). Plano: (1) confirmar reproduzindo com log em `Focus` (retorno de SetForegroundWindow + GetForegroundWindow depois); (2) restaurar a ativação robusta — repetir a sequência, e se não bastar usar o padrão AttachThreadInput (anexar a thread do foreground atual, SetForegroundWindow, desanexar) ou o truque de ALT sintético. (3) Testar in-game com Alt+Tab, que é o default e ainda por cima é hotkey de sistema. Verificar as hotkeys diretas no mesmo teste.",
+      "fix": "IMPLEMENTADO (aguarda validação in-game no Windows). `StreamManager.Focus` agora: guarda contra hwnd morto, restaura se minimizado, tenta `SetForegroundWindow` e CONFERE com `GetForegroundWindow`; se não pegou, `AttachThreadInput(ourThread, foregroundThread, true)` + `BringWindowToTop` + nova tentativa, sempre desanexando no finally; se ainda assim falhar, `AppLog.Warn(\"Focus\", ...)` com o hwnd alvo e o foreground real — é esse log que confirma/refuta a hipótese em runtime. Novos P/Invokes em `Native/NativeMethods.cs`: AttachThreadInput, BringWindowToTop, GetCurrentThreadId.",
       "tags": [
         "hotkey",
         "regression",
@@ -118,11 +118,34 @@
         "focus",
         "win32",
         "v0.8.0",
-        "open"
+        "pending-verification"
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-08-09T00:00:00Z"
+      "last_seen": "2026-08-09T13:00:00Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-08-09T13:30:00Z",
+      "error_message": "usuário (testando o rc do fix de bug-006): \"usando o modificador ctrl com o tab cicla corretamente, mas usando só o tab não funciona sem clicar fora\" — hotkey de cycle sem modificador (Tab puro) não cicla; com Ctrl+Tab funciona.",
+      "file": "Services/HotkeyManager.cs",
+      "root_cause": "Duas causas distintas, separadas pelo teste do usuário (cliente do jogo em foco quando Tab puro falhou). (1) O DEFAULT do app era Alt+Tab — combo RESERVADO pelo Windows, RegisterHotKey sempre falha (1409). Como o retorno era ignorado, o atalho default nunca funcionou e parecia bug de foco. É a explicação mais provável do relato original de bug-006 em quem nunca trocou o default. (2) Tab sem modificador: a hotkey registra (prova: funciona quando o foreground não é o jogo), mas com o cliente do jogo em foco a tecla é consumida antes do processamento de hotkey — jogo em fullscreen exclusivo ou com hook WH_KEYBOARD_LL, que roda ANTES das hotkeys. Fora do nosso alcance: nenhuma API deixa o RegisterHotKey ganhar de um LL hook. Ctrl+Tab sobrevive porque o jogo só reivindica Tab puro.",
+      "fix": "(a) default de CycleModifiers 'Alt' -> 'Ctrl' em Models/Settings.cs (Alt+Tab nunca poderia registrar); (b) HotkeyManager acumula os combos recusados em FailedCombos e loga cada registro (AppLog.Info/Warn com win32 error); (c) HotkeysPage mostra aviso laranja com a nova chave i18n HotkeysRegisterFailed (en+pt-BR), alimentado por MainWindow depois de Attach e de cada Reload. Teclas engolidas pelo jogo (caso 2) NÃO têm fix técnico — a orientação é usar modificador.",
+      "tags": [
+        "hotkey",
+        "registerhotkey",
+        "modifier",
+        "no-modifier",
+        "win32",
+        "alt-tab-reserved",
+        "ll-keyboard-hook",
+        "fixed-with-caveat"
+      ],
+      "related_bugs": [
+        "bug-006"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-09T14:00:00Z"
     }
   ]
 }

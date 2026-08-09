@@ -110,7 +110,8 @@ public class Hotkeys
 {
     public bool Enabled { get; set; } = true;
     public string CycleKey { get; set; } = "Tab";
-    public string CycleModifiers { get; set; } = "Alt";
+    // Not Alt+Tab: Windows reserves it, so RegisterHotKey refuses and the default never fires.
+    public string CycleModifiers { get; set; } = "Ctrl";
     public string DirectModifiers { get; set; } = "Alt";
     public List<string> DirectKeys { get; set; } = new()
     {

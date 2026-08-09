@@ -25,6 +25,10 @@
           <!-- Enable/Disable -->
           <CheckBox x:Name="ChkEnabled" Content="{loc:Tr HotkeysEnable}" Margin="0,0,0,16" Checked="OnEnabledChanged" Unchecked="OnEnabledChanged"/>
 
+          <!-- Only visible when Windows refused a combo (Alt+Tab and friends). -->
+          <TextBlock x:Name="TxtRegisterWarning" Foreground="#C24E00" TextWrapping="Wrap"
+                     Margin="0,0,0,16" Visibility="Collapsed"/>
+
           <!-- Cycle Hotkey Section -->
           <TextBlock Text="{loc:Tr HotkeysCycleTitle}" FontWeight="SemiBold" Margin="0,0,0,6"/>
           <TextBlock Text="{loc:Tr HotkeysCycleDesc}" Foreground="Gray" TextWrapping="Wrap" Margin="0,0,0,8"/>

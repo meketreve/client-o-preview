@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -20,6 +22,7 @@ public sealed class HotkeyManager : IDisposable
     private const int IdDirectBase = 100;
 
     private readonly Window _host;
+    private readonly List<string> _failed = new();
     private HwndSource? _source;
     private Hotkeys _hotkeys = new();
     private bool _registered;
@@ -31,6 +34,9 @@ public sealed class HotkeyManager : IDisposable
 
     /// <summary>Direct hotkey pressed, with its 0-based index.</summary>
     public event EventHandler<int>? DirectRequested;
+
+    /// <summary>Combos Windows refused on the last <see cref="Reload"/>, e.g. "Alt+Tab". Empty when all took.</summary>
+    public IReadOnlyList<string> FailedCombos => _failed;
 
     /// <summary>Call once the host window has a handle (Loaded).</summary>
     public void Attach(Hotkeys hotkeys)
@@ -58,19 +64,27 @@ public sealed class HotkeyManager : IDisposable
 
     private void Register()
     {
+        _failed.Clear();
         if (!_hotkeys.Enabled) return;
         var hwnd = Handle;
         if (hwnd == IntPtr.Zero) return;
 
         var cycleVk = VirtualKeyOf(_hotkeys.CycleKey);
-        if (cycleVk != 0)
-            RegisterHotKey(hwnd, IdCycle, ParseModifiers(_hotkeys.CycleModifiers) | MOD_NOREPEAT, cycleVk);
+        if (cycleVk == 0)
+            LogUnknownKey("cycle", _hotkeys.CycleKey);
+        else
+            LogRegister("cycle", _hotkeys.CycleModifiers, _hotkeys.CycleKey,
+                RegisterHotKey(hwnd, IdCycle, ParseModifiers(_hotkeys.CycleModifiers) | MOD_NOREPEAT, cycleVk));
 
         var directMods = ParseModifiers(_hotkeys.DirectModifiers) | MOD_NOREPEAT;
         for (int i = 0; i < _hotkeys.DirectKeys.Count && i < DirectCount; i++)
         {
             var vk = VirtualKeyOf(_hotkeys.DirectKeys[i]);
-            if (vk != 0) RegisterHotKey(hwnd, IdDirectBase + i, directMods, vk);
+            if (vk == 0)
+                LogUnknownKey($"direct[{i}]", _hotkeys.DirectKeys[i]);
+            else
+                LogRegister($"direct[{i}]", _hotkeys.DirectModifiers, _hotkeys.DirectKeys[i],
+                    RegisterHotKey(hwnd, IdDirectBase + i, directMods, vk));
         }
         _registered = true;
     }
@@ -102,6 +116,28 @@ public sealed class HotkeyManager : IDisposable
             handled = true;
         }
         return IntPtr.Zero;
+    }
+
+    // Windows refuses combos it reserves (Alt+Tab) or that another app already holds, and the
+    // refusal used to be silent — a hotkey that "does nothing" looked identical to a focus bug.
+    private void LogRegister(string what, string? modifiers, string? key, bool ok)
+    {
+        var combo = string.IsNullOrEmpty(modifiers) || modifiers == "None" ? key ?? "" : $"{modifiers}+{key}";
+        if (ok)
+        {
+            AppLog.Info("Hotkeys", $"{what} registered: {combo}");
+            return;
+        }
+
+        AppLog.Warn("Hotkeys", $"{what} NOT registered: {combo} (win32 error {Marshal.GetLastWin32Error()})");
+        if (!_failed.Contains(combo)) _failed.Add(combo);
+    }
+
+    private void LogUnknownKey(string what, string? key)
+    {
+        if (string.IsNullOrEmpty(key)) return;
+        AppLog.Warn("Hotkeys", $"{what}: unknown key name '{key}'");
+        if (!_failed.Contains(key)) _failed.Add(key);
     }
 
     /// <summary>"Alt+Ctrl" -> MOD_ALT | MOD_CONTROL. "None"/empty -> no modifier.</summary>

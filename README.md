@@ -64,9 +64,14 @@ A região é salva em coordenadas relativas (0–1), então continua correta mes
 
 ### 5. Atalhos de Teclado (Hotkeys)
 Na aba **Hotkeys**, você pode configurar uma tecla para alternar entre as janelas abertas:
-*   **Cycle Hotkey**: Escolha uma combinação (ex: `Alt + Tab` ou uma tecla única como `F1`).
-*   **Device Filter**: O sistema detecta automaticamente seu teclado. Isso garante que a hotkey funcione apenas no dispositivo desejado.
-*   Ao pressionar a hotkey, o app trará a próxima janela da lista para o primeiro plano.
+*   **Cycle Hotkey**: escolha uma combinação (padrão: `Ctrl + Tab`).
+*   **Hotkeys diretas**: `Alt + NumPad 1..0` focam um cliente específico, opcionalmente amarrado a um título de janela.
+*   Ao pressionar a hotkey, o app trará a janela correspondente para o primeiro plano — mesmo minimizada.
+
+**Sempre use um modificador (Ctrl/Alt/Shift).** Duas armadilhas do Windows:
+
+*   `Alt + Tab` é **reservado pelo sistema** — o Windows recusa o registro e o atalho nunca dispara. O app agora avisa em laranja na própria aba quando um combo é recusado (o motivo também vai para o `error.log`).
+*   Uma **tecla sem modificador** (só `Tab`, só `F1`) pode ser engolida pelo jogo antes de virar hotkey, dependendo de como o cliente lê o teclado. Nesse caso o atalho funciona fora do jogo e "não funciona" dentro dele.
 
 ### 6. Miniatura (Thumbnail)
 A antiga aba **General** foi incorporada aqui — todas as opções de preview ficam em um lugar só.
@@ -88,12 +93,6 @@ Todas as suas preferências, posições de janelas e hotkeys são salvas automat
 `%APPDATA%/client-o-preview/settings.json`
 
 Se algo der errado, o motivo fica registrado em `%APPDATA%/client-o-preview/error.log`.
-
-## 🐞 Problemas conhecidos (v0.8.0)
-- **A hotkey de ciclar entre os clientes (Alt+Tab por padrão) não está funcionando.**
-  As hotkeys diretas (Alt + NumPad) podem estar afetadas pelo mesmo motivo — a
-  investigação está em aberto. Clicar na miniatura continua focando o cliente
-  normalmente. Correção prevista para a próxima versão.
 
 ## 📺 Tutorial em Vídeo
 Confira o funcionamento básico aqui: [YouTube - Como usar client-o-preview](https://youtu.be/sjbJxVLL4h4)

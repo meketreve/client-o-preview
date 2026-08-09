@@ -271,6 +271,19 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
         }
     }
 
+    /// <summary>Show which combos Windows refused, so a dead hotkey does not look like a broken app.</summary>
+    public void ShowRegistrationResult(IReadOnlyList<string> failedCombos)
+    {
+        if (failedCombos.Count == 0)
+        {
+            TxtRegisterWarning.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        TxtRegisterWarning.Text = Loc.Format("HotkeysRegisterFailed", string.Join(", ", failedCombos));
+        TxtRegisterWarning.Visibility = Visibility.Visible;
+    }
+
     private void NotifyChanged()
     {
         HotkeysChanged?.Invoke(this, _hotkeys);

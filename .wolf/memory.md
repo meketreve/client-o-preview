@@ -117,3 +117,12 @@ testes não pegam esse tipo de coisa; só o teste in-game pegou.
 
 **Próximo passo:** corrigir bug-006 em `StreamManager.Focus` (~4 linhas), verificar também as
 hotkeys diretas, tirar "Problemas conhecidos" do README, soltar v0.8.1.
+
+## Session: 2026-08-09 12:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:00 | bug-006: `Focus` com ativação robusta — 1ª tentativa + fallback `AttachThreadInput`/`BringWindowToTop` na thread do foreground, `AppLog.Warn` se ainda falhar | Services/StreamManager.cs, Native/NativeMethods.cs | build 0 warnings, 39 testes passam; **falta validar in-game no Windows** | ~9k |
+| 13:15 | rc1 testado pelo usuário: Ctrl+Tab cicla → fix de bug-006 CONFIRMADO. Tab sem modificador não cicla → bug-007 | — | fix de foco validado | ~2k |
+| 13:30 | bug-007: instrumentar registro de hotkey — retorno de RegisterHotKey conferido e logado por hotkey, novo `AppLog.Info` | Services/HotkeyManager.cs, Services/AppLog.cs | build 0 warnings; rc2 em Downloads | ~7k |
+| 14:00 | bug-007 fechado: default Alt+Tab (reservado pelo Windows) -> Ctrl+Tab; FailedCombos + aviso na HotkeysPage (i18n HotkeysRegisterFailed) | Models/Settings.cs, Services/HotkeyManager.cs, Views/HotkeysPage.*, MainWindow.xaml.cs, Localization/Loc.cs | build 0 warnings, 39 testes; rc3 em Downloads | ~12k |

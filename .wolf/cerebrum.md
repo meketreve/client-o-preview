@@ -129,3 +129,24 @@ Onde mexer para cada tipo de mudança (**atualizado depois do refactor de 2026-0
 - [2026-08-08] Testes por **source link** em vez de `ProjectReference`, e alvo `net8.0` em vez de `net8.0-windows`: torna `dotnet test` executável no WSL, que é onde o desenvolvimento acontece. O custo é manter a lista de arquivos no csproj de teste.
 - [2026-08-08] Geometria e chaves saíram de dentro das janelas para `Services/ThumbnailGeometry.cs` e `Services/LayoutKey.cs`. O critério de corte foi "dá para testar sem abrir uma janela", não "é bonito".
 - [2026-08-08] O refactor ficou em `refactor/maintainability`, não direto na `main`: não dá para rodar WPF no WSL, então merge só depois do teste in-game.
+
+## Sessão 2026-08-09 (parte 2) — hotkeys: foco e registro
+
+### Key Learnings
+
+- **`SetForegroundWindow` de um processo em background é recusado pelo Windows.** O padrão que funciona: tentar uma vez e **conferir com `GetForegroundWindow()`** (a API retorna `true` mesmo quando só piscou a taskbar); se não pegou, `AttachThreadInput(nossaThread, threadDoForegroundAtual, true)` + `BringWindowToTop` + nova tentativa, sempre desanexando no `finally`. Confirmado in-game: consertou o ciclo entre clientes.
+- **`Alt+Tab` é reservado pelo sistema** — `RegisterHotKey` sempre falha (win32 1409). Era o **default do app**, ou seja, em instalação nova a hotkey de ciclar nunca funcionou. Um default que a plataforma recusa é um bug silencioso: escolher combos que o SO permite.
+- **Retorno de API Win32 ignorado = bug indistinguível.** `RegisterHotKey` falhando e `SetForegroundWindow` falhando produzem o mesmo sintoma ("aperto e não acontece nada"). Conferir e logar o retorno separou as duas causas em um teste só.
+- **Hotkey sem modificador pode ser engolida pela janela em foco.** Hook `WH_KEYBOARD_LL` (comum em jogo/anticheat) e fullscreen exclusivo rodam **antes** do processamento de hotkey do Windows — não existe API que faça `RegisterHotKey` ganhar disso. Sintoma-assinatura: "funciona fora do jogo, não funciona dentro". Único remédio é orientar o uso de modificador.
+- **Sintoma pode provar o registro.** "Só funciona depois de clicar fora" já prova que a hotkey **registrou** (senão não funcionaria em lugar nenhum) — isso descarta a hipótese de registro sem precisar de log.
+
+### Decision Log
+
+- [2026-08-09] Default de `CycleModifiers` mudou de `Alt` para `Ctrl`. Não migra `settings.json` existente: mexer em config que o usuário escolheu é pior que deixar o aviso aparecer.
+- [2026-08-09] Falha de registro de hotkey virou **aviso na própria aba** (laranja, via `HotkeysPage.ShowRegistrationResult` alimentado pela `MainWindow`), não só linha de log. Erro que o usuário provoca na UI tem que aparecer na UI.
+- [2026-08-09] Caminho de foco continua **sem teste automatizado** — exige janela real. Cobertura por checklist manual, como já estava previsto.
+
+### Do-Not-Repeat
+
+- [2026-08-09] Não ignorar o retorno de `RegisterHotKey`/`SetForegroundWindow`. Bool ignorado em P/Invoke vira "não acontece nada" sem pista nenhuma.
+- [2026-08-09] Não oferecer/definir hotkey sem modificador como padrão nem sugerir ao usuário: o jogo em foco engole a tecla.

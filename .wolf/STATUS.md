@@ -8,6 +8,13 @@
 
 ## ✅ Done
 
+### Release v0.8.1 (2026-08-09) — hotkeys consertadas
+- **bug-006 corrigido e validado in-game**: `StreamManager.Focus` confere o resultado com `GetForegroundWindow()` e, se o Windows recusou, refaz a ativação com `AttachThreadInput` na thread do foreground atual + `BringWindowToTop`. Usuário confirmou: Ctrl+Tab cicla corretamente.
+- **bug-007 (achado durante o teste)**: o default era `Alt+Tab`, **reservado pelo Windows** — `RegisterHotKey` sempre falhava (1409), silenciosamente. Default virou `Ctrl+Tab`; `settings.json` existente não é migrado.
+- **Falha de registro agora é visível**: `HotkeyManager.FailedCombos` + aviso laranja na aba Hotkeys (`HotkeysRegisterFailed`, en + pt-BR) + linha no `error.log` com o código win32. Novo `AppLog.Info`.
+- **Limite conhecido e documentado**: hotkey **sem modificador** pode ser engolida pelo cliente em foco (hook `WH_KEYBOARD_LL` / fullscreen exclusivo) — roda antes do processamento de hotkey do Windows, sem contorno via API. README orienta usar modificador.
+- README: "Problemas conhecidos" removido, seção de atalhos reescrita com as duas armadilhas.
+
 ### Release v0.8.0 (2026-08-09)
 - Refactor **validado in-game** pelo usuário; branch `refactor/maintainability` mergeada na `main`.
 - `<Version>` 0.8.0, tag `v0.8.0`, release com o `.exe` single-file.
@@ -65,40 +72,25 @@ para o usuário, exceto as 4 correções de bug abaixo.
 
 ---
 
-## 🚀 Próxima fase — corrigir a hotkey de ciclar (bug-006) e soltar a v0.8.1
+## 🚀 Próxima fase — não decidida (v0.8.1 fechou o ciclo das hotkeys)
 
-**Goal:** _regressão do refactor: `SetForegroundWindow` de um app em background é recusado pelo Windows; a v0.7.0 escapava porque chamava a sequência de ativação duas vezes por acionamento._
+Nenhuma quest em aberto. Candidatas, em ordem de custo/benefício:
 
-**Comece por aqui:** `.wolf/buglog.json` → **bug-006** tem a hipótese completa e o plano de correção.
-O código a mexer é `StreamManager.Focus` (`Services/StreamManager.cs`), 4 linhas.
-
-### Acceptance criteria
-1. Alt+Tab (hotkey de cycle) traz o próximo cliente para frente, com 3+ previews abertas.
-2. Hotkeys diretas (Alt+NumPad) idem — **verificar também**, usam o mesmo `Focus` e podem estar quebradas sem relato.
-3. Funciona com o cliente minimizado (restaura) e com ele atrás de outra janela.
-4. Clicar na miniatura continua focando (não regredir o caminho que funciona hoje).
-5. README: remover a seção "Problemas conhecidos" quando fechar.
-
-### Files to create / edit
-| Type | File | Content |
-|---|---|---|
-| edit | `Services/StreamManager.cs` | `Focus()`: ativação robusta (repetir a sequência; se não bastar, `AttachThreadInput` na thread do foreground atual) |
-| edit | `Native/NativeMethods.cs` | possivelmente `AttachThreadInput` (`GetWindowThreadProcessId` já existe) |
-| edit | `README.md` | tirar "Problemas conhecidos" |
-| edit | `ClientOPreview.csproj` | `<Version>` 0.8.0 → 0.8.1 |
+1. **CI no GitHub Actions** — `dotnet build` + `dotnet test` no push. Barato (os testes já rodam em `net8.0`, sem Windows) e evita que um refactor volte a quebrar o núcleo sem ninguém ver. Único item que protege o que já existe.
+2. **Verificação pendente do rc3**: o aviso laranja de combo recusado **não foi confirmado visualmente** pelo usuário — marcar Alt+Tab na aba Hotkeys deve mostrar o aviso na hora, e voltar para Ctrl+Tab deve sumir com ele. Confirmar na primeira oportunidade.
+3. **Hotkeys diretas (Alt+NumPad) in-game** — usam o mesmo `Focus` corrigido, mas não houve relato de teste explícito.
+4. Terceiro idioma (es?) — a string table aguenta, é só mais um dicionário + rádio.
+5. Hotkey para alternar região ↔ janela inteira.
+6. Presets globais por jogo (perfil) além do preset por piloto.
 
 ### Closed decisions
+- Ativação de janela: tentar → **conferir com `GetForegroundWindow()`** → `AttachThreadInput` como fallback. Não confiar no bool de `SetForegroundWindow`.
+- Default de hotkey de ciclo: `Ctrl+Tab`. `Alt+Tab` é reservado pelo Windows e nunca registra.
+- `settings.json` existente **não** é migrado quando um default muda.
+- Caminho de foco fica sem teste automatizado (exige janela real) — checklist manual.
 - Refactor por extração de colaborador, não MVVM: preserva o padrão "página emite `event` → MainWindow aplica".
 - `SettingsService` via `JsonSerializer` + `SnakeCaseLower` mantendo os mesmos nomes JSON.
 - Testes em `net8.0` com source link, para rodarem no WSL; o app segue `net8.0-windows`.
-- v0.8.0 saiu **com** a regressão documentada, a pedido do usuário — o ganho de manutenção e os 4 bugs corrigidos valiam mais que segurar a release.
-
-### Open decisions
-- Vale um teste para o caminho de foco? Exige janela real → provavelmente não; cobrir por checklist manual.
-- CI no GitHub Actions rodando `dotnet build` + `dotnet test` no push?
-- Terceiro idioma (es?) — a string table aguenta, é só mais um dicionário + rádio.
-- Hotkey para alternar região ↔ janela inteira?
-- Presets globais por jogo (perfil) além do preset por piloto?
 
 ---
 
@@ -117,7 +109,7 @@ O código a mexer é `StreamManager.Focus` (`Services/StreamManager.cs`), 4 linh
 ## ⚠️ External blockers (don't block coding)
 
 - Executar a app só no Windows (WPF). No WSL, `~/.dotnet/dotnet build` compila e `dotnet test` roda (os testes são `net8.0`).
-- O refactor **ainda não rodou no Windows** — é a próxima fase.
+- Fluxo de teste que funcionou: publicar e copiar o `.exe` para `/mnt/c/Users/Meketreve/Downloads/` com nome `ClientOPreview-vX.Y.Z-rcN.exe`; o usuário roda no Windows e reporta.
 
 ---
 

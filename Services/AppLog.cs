@@ -36,6 +36,8 @@ public static class AppLog
         LogPath = Path.Combine(dir, "error.log");
     }
 
+    public static void Info(string context, string message) => Write("INFO", context, message);
+
     public static void Warn(string context, string message) => Write("WARN", context, message);
 
     public static void Warn(string context, Exception ex) => Write("WARN", context, ex.ToString());
