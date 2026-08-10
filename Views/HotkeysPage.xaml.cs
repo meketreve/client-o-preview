@@ -245,10 +245,18 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
             key == Key.LWin || key == Key.RWin)
             return;
         
-        TxtCycleKey.Text = key.ToString();
-        _hotkeys.CycleKey = key.ToString();
+        var name = NameOf(key);
+        TxtCycleKey.Text = name;
+        _hotkeys.CycleKey = name;
         NotifyChanged();
     }
+
+    /// <summary>
+    /// Key name to store, or empty for Esc / Delete / Backspace — a binding you can set has to be
+    /// one you can unset, and an empty name simply registers nothing.
+    /// </summary>
+    private static string NameOf(Key key) =>
+        key is Key.Escape or Key.Delete or Key.Back ? "" : key.ToString();
 
     private void OnDirectKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
@@ -262,10 +270,11 @@ public partial class HotkeysPage : System.Windows.Controls.UserControl
 
         if (sender is System.Windows.Controls.TextBox tb && tb.Tag is int index)
         {
-            tb.Text = key.ToString();
+            var name = NameOf(key);
+            tb.Text = name;
             if (index < _directKeyItems.Count)
             {
-                _directKeyItems[index].Key = key.ToString();
+                _directKeyItems[index].Key = name;
             }
             UpdateDirectKeysInSettings();
             NotifyChanged();

@@ -150,3 +150,24 @@ Onde mexer para cada tipo de mudança (**atualizado depois do refactor de 2026-0
 
 - [2026-08-09] Não ignorar o retorno de `RegisterHotKey`/`SetForegroundWindow`. Bool ignorado em P/Invoke vira "não acontece nada" sem pista nenhuma.
 - [2026-08-09] Não oferecer/definir hotkey sem modificador como padrão nem sugerir ao usuário: o jogo em foco engole a tecla.
+
+## Sessão 2026-08-09 (parte 3) — v0.9.0
+
+### Key Learnings
+
+- **UIPI foi a causa raiz das hotkeys "quebradas", não o refactor.** Cliente de jogo rodando elevado + app comum = `AttachThreadInput` negado (win32 5) e nenhuma forma de trazer a janela para frente. Assinatura do sintoma: **funciona quando o foreground é uma janela comum, falha quando é o jogo**. Antes de investigar API de foco, perguntar "o alvo roda elevado?".
+- **Hipótese confirmada por teste parcial é hipótese não confirmada.** "Ctrl+Tab funcionou" foi tomado como validação de bug-006, mas o teste tinha sido feito com o foreground fora do jogo. Pedir o cenário exato do teste, não só o resultado.
+- **`Dictionary` não promete ordem.** O ciclo dependia da ordem de `_streams.Keys` — funcionava por acaso e não dava para reordenar. Ordem que o usuário enxerga precisa de `List` explícita.
+- **Título não identifica preview** (clientes com o mesmo título). Handle identifica em runtime; `LayoutKey.For(title, occurrence)` identifica entre sessões. A lista da UI carrega o `IntPtr` junto por isso.
+- **`net8.0-windows` com `UseWindowsForms` ambiguiza tipos de UI** (`Point`, `MouseEventArgs`, `DragEventArgs`, `DragDropEffects` existem em WinForms e WPF). Em code-behind novo, qualificar `System.Windows.*` desde o começo.
+
+### Decision Log
+
+- [2026-08-09] Elevação por **manifesto `requireAdministrator`**, escolhido pelo usuário entre: detectar em runtime e oferecer reinício, manifesto, ou só documentar. Motivo: o cliente dele roda elevado sempre.
+- [2026-08-09] Ordem do ciclo **persistida** (`hotkeys.cycle_order`), não só de sessão, reusando a chave dos layouts.
+- [2026-08-09] Esc/Delete/Backspace limpam o campo de tecla; nome vazio já não registrava nada, então a feature é uma linha (`HotkeysPage.NameOf`) e não um caminho novo.
+- [2026-08-09] v0.9.0 saiu **sem teste in-game da build final**, a pedido do usuário. Pendência anotada no STATUS.
+
+### Do-Not-Repeat
+
+- [2026-08-09] Não anunciar bug como corrigido a partir de confirmação parcial do usuário. Perguntar em que cenário o teste rodou antes de escrever "validado" em release notes.

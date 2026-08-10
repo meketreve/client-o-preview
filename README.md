@@ -68,6 +68,7 @@ Na aba **Hotkeys**, você pode configurar uma tecla para alternar entre as janel
 *   **Hotkeys diretas**: `Alt + NumPad 1..0` focam um cliente específico, opcionalmente amarrado a um título de janela.
 *   Ao pressionar a hotkey, o app trará a janela correspondente para o primeiro plano — mesmo minimizada.
 *   **Ordem do ciclo**: arraste os nomes na lista **Previews abertas**, à direita, para escolher em que ordem a hotkey percorre os clientes. A ordem fica salva e vale também para as hotkeys diretas por posição.
+*   **Tirar um atalho**: clique no campo da tecla e aperte **Esc**, **Delete** ou **Backspace**. O campo fica vazio e aquele atalho deixa de ser registrado.
 
 **Evite `Alt + Tab`:** é um combo **reservado pelo Windows** — o registro é recusado e o atalho nunca dispara. O app avisa em laranja na própria aba quando isso acontece (o motivo, com o código de erro do Windows, também vai para o `error.log`).
 

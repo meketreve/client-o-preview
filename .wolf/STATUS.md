@@ -8,6 +8,13 @@
 
 ## ✅ Done
 
+### Release v0.9.0 (2026-08-09) — ordem do ciclo, elevação, limpar atalho
+- **Causa real do bug de foco encontrada: UIPI.** O cliente do jogo roda elevado; um processo de integridade menor não consegue ativar a janela dele (`AttachThreadInput` negado). Testado: com o app elevado funciona, **inclusive com Tab sem modificador** — o que derrubou a hipótese anterior de que o jogo engolia a tecla (bug-007 hipótese 2 estava errada).
+- **`app.manifest` com `requireAdministrator`** + `<ApplicationManifest>` no csproj (decisão do usuário, sobre detectar em runtime ou só documentar). Verificado que a string vai embutida no `.exe` publicado.
+- **Ordem do ciclo arrastável**: `StreamManager` mantém `_order` explícito (antes dependia da ordem do `Dictionary`, que não promete nada). Lista de previews abertas virou `ListBox` com drag-drop; ordem salva em `hotkeys.cycle_order` com a chave de layout, então sobrevive ao restart. Arrastar preserva o ponteiro do ciclo.
+- **Esc / Delete / Backspace limpam o campo de tecla** (`HotkeysPage.NameOf`) — nome vazio simplesmente não registra nada.
+- README: seção de elevação, ordem do ciclo, como limpar atalho; nota errada sobre "tecla sem modificador é engolida pelo jogo" removida.
+
 ### Release v0.8.1 (2026-08-09) — hotkeys consertadas
 - **bug-006 corrigido e validado in-game**: `StreamManager.Focus` confere o resultado com `GetForegroundWindow()` e, se o Windows recusou, refaz a ativação com `AttachThreadInput` na thread do foreground atual + `BringWindowToTop`. Usuário confirmou: Ctrl+Tab cicla corretamente.
 - **bug-007 (achado durante o teste)**: o default era `Alt+Tab`, **reservado pelo Windows** — `RegisterHotKey` sempre falhava (1409), silenciosamente. Default virou `Ctrl+Tab`; `settings.json` existente não é migrado.
@@ -72,18 +79,24 @@ para o usuário, exceto as 4 correções de bug abaixo.
 
 ---
 
-## 🚀 Próxima fase — não decidida (v0.8.1 fechou o ciclo das hotkeys)
+## 🚀 Próxima fase — não decidida (v0.9.0 fechou o ciclo das hotkeys)
 
-Nenhuma quest em aberto. Candidatas, em ordem de custo/benefício:
+**Verificação pendente da v0.9.0** — a release saiu a pedido do usuário **sem** o teste in-game da build final. Confirmar na primeira oportunidade:
+1. UAC ao abrir, e Ctrl+Tab ciclando com o cliente em foco.
+2. Arrastar a lista reordena, numeração acompanha, ciclo segue a ordem; ordem preservada depois de fechar e reabrir.
+3. Esc/Delete/Backspace esvaziam o campo de tecla e o atalho para de disparar.
+4. Hotkeys diretas (Alt+NumPad) seguem a mesma ordem.
+
+Candidatas seguintes, em ordem de custo/benefício:
 
 1. **CI no GitHub Actions** — `dotnet build` + `dotnet test` no push. Barato (os testes já rodam em `net8.0`, sem Windows) e evita que um refactor volte a quebrar o núcleo sem ninguém ver. Único item que protege o que já existe.
-2. **Verificação pendente do rc3**: o aviso laranja de combo recusado **não foi confirmado visualmente** pelo usuário — marcar Alt+Tab na aba Hotkeys deve mostrar o aviso na hora, e voltar para Ctrl+Tab deve sumir com ele. Confirmar na primeira oportunidade.
-3. **Hotkeys diretas (Alt+NumPad) in-game** — usam o mesmo `Focus` corrigido, mas não houve relato de teste explícito.
-4. Terceiro idioma (es?) — a string table aguenta, é só mais um dicionário + rádio.
-5. Hotkey para alternar região ↔ janela inteira.
-6. Presets globais por jogo (perfil) além do preset por piloto.
+2. Terceiro idioma (es?) — a string table aguenta, é só mais um dicionário + rádio.
+3. Hotkey para alternar região ↔ janela inteira.
+4. Presets globais por jogo (perfil) além do preset por piloto.
 
 ### Closed decisions
+- Elevação: **manifesto `requireAdministrator`**, não detecção em runtime. Escolha do usuário — o cliente dele roda elevado sempre, então o UAC é inevitável de qualquer jeito.
+- Ordem do ciclo mora no `StreamManager` (`_order`) e é persistida por chave de layout, não por título puro: título repete entre clientes.
 - Ativação de janela: tentar → **conferir com `GetForegroundWindow()`** → `AttachThreadInput` como fallback. Não confiar no bool de `SetForegroundWindow`.
 - Default de hotkey de ciclo: `Ctrl+Tab`. `Alt+Tab` é reservado pelo Windows e nunca registra.
 - `settings.json` existente **não** é migrado quando um default muda.
