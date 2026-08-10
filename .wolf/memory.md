@@ -134,3 +134,14 @@ hotkeys diretas, tirar "Problemas conhecidos" do README, soltar v0.8.1.
 | 16:40 | decisão do usuário: manifesto requireAdministrator. app.manifest criado + ApplicationManifest no csproj, versão 0.9.0, README (seção de elevação + ordem do ciclo, nota errada sobre tecla sem modificador removida) | app.manifest, ClientOPreview.csproj, README.md | build 0 warnings, 39 testes, requireAdministrator confirmado dentro do .exe; rc2 em Downloads | ~9k |
 | 16:55 | feature: Esc/Delete/Backspace limpam o campo de tecla (cycle e diretas), hints i18n atualizados | Views/HotkeysPage.xaml.cs, Localization/Loc.cs, README.md | build 0 warnings, 39 testes | ~6k |
 | 17:05 | v0.9.0: commits 3f76ef9 + fc46330 na main, tag v0.9.0, release no GitHub com o .exe; cópia em Downloads | — | https://github.com/meketreve/client-o-preview/releases/tag/v0.9.0 | ~4k |
+
+## Resumo da sessão 2026-08-09 (parte 3)
+
+Fechou o ciclo das hotkeys, que vinha desde a v0.8.0.
+
+- **bug-006** (foco recusado): `StreamManager.Focus` passou a conferir o resultado com `GetForegroundWindow()` e a usar `AttachThreadInput` + `BringWindowToTop` como fallback, com `SwitchToThisWindow` de último recurso. Saiu na v0.8.1.
+- **bug-007**: default era `Alt+Tab`, combo reservado pelo Windows — `RegisterHotKey` sempre falhava, e o retorno era ignorado. Default virou `Ctrl+Tab`; falha de registro agora aparece na UI e no log. Saiu na v0.8.1.
+- **bug-008**: causa raiz de verdade era **UIPI** — cliente do jogo roda elevado, app comum não consegue ativar a janela dele. Fechado na v0.9.0 com `app.manifest` `requireAdministrator` (escolha do usuário). Isso também derrubou a hipótese errada de que o jogo engolia a tecla.
+- **Features da v0.9.0**: ordem do ciclo arrastável e persistida (`_order` explícito no `StreamManager`, salva em `hotkeys.cycle_order` por chave de layout); Esc/Delete/Backspace limpam o campo de tecla.
+- Releases **v0.8.1** e **v0.9.0** publicadas com o `.exe`. v0.9.0 **validada in-game** pelo usuário.
+- Método que funcionou: publicar rc para `/mnt/c/Users/Meketreve/Downloads/`, usuário testa no Windows, log em `%APPDATA%` separa as hipóteses. Foram 4 rcs até a causa raiz aparecer.
