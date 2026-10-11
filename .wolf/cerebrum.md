@@ -2,7 +2,7 @@
 
 > OpenWolf's learning memory. Updated automatically as the AI learns from interactions.
 > Do not edit manually unless correcting an error.
-> Last updated: 2026-08-08
+> Last updated: 2026-10-11
 
 ## User Preferences
 
@@ -22,6 +22,11 @@
 - **Build no WSL funciona** com `~/.dotnet/dotnet build` graças a `EnableWindowsTargeting=true` (só compila; rodar, só no Windows). O Windows tem só runtime (`Microsoft.WindowsDesktop.App 8.0.28`), sem SDK.
 - **`obj/` é versionado no repo** (entrou antes do `.gitignore`): todo build no WSL reescreve com paths Linux → rodar `git checkout -- obj/` depois de compilar.
 - **Versão do app**: `<Version>` no csproj + `AboutPage` lendo do assembly. Release = tag `vX.Y.Z` + `gh release create` com o `.exe` single-file.
+- [2026-10-11] **Máquina de dev agora é Linux nativo** (Mint 22.2 Cinnamon, X11), não WSL. SDK em `~/.dotnet` (instalado com dotnet-install.sh). Jogo do usuário roda via Steam/Proton (Perpetuum) — janela X11 comum.
+- [2026-10-11] **Versão Linux em `linux/`** (Avalonia 11.2.3 + XComposite/XRender), mesmo repo. Núcleo por *source link* como os testes. Root csproj exclui `linux/**`.
+- [2026-10-11] X11: o error handler padrão do Xlib chama `exit()` — `X11.InstallErrorHandler()` (depois do Avalonia subir) é obrigatório; BadWindow/BadMatch são rotina quando o cliente fecha.
+- [2026-10-11] Avalonia não grava `_NET_WM_PID`: filtrar janelas próprias pelo handle (`TryGetPlatformHandle`), não pelo pid (bug-009).
+- [2026-10-11] Teste ao vivo no Linux sem sujar `~/.config`: `XDG_CONFIG_HOME=<scratch> dotnet linux/bin/Debug/net8.0/client-o-preview.dll` + `scrot`; `last_open_windows` no settings faz abrir preview sem clicar.
 - Copiar `.exe` pra `/mnt/c/...` falha com I/O error se a versão anterior estiver rodando no Windows — salvar com nome versionado.
 
 ## Do-Not-Repeat
@@ -33,6 +38,10 @@
 - [2026-08-02] Region Focus via `DWM_TNP_RECTSOURCE` em vez de captura de tela (PrintWindow/BitBlt): mantém a promessa do README de não interagir com o processo do jogo e funciona em cliente DX fullscreen, onde PrintWindow costuma retornar preto.
 - [2026-08-02] Presets nomeados (nome do piloto) + assignment por `title:occurrence:title`, reaproveitando o esquema de chave dos layouts.
 - [2026-08-02] Picker não-modal e `Topmost=true`: o usuário precisa clicar no jogo para exibir o painel que vai recortar enquanto o seletor está aberto.
+
+- [2026-10-11] Linux: Avalonia (não Rust/repo separado) para dividir o núcleo C#; X11 só (Wayland não deixa capturar janela alheia). Escolha do usuário. MVP primeiro: sem seletor visual de região, sem aba Zoom, sem bandeja.
+- [2026-10-11] Linux: captura = XRender escala no servidor para um pixmap do tamanho da preview + `XGetImage` do resultado pequeno → `WriteableBitmap`. Mantém toda a UI no Avalonia; custo de cópia é só do tamanho da miniatura.
+- [2026-10-11] Linux: UI de config em código C# (sem XAML) — um arquivo por tela, troca de idioma reconstrói as abas.
 
 ## Sessão 2026-08-03 — i18n, fusão de abas, topmost por foco
 

@@ -2,11 +2,17 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-09
+> Last updated: 2026-10-11
 
 ---
 
 ## ✅ Done
+
+### Versão Linux MVP (2026-10-11) — `linux/`, mesmo repo
+- Avalonia 11.2.3 + XComposite/XRender, só X11. Núcleo (Settings, Loc, LayoutKey, SettingsService, ThumbnailGeometry) por source link.
+- Lista de janelas (EWMH), previews ao vivo, clique foca (`_NET_ACTIVE_WINDOW` fonte 2), arrastar/redimensionar, layout salvo, recorte por preset em %, zoom interno no hover, hotkeys XGrabKey (ciclo + 10 diretas), ordem do ciclo (Subir/Descer), en/pt-BR.
+- Testado ao vivo no Cinnamon (preview do Steam, recorte, opacidade 70%, 11 hotkeys registradas). 63 testes. bug-009 (janelas próprias na lista).
+- **Falta**: validação in-game do usuário (Perpetuum/Proton), seletor visual de região, aba Zoom, mapeamento hotkey→título na UI, bandeja.
 
 ### Release v0.9.0 (2026-08-09) — ordem do ciclo, elevação, limpar atalho
 - **Validada in-game pelo usuário** ("testei e ficou bom"), depois da publicação. Nada pendente.
@@ -80,7 +86,13 @@ para o usuário, exceto as 4 correções de bug abaixo.
 
 ---
 
-## 🚀 Próxima fase — não decidida (v0.9.0 fechou o ciclo das hotkeys)
+## 🚀 Próxima fase — validar a versão Linux in-game
+
+1. Usuário roda `./build-linux.sh` (ou `cd linux && dotnet run`) e testa com o Perpetuum: preview, clique foca, Ctrl+Tab cicla, posição volta no restart.
+2. Corrigir o que aparecer; depois release v0.10.0 com os dois binários.
+3. Paridade Linux (seletor visual, Zoom, mapeamento hotkey→título, bandeja) e CI.
+
+## (anterior) Próxima fase — não decidida (v0.9.0 fechou o ciclo das hotkeys)
 
 v0.9.0 validada in-game. Nenhuma quest em aberto. Candidatas, em ordem de custo/benefício:
 

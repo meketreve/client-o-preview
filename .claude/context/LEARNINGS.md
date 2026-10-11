@@ -29,6 +29,11 @@ tier: 2
 - [2026-08-02] [dwm] thumbnail DWM é composto acima do host — overlay de UI precisa ser outra janela
 - [2026-08-08] [deploy] copiar `.exe` para `/mnt/c/...` falha se a versão anterior estiver rodando — nome versionado
 
+- [2026-10-11] [x11] error handler padrão do Xlib chama exit() — instalar o nosso depois do Avalonia; BadWindow é rotina
+- [2026-10-11] [avalonia] não grava `_NET_WM_PID` — excluir janelas próprias por handle (bug-009)
+- [2026-10-11] [x11] Wayland não captura janela alheia — build Linux é só X11 (Xorg)
+- [2026-10-11] [x11] atalho que o desktop já usa → BadAccess no XGrabKey; jogo com XGrabKeyboard engole atalhos
+
 ## Erros a não repetir
 
 - [2026-08-08] [settings] campo-espelho de settings na `MainWindow` causou bug-002 — ler direto do model
@@ -44,4 +49,6 @@ tier: 2
 - [2026-08-02] [regiao] [✓] recorte via `rcSource` do DWM — [✗] PrintWindow/BitBlt: interage com o jogo e dá preto em fullscreen DX
 - [2026-08-03] [i18n] [✓] string table em C# — [✗] `.resx`: build mais complexo para só 2 idiomas
 - [2026-08-09] [elevacao] [✓] manifesto `requireAdministrator` — escolha do usuário; detecção em runtime descartada
+- [2026-10-11] [linux] [✓] Avalonia + X11 no mesmo repo, núcleo por source link — [✗] repo separado em Rust: perde o núcleo C#
+- [2026-10-11] [linux] [✓] XRender escala no servidor + XGetImage pequeno → WriteableBitmap (UI toda no Avalonia)
 - [2026-08-09] [settings] [✓] mudança de default não migra `settings.json` existente — não mexer em escolha do usuário

@@ -177,6 +177,21 @@ public sealed class Loc : INotifyPropertyChanged
         // Errors
         ["ErrorUnhandled"] = "Unhandled Exception",
         ["ErrorStartup"] = "Startup Error",
+
+        // Linux build
+        ["LinuxRegionHint"] = "The visual picker is not available on Linux yet: type the area as a percentage of the window.",
+        ["LinuxRegionEditor"] = "Preset (percent of the window):",
+        ["LinuxRegionSaveNew"] = "Save as new preset",
+        ["LinuxRegionApply"] = "Apply to selected preview",
+        ["LinuxRegionLeft"] = "Left %",
+        ["LinuxRegionTop"] = "Top %",
+        ["LinuxRegionWidth"] = "Width %",
+        ["LinuxRegionHeight"] = "Height %",
+        ["LinuxHotkeysFailed"] = "The X server refused these shortcuts — the desktop or another app already uses them: {0}. Pick another combination.",
+        ["LinuxCycleOrder"] = "Cycle order:",
+        ["LinuxMoveUp"] = "Up",
+        ["LinuxMoveDown"] = "Down",
+        ["LinuxAboutNote"] = "Linux build: needs an X11 (Xorg) session. Wayland does not let one app capture another app's windows.",
     };
 
     private static readonly Dictionary<string, string> Pt = new()
@@ -298,5 +313,20 @@ public sealed class Loc : INotifyPropertyChanged
         // Erros
         ["ErrorUnhandled"] = "Exceção não tratada",
         ["ErrorStartup"] = "Erro na inicialização",
+
+        // Linux build
+        ["LinuxRegionHint"] = "O seletor visual ainda não existe no Linux: digite a área em porcentagem da janela.",
+        ["LinuxRegionEditor"] = "Preset (porcentagem da janela):",
+        ["LinuxRegionSaveNew"] = "Salvar como novo preset",
+        ["LinuxRegionApply"] = "Aplicar na preview selecionada",
+        ["LinuxRegionLeft"] = "Esquerda %",
+        ["LinuxRegionTop"] = "Topo %",
+        ["LinuxRegionWidth"] = "Largura %",
+        ["LinuxRegionHeight"] = "Altura %",
+        ["LinuxHotkeysFailed"] = "O servidor X recusou estes atalhos — o desktop ou outro app já usa: {0}. Escolha outra combinação.",
+        ["LinuxCycleOrder"] = "Ordem do ciclo:",
+        ["LinuxMoveUp"] = "Subir",
+        ["LinuxMoveDown"] = "Descer",
+        ["LinuxAboutNote"] = "Versão Linux: precisa de sessão X11 (Xorg). O Wayland não deixa um app capturar a janela de outro.",
     };
 }

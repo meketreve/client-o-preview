@@ -9,25 +9,26 @@ tier: 2
 
 ## Estado atual
 
-v0.9.0 publicada e validada in-game pelo usuário em 2026-08-09; nada pendente desde então (projeto parado ~2 meses).
-Hotkeys de ciclo funcionando (causa raiz era UIPI → app roda elevado). Build 0 warnings, 39 testes verdes no último registro.
-Histórico detalhado das releases e do refactor: `.wolf/STATUS.md`.
+Versão Linux (MVP) em `linux/` — Avalonia + XComposite/XRender, X11 só. Compila, 63 testes verdes, testada ao vivo
+no Cinnamon com preview do Steam (recorte por preset, opacidade, hotkeys registradas). **Falta validação in-game
+pelo usuário** (Perpetuum via Proton): foco por clique/hotkey, ciclo, posição salva.
+Windows segue v0.9.0, build 0 warnings.
 
 ## Próxima fase
 
-Não decidida — escolher com o usuário. Candidatas (custo/benefício):
-1. CI no GitHub Actions: `dotnet build` + `dotnet test` no push (novo `.github/workflows/`) → verify: `gh run list` verde
-2. Terceiro idioma (es) em `Localization/Loc.cs` + rádio em `Views/LanguagePage`
-3. Hotkey para alternar região ↔ janela inteira (`Services/HotkeyManager.cs`)
-4. Perfis globais por jogo além do preset por piloto
-Antes de tudo: `~/.dotnet/dotnet build && ~/.dotnet/dotnet test tests/ClientOPreview.Tests` → verify: 0 erros, 39 passed
+1. Usuário testa o Linux in-game → corrigir o que aparecer (foco `_NET_ACTIVE_WINDOW`, grab de teclado do jogo)
+2. Release v0.10.0 com os dois binários (`build.bat` no Windows + `./build-linux.sh`)
+3. Paridade Linux: seletor visual de região, aba Zoom, mapeamento hotkey → título, bandeja
+4. CI no GitHub Actions: build dos dois projetos + testes
 
 ## Pendências e bloqueios
 
-- Executar/validar só no Windows: publicar e copiar `.exe` versionado para `/mnt/c/Users/Meketreve/Downloads/`; usuário testa in-game
-- Caminho de foco/hotkey sem teste automatizado — checklist manual
+- Windows: executar/validar só no Windows; usuário testa in-game
+- Caminho de foco/hotkey sem teste automatizado — checklist manual nos dois OS
 
 ## Concluído (recente)
+
+- 2026-10-11: versão Linux MVP (`linux/`), testes de `KeyNames`, `build-linux.sh`, README
 
 - v0.9.0: ordem do ciclo arrastável, `requireAdministrator`, Esc/Delete/Backspace limpam tecla
 - v0.8.1: foco com `AttachThreadInput`, default `Ctrl+Tab`, aviso de falha de registro

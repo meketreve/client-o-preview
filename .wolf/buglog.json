@@ -171,6 +171,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-09T16:00:00Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-10-11T18:16:00",
+      "error_message": "versão Linux: as janelas do próprio app (config e previews) apareciam na lista de clientes",
+      "file": "linux/Platform/X11.cs",
+      "root_cause": "o filtro era por _NET_WM_PID, e o Avalonia não grava _NET_WM_PID nas janelas dele",
+      "fix": "GetClientWindows recebe os handles X do próprio app (PreviewManager.OwnHandles) e os exclui",
+      "tags": [
+        "linux",
+        "x11",
+        "avalonia",
+        "window-list"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-11T18:16:00"
     }
   ]
 }
