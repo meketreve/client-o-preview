@@ -35,6 +35,8 @@ public class RegionPreset
 
 public class RegionSettings
 {
+    // Master switch: off shows every preview whole, keeping presets and assignments for later.
+    public bool Enabled { get; set; } = true;
     public List<RegionPreset> Presets { get; set; } = new();
     // Layout key of a stream (title:occurrence:title) -> preset name
     public Dictionary<string, string> Assignments { get; set; } = new();

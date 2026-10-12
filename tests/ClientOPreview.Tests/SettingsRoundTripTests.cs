@@ -104,6 +104,23 @@ public class SettingsRoundTripTests : IDisposable
     }
 
     [Fact]
+    public void Region_focus_switch_defaults_on_for_files_without_it_and_survives_a_restart()
+    {
+        // v0.10.0 and older never wrote regions.enabled: those users must keep their crops.
+        File.WriteAllText(Path_, """{ "regions": { "presets": [ { "name": "drones", "w": 0.5, "h": 0.5 } ] } }""");
+        var service = new SettingsService(Path_);
+        Assert.True(service.GetSettings().Regions.Enabled);
+
+        service.GetSettings().Regions.Enabled = false;
+        service.SaveSettings();
+        Assert.Contains("\"enabled\": false", File.ReadAllText(Path_));
+
+        var reloaded = new SettingsService(Path_).GetSettings().Regions;
+        Assert.False(reloaded.Enabled);
+        Assert.NotNull(reloaded.FindPreset("drones"));
+    }
+
+    [Fact]
     public void The_json_keeps_the_snake_case_names_older_versions_wrote()
     {
         var service = new SettingsService(Path_);

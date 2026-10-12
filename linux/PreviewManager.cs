@@ -220,7 +220,17 @@ internal sealed class PreviewManager
         return _settings.Regions.Assignments.TryGetValue(RegionKeyOf(win), out var name) ? name : null;
     }
 
-    public void ApplyRegion(PreviewWindow win) => win.ApplyRegion(_settings.Regions.FindPreset(ResolveRegion(win)));
+    public void ApplyRegion(PreviewWindow win) =>
+        win.ApplyRegion(_settings.Regions.Enabled ? _settings.Regions.FindPreset(ResolveRegion(win)) : null);
+
+    /// <summary>Master switch for every preview; assignments stay untouched.</summary>
+    public void SetRegionsEnabled(bool enabled)
+    {
+        if (_settings.Regions.Enabled == enabled) return;
+        _settings.Regions.Enabled = enabled;
+        _service.SaveSettings();
+        foreach (var win in _previews.Values) ApplyRegion(win);
+    }
 
     public void AssignRegion(PreviewWindow win, string? preset, bool fit)
     {

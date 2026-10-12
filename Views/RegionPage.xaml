@@ -16,6 +16,10 @@
       <TextBlock Text="{loc:Tr RegionTitle}" FontWeight="SemiBold"/>
       <TextBlock Text="{loc:Tr RegionDesc}"
                  Foreground="Gray" TextWrapping="Wrap" Margin="0,4,0,0"/>
+      <CheckBox x:Name="ChkEnabled" Content="{loc:Tr RegionEnabled}" Margin="0,8,0,0"
+                Checked="ChkEnabled_Changed" Unchecked="ChkEnabled_Changed"/>
+      <TextBlock Text="{loc:Tr RegionEnabledHint}"
+                 Foreground="Gray" TextWrapping="Wrap" Margin="20,2,0,0" FontSize="11"/>
     </StackPanel>
 
     <Grid Grid.Row="1">

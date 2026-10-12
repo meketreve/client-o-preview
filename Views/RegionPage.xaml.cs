@@ -39,6 +39,7 @@ public partial class RegionPage : System.Windows.Controls.UserControl
     public event EventHandler<StreamEntry?>? NewPresetRequested;
     public event EventHandler<(StreamEntry Stream, string? Preset)>? AssignRequested;
     public event EventHandler<string>? DeletePresetRequested;
+    public event EventHandler<bool>? EnabledChanged;
 
     public RegionPage()
     {
@@ -47,6 +48,19 @@ public partial class RegionPage : System.Windows.Controls.UserControl
     }
 
     private static string NoneLabel => Loc.Get("RegionNone");
+
+    public void SetEnabled(bool enabled)
+    {
+        _loading = true;
+        ChkEnabled.IsChecked = enabled;
+        _loading = false;
+    }
+
+    private void ChkEnabled_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        EnabledChanged?.Invoke(this, ChkEnabled.IsChecked == true);
+    }
 
     public void SetStreams(IList<StreamEntry> streams)
     {

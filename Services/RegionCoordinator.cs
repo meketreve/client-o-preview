@@ -39,7 +39,7 @@ public sealed class RegionCoordinator
 
     public void Apply(StreamWindow win, bool fit = false)
     {
-        var preset = _settings.Regions.FindPreset(Resolve(win.SourceHwnd));
+        var preset = _settings.Regions.Enabled ? _settings.Regions.FindPreset(Resolve(win.SourceHwnd)) : null;
         win.ApplyRegion(preset);
         if (fit && preset != null) win.FitToRegion();
     }
@@ -58,6 +58,15 @@ public sealed class RegionCoordinator
     }
 
     public void Forget(IntPtr hwnd) => _live.Remove(hwnd);
+
+    /// <summary>Master switch for every preview; assignments stay untouched.</summary>
+    public void SetEnabled(bool enabled)
+    {
+        if (_settings.Regions.Enabled == enabled) return;
+        _settings.Regions.Enabled = enabled;
+        _service.SaveSettings();
+        foreach (var win in _streams.Windows) Apply(win);
+    }
 
     public void DeletePreset(string name)
     {

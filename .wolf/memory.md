@@ -154,3 +154,4 @@ Fechou o ciclo das hotkeys, que vinha desde a v0.8.0.
 | 22:22 | bug-010: previews fora da tela + arraste manual | linux/PreviewWindow.cs, PreviewManager.cs | build ok, clamp testado ao vivo | ~15k |
 | 10:20 | bug-011: captura em thread própria, render Software, frame pixmap do compositor | linux/Platform/*, Program.cs, PreviewWindow.cs, PreviewManager.cs | CPU 54%→8%, Xorg 746→542 MiB, testado ao vivo | ~40k |
 | 10:25 | release v0.10.0 (Windows + Linux), merge feat/linux → main | csproj x2, STATUS | publicada | ~5k |
+| 10:40 | chave global do foco de região (regions.enabled) nos dois builds | Settings.cs, Loc.cs, RegionCoordinator, RegionPage, MainWindow x2, PreviewManager, testes | 64 testes, testado ao vivo no Linux | ~12k |

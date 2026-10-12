@@ -166,6 +166,7 @@ public partial class MainWindow : Window
             RefreshRegionPage();
         });
         _regionPage.DeletePresetRequested += (_, name) => _regions.DeletePreset(name);
+        _regionPage.EnabledChanged += (_, on) => _regions.SetEnabled(on);
     }
 
     private void LoadPages()
@@ -173,6 +174,7 @@ public partial class MainWindow : Window
         _thumbnailPage.LoadFrom(_settings.Thumbnail, _settings.General);
         _hotkeysPage.LoadFrom(_settings.Hotkeys);
         _zoomPage.LoadFrom(_settings.Zoom);
+        _regionPage.SetEnabled(_settings.Regions.Enabled);
     }
 
     /// <summary>Mutate a General setting, persist it, then optionally react to it.</summary>

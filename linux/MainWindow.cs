@@ -335,9 +335,13 @@ internal sealed class MainWindow : Window
             RefreshOpenLists();
         }
 
+        var enabled = Check("RegionEnabled", _settings.Regions.Enabled);
+        enabled.IsCheckedChanged += (_, __) => _previews.SetRegionsEnabled(enabled.IsChecked == true);
+
         return Column(
             Header("RegionTitle"),
             Hint(T("RegionDesc")),
+            enabled, Hint(T("RegionEnabledHint")),
             Label(T("RegionOpenPreviews")), _regionPreviews,
             Label(T("RegionSavedPresets")), Row(_regionPresets, Btn("RegionDeletePreset", Delete)),
             Row(Btn("LinuxRegionApply", ApplyPreset), Btn("RegionClear", Clear)),
