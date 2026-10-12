@@ -74,6 +74,19 @@ internal sealed class X11 : IDisposable
         }
     }
 
+    /// <summary>
+    /// The error recorded since <see cref="ClearError"/>, without a sync. Only valid right after a
+    /// call that waits for a reply (XGetImage, XGetWindowAttributes…): by then every earlier error
+    /// on the connection has been delivered.
+    /// </summary>
+    public static XErrorEvent? TakeError(IntPtr display)
+    {
+        lock (ErrorGate)
+        {
+            return LastError.Remove(display, out var e) ? e : null;
+        }
+    }
+
     // ===== Atoms and properties =====
 
     public IntPtr Atom(string name)

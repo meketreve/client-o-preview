@@ -38,6 +38,11 @@ tier: 2
 - [2026-10-11] [avalonia] `BeginMoveDrag` não move preview sem borda no Cinnamon — arraste manual (bug-010)
 - [2026-10-11] [x11] `wmctrl -lG` dobra x/y com WM que reparenta — conferir posição com `XTranslateCoordinates`
 
+- [2026-10-12] [avalonia] GLX na NVIDIA com ~10 janelas = ~90% de CPU na thread de render; Software = ~8% — padrão Software (bug-011)
+- [2026-10-12] [x11] janela Avalonia em software é ARGB: byte de alfa 0 vindo do XGetImage deixa a preview transparente — forçar 0xFF
+- [2026-10-12] [x11] captura lê o pixmap do frame do compositor (sem VRAM extra); redirect do cliente só como fallback
+- [2026-10-12] [perpetuum] 1 cliente com janela 1928x1074 sai corrompido na captura em qualquer modo (janela real ok) — provável superfície Vulkan filha do Wine; não resolvido
+
 ## Erros a não repetir
 
 - [2026-08-08] [settings] campo-espelho de settings na `MainWindow` causou bug-002 — ler direto do model

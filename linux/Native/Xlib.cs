@@ -175,6 +175,10 @@ internal static class Xlib
     public static extern int XTranslateCoordinates(IntPtr display, IntPtr src, IntPtr dest, int srcX, int srcY,
         out int destX, out int destY, out IntPtr child);
 
+    [DllImport(X11)]
+    public static extern int XQueryTree(IntPtr display, IntPtr window, out IntPtr root, out IntPtr parent,
+        out IntPtr children, out uint nchildren);
+
     // ===== Composite =====
 
     [DllImport(Xcomposite)] public static extern int XCompositeQueryExtension(IntPtr display, out int eventBase, out int errorBase);

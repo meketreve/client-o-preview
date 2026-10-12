@@ -24,7 +24,9 @@ internal sealed class PreviewManager
     private readonly List<IntPtr> _order = new();
     private readonly Dictionary<IntPtr, string?> _liveRegion = new();
     private readonly DispatcherTimer _foreground = new() { Interval = TimeSpan.FromMilliseconds(400) };
-    private readonly DispatcherTimer _frames = new() { Interval = TimeSpan.FromMilliseconds(66) };
+    private readonly DispatcherTimer _frames = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private readonly CaptureWorker _worker = new(framesPerSecond: 10);
+    private readonly Dictionary<IntPtr, CaptureJob> _jobs = new();
 
     private bool _topmostSuspended;
     private int _cycleIndex = -1;
@@ -71,7 +73,9 @@ internal sealed class PreviewManager
     {
         if (_previews.ContainsKey(item.HWnd)) return;
 
-        var win = new PreviewWindow(item, new WindowCapture(_x, item.HWnd))
+        var job = _worker.Add(item.HWnd);
+        _jobs[item.HWnd] = job;
+        var win = new PreviewWindow(item, job)
         {
             Topmost = _settings.General.PreviewsTopmost && !_topmostSuspended,
             OccurrenceIndex = AllocateOccurrence(item.Title)
@@ -89,6 +93,9 @@ internal sealed class PreviewManager
         win.Opened += (_, __) =>
         {
             _x.SetOpacity(win.OwnHandle, t.OpacityPct / 100.0);
+            // The WM may ignore the position asked before mapping and cascade the new window
+            // somewhere else (seen with Cinnamon); ask again now that it is mapped.
+            if (win.WantedPosition is { } wanted) win.Position = wanted;
             win.EnsureOnScreen();
             win.ApplyGridSettings(_settings.General.SnapToGrid, _settings.General.GridSize);
         };
@@ -96,6 +103,7 @@ internal sealed class PreviewManager
         {
             _previews.Remove(item.HWnd);
             _order.Remove(item.HWnd);
+            if (_jobs.Remove(item.HWnd, out var finished)) _worker.Remove(finished);
             _liveRegion.Remove(item.HWnd);
             if (_exiting) return;
             RememberOpen();
@@ -125,6 +133,7 @@ internal sealed class PreviewManager
         Stop();
         _exiting = true;
         foreach (var win in _previews.Values.ToList()) win.Close();
+        _worker.Dispose();
     }
 
     /// <summary>Reopens the previews that were open when the app last closed, matched by title.</summary>
@@ -174,6 +183,7 @@ internal sealed class PreviewManager
         var key = LayoutKeyOf(win);
         if (key.Length > 0 && LayoutKey.TryParseGeometry(_service.GetLayout(key), out var l, out var t, out var w, out var h))
         {
+            win.WantedPosition = new PixelPoint(l, t);
             win.Position = new PixelPoint(l, t);
             win.Width = Math.Max(win.MinWidth, w);
             win.Height = Math.Max(win.MinHeight, h);
@@ -182,7 +192,9 @@ internal sealed class PreviewManager
         // Stagger inside the primary monitor: (0,0) of the desktop may belong to no monitor at all.
         var area = win.Screens.Primary?.WorkingArea ?? new PixelRect(0, 0, 800, 600);
         win.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.Manual;
-        win.Position = new PixelPoint(area.X + 50 + (_stagger % 10) * 30, area.Y + 50 + (_stagger % 10) * 30);
+        var start = new PixelPoint(area.X + 50 + (_stagger % 10) * 30, area.Y + 50 + (_stagger % 10) * 30);
+        win.WantedPosition = start;
+        win.Position = start;
         _stagger++;
     }
 
@@ -335,7 +347,8 @@ internal sealed class PreviewManager
         {
             foreach (var hwnd in _previews.Keys.ToList())
             {
-                if (!_x.IsAlive(hwnd)) _previews[hwnd].Close();
+                // Reported by the capture thread, so the poll costs no X round trip per preview.
+                if (_jobs.TryGetValue(hwnd, out var job) && job.Gone) _previews[hwnd].Close();
             }
 
             var active = _x.GetActiveWindow();

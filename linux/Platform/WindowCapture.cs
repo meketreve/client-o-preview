@@ -9,95 +9,156 @@ namespace ClientOPreview.Linux.Platform;
 
 /// <summary>
 /// Live picture of one client window — the Linux stand-in for a DWM thumbnail.
+/// Used only from the <see cref="CaptureWorker"/> thread, on the worker's own X connection.
 ///
-/// The client is redirected off-screen with XComposite (the compositor keeps drawing it as
-/// usual), XRender scales the region we want into a small pixmap on the X server, and only
-/// that small result is read back. So a 1080p client costs a 320x180 copy per frame, not 8 MB.
-/// Nothing touches the game itself: same as on Windows, it is a read of what the WM already draws.
+/// VRAM: a compositing WM (Cinnamon/Muffin) already keeps every window frame in an off-screen
+/// pixmap to draw the desktop. We read the client's area out of that same pixmap instead of
+/// redirecting the client a second time — redirecting would make the X server keep one more
+/// full-size copy per client (~8 MB each at 1920x1040). Only when the frame is not redirected
+/// (no compositor, or a fullscreen client the WM unredirected) do we redirect the client.
+///
+/// XRender scales the wanted area into a small pixmap on the server; only that small result is
+/// read back. Nothing touches the game: it is a read of what the WM already draws.
 /// </summary>
 internal sealed class WindowCapture : IDisposable
 {
     private readonly X11 _x;
-    private readonly IntPtr _source;
+    private readonly IntPtr _client;
     private readonly IntPtr _rgb24;
-    private bool _redirected;
 
-    // Destination pixmap/picture, rebuilt when the preview size changes.
+    // Where pixels come from: the WM frame (preferred) or the client redirected by us.
+    private IntPtr _frame;
+    private IntPtr _frameVisual;
+    private bool _redirectedByUs;
+    private int _sinceFrameCheck;
+
     private IntPtr _dstPixmap, _dstPicture;
     private int _dstW, _dstH;
 
-    public WindowCapture(X11 x, IntPtr source)
+    public WindowCapture(X11 x, IntPtr client)
     {
         _x = x;
-        _source = source;
+        _client = client;
         _rgb24 = XRenderFindStandardFormat(x.Display, PictStandardRGB24);
-
-        X11.ClearError(x.Display);
-        XCompositeRedirectWindow(x.Display, source, CompositeRedirectAutomatic);
-        var err = X11.SyncError(x.Display);
-        _redirected = err == null;
-        X11.LogError($"redirect 0x{source.ToInt64():X}", err);
+        ResolveFrame();
     }
 
-    /// <summary>Size of the client window; empty while it is unmapped (minimized, other workspace).</summary>
-    public bool TryGetSourceSize(out NativeMethods.SIZE size)
+    /// <summary>The client window no longer exists.</summary>
+    public bool Gone { get; private set; }
+
+    /// <summary>Size of the client window at the last capture (0x0 before the first one).</summary>
+    public NativeMethods.SIZE SourceSize { get; private set; }
+
+    /// <summary>Top-level ancestor of the client: the frame the WM reparented it into.</summary>
+    private void ResolveFrame()
     {
-        size = default;
-        X11.ClearError(_x.Display);
-        XGetWindowAttributes(_x.Display, _source, out var attr);
-        if (X11.SyncError(_x.Display) != null || attr.map_state != IsViewable) return false;
-        size = new NativeMethods.SIZE { cx = attr.width, cy = attr.height };
-        return size.cx > 0 && size.cy > 0;
+        _sinceFrameCheck = 0;
+        var d = _x.Display;
+        var window = _client;
+        X11.ClearError(d);
+        while (true)
+        {
+            if (XQueryTree(d, window, out var root, out var parent, out var children, out _) == 0)
+            {
+                Gone = true;
+                return;
+            }
+            if (children != IntPtr.Zero) XFree(children);
+            if (parent == IntPtr.Zero || parent == root) break;
+            window = parent;
+        }
+
+        if (window != _frame)
+        {
+            _frame = window;
+            XGetWindowAttributes(d, _frame, out var fa);
+            _frameVisual = fa.visual;
+        }
     }
 
     /// <summary>
-    /// Renders <paramref name="crop"/> of the client, scaled to width x height, as BGRX pixels
-    /// into <paramref name="target"/> (stride = width * 4). False when there is no frame to show
-    /// (client unmapped or gone) — the caller keeps the previous frame.
+    /// Renders the client — cropped by <paramref name="region"/>, zoomed when asked — scaled into
+    /// an area of areaW x areaH (letterboxed when the region keeps its proportions). Writes BGRX
+    /// rows into <paramref name="buffer"/>; returns the size written, or null when there is no
+    /// new frame (client unmapped, gone, or the server refused).
     /// </summary>
-    public bool Capture(NativeMethods.RECT crop, int width, int height, IntPtr target)
+    public (int W, int H)? Capture(int areaW, int areaH, RegionPreset? region, bool zoomed, Zoom zoom, ref byte[] buffer)
     {
-        if (!_redirected || width <= 0 || height <= 0) return false;
+        if (Gone || areaW < 2 || areaH < 2) return null;
         var d = _x.Display;
 
         X11.ClearError(d);
-        XGetWindowAttributes(d, _source, out var attr);
-        if (X11.SyncError(d) != null || attr.map_state != IsViewable) return false;
+        XGetWindowAttributes(d, _client, out var attr);
+        if (X11.TakeError(d) != null)
+        {
+            Gone = true;
+            return null;
+        }
+        if (attr.map_state != IsViewable || attr.width <= 0 || attr.height <= 0) return null;
 
-        EnsureDestination(width, height);
+        if (++_sinceFrameCheck > 50) ResolveFrame(); // reparenting is rare; re-check now and then
 
-        // The window pixmap is reallocated by the server whenever the client resizes, so it is
-        // named again every frame; that is cheap compared to the copy.
+        var src = new NativeMethods.SIZE { cx = attr.width, cy = attr.height };
+        SourceSize = src;
+        var crop = ThumbnailGeometry.CropSource(src, region, zoomed, zoom);
+        var dest = new NativeMethods.RECT { Left = 0, Top = 0, Right = areaW, Bottom = areaH };
+        if (ThumbnailGeometry.NeedsCrop(region) && region!.LockAspect)
+            dest = ThumbnailGeometry.Letterbox(dest, crop.Right - crop.Left, crop.Bottom - crop.Top);
+        int w = dest.Right - dest.Left, h = dest.Bottom - dest.Top;
+
+        // Client's top-left inside the pixmap we read from.
+        int ox = 0, oy = 0;
+        IntPtr drawable = _client, visual = attr.visual;
+        if (!_redirectedByUs && _frame != IntPtr.Zero && _frame != _client)
+        {
+            XTranslateCoordinates(d, _client, _frame, 0, 0, out ox, out oy, out _);
+            drawable = _frame;
+            visual = _frameVisual;
+        }
+
+        EnsureDestination(w, h);
+
         IntPtr pixmap = IntPtr.Zero, picture = IntPtr.Zero, image = IntPtr.Zero;
         try
         {
-            pixmap = XCompositeNameWindowPixmap(d, _source);
-            var format = XRenderFindVisualFormat(d, attr.visual);
-            if (pixmap == IntPtr.Zero || format == IntPtr.Zero) return false;
+            X11.ClearError(d);
+            pixmap = XCompositeNameWindowPixmap(d, drawable);
+            var format = XRenderFindVisualFormat(d, visual);
+            if (pixmap == IntPtr.Zero || format == IntPtr.Zero) return null;
 
             picture = XRenderCreatePicture(d, pixmap, format, 0, IntPtr.Zero);
-
             double cw = Math.Max(1, crop.Right - crop.Left);
             double ch = Math.Max(1, crop.Bottom - crop.Top);
-            var transform = XTransform.ScaleTranslate(cw / width, ch / height, crop.Left, crop.Top);
+            var transform = XTransform.ScaleTranslate(cw / w, ch / h, ox + crop.Left, oy + crop.Top);
             XRenderSetPictureTransform(d, picture, ref transform);
-            XRenderSetPictureFilter(d, picture, "good", IntPtr.Zero, 0);
+            XRenderSetPictureFilter(d, picture, "bilinear", IntPtr.Zero, 0);
+            XRenderComposite(d, PictOpSrc, picture, IntPtr.Zero, _dstPicture, 0, 0, 0, 0, 0, 0, (uint)w, (uint)h);
 
-            XRenderComposite(d, PictOpSrc, picture, IntPtr.Zero, _dstPicture, 0, 0, 0, 0, 0, 0, (uint)width, (uint)height);
-
-            image = XGetImage(d, _dstPixmap, 0, 0, (uint)width, (uint)height, unchecked((nuint)AllPlanes), ZPixmap);
-            var err = X11.SyncError(d);
-            if (err != null || image == IntPtr.Zero) return false;
+            // A round trip: every error caused by the requests above has arrived when it returns.
+            image = XGetImage(d, _dstPixmap, 0, 0, (uint)w, (uint)h, unchecked((nuint)AllPlanes), ZPixmap);
+            if (X11.TakeError(d) is { } err || image == IntPtr.Zero)
+            {
+                // BadMatch on the frame: it is not redirected (no compositor, or a fullscreen client
+                // the WM unredirected). Fall back to redirecting the client ourselves.
+                if (!_redirectedByUs && drawable == _frame) RedirectClient();
+                return null;
+            }
 
             var img = Marshal.PtrToStructure<XImage>(image);
-            if (img.bits_per_pixel != 32) return false;
-            CopyRows(img.data, img.bytes_per_line, target, width * 4, height);
-            return true;
+            if (img.bits_per_pixel != 32) return null;
+            int stride = w * 4;
+            if (buffer.Length < stride * h) buffer = new byte[stride * h];
+            for (int y = 0; y < h; y++)
+                Marshal.Copy(img.data + y * img.bytes_per_line, buffer, y * stride, stride);
+            // The 4th byte of a depth-24 image is padding (usually 0). The preview window is ARGB,
+            // so a 0 there would make the compositor show the desktop through the thumbnail.
+            for (int i = 3; i < stride * h; i += 4) buffer[i] = 0xFF;
+            return (w, h);
         }
         catch (Exception ex)
         {
-            AppLog.Warn($"capture 0x{_source.ToInt64():X}", ex);
-            return false;
+            AppLog.Warn($"capture 0x{_client.ToInt64():X}", ex);
+            return null;
         }
         finally
         {
@@ -107,13 +168,13 @@ internal sealed class WindowCapture : IDisposable
         }
     }
 
-    private static unsafe void CopyRows(IntPtr src, int srcStride, IntPtr dst, int dstStride, int rows)
+    private void RedirectClient()
     {
-        int bytes = Math.Min(srcStride, dstStride);
-        for (int y = 0; y < rows; y++)
-        {
-            Buffer.MemoryCopy((byte*)src + (long)y * srcStride, (byte*)dst + (long)y * dstStride, dstStride, bytes);
-        }
+        X11.ClearError(_x.Display);
+        XCompositeRedirectWindow(_x.Display, _client, CompositeRedirectAutomatic);
+        var err = X11.SyncError(_x.Display);
+        _redirectedByUs = err == null;
+        AppLog.Info("Capture", $"0x{_client.ToInt64():X}: WM frame not readable, redirecting the client ({(_redirectedByUs ? "ok" : X11.Describe(err!.Value))})");
     }
 
     private void EnsureDestination(int width, int height)
@@ -136,12 +197,13 @@ internal sealed class WindowCapture : IDisposable
     public void Dispose()
     {
         FreeDestination();
-        if (_redirected)
+        if (_redirectedByUs)
         {
             X11.ClearError(_x.Display);
-            XCompositeUnredirectWindow(_x.Display, _source, CompositeRedirectAutomatic);
+            XCompositeUnredirectWindow(_x.Display, _client, CompositeRedirectAutomatic);
             X11.SyncError(_x.Display); // the client may already be gone; nothing to do about it
-            _redirected = false;
+            _redirectedByUs = false;
         }
+        XFlush(_x.Display);
     }
 }

@@ -208,6 +208,27 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-10-11T22:20:00"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-10-12T10:20:00",
+      "error_message": "usuário (Linux): \"a interface do app fica travando\" + VRAM alta",
+      "file": "linux/Program.cs, linux/Platform/CaptureWorker.cs, linux/Platform/WindowCapture.cs",
+      "root_cause": "1) captura de todas as previews na thread da UI, com round trips ao X por preview a cada 66 ms; 2) Avalonia em GLX no driver NVIDIA: com ~10 janelas a thread de render gastava ~90% de um core (spin no swap) e cada janela tinha contexto GL; 3) XCompositeRedirectWindow em cada cliente = uma cópia extra em VRAM por cliente",
+      "fix": "CaptureWorker em thread própria com conexão X própria (UI só copia o quadro pronto); renderização Software por padrão (COP_RENDER=glx|egl para voltar); captura lê o pixmap do frame que o compositor já mantém, redirect do cliente só como fallback; alfa forçado a 0xFF (janela ARGB no modo software mostrava o fundo); posição reaplicada depois do map (Cinnamon cascateava as janelas em software)",
+      "tags": [
+        "linux",
+        "x11",
+        "performance",
+        "vram",
+        "avalonia",
+        "nvidia"
+      ],
+      "related_bugs": [
+        "bug-010"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T10:20:00"
     }
   ]
 }

@@ -152,3 +152,4 @@ Fechou o ciclo das hotkeys, que vinha desde a v0.8.0.
 |------|--------|---------|---------|--------|
 | 18:25 | versão Linux (Avalonia + X11) em linux/, núcleo por source link | linux/*, Loc.cs, ClientOPreview.csproj, README.md, build-linux.sh, tests | build ok, 63 testes, testado ao vivo (preview Steam, recorte, opacidade) | ~60k |
 | 22:22 | bug-010: previews fora da tela + arraste manual | linux/PreviewWindow.cs, PreviewManager.cs | build ok, clamp testado ao vivo | ~15k |
+| 10:20 | bug-011: captura em thread própria, render Software, frame pixmap do compositor | linux/Platform/*, Program.cs, PreviewWindow.cs, PreviewManager.cs | CPU 54%→8%, Xorg 746→542 MiB, testado ao vivo | ~40k |

@@ -37,9 +37,20 @@ internal static class Program
         }
     }
 
+    // Software by default: measured with 9 previews on an NVIDIA card, GLX cost ~90% of a core
+    // (the driver spins on every window's buffer swap) and a GL context per window costs VRAM.
+    // Skia in software paints these small windows for ~8%. COP_RENDER=glx|egl overrides.
+    private static X11RenderingMode[] RenderingModes() => Environment.GetEnvironmentVariable("COP_RENDER") switch
+    {
+        "glx" => new[] { X11RenderingMode.Glx },
+        "egl" => new[] { X11RenderingMode.Egl },
+        "software" => new[] { X11RenderingMode.Software },
+        _ => new[] { X11RenderingMode.Software }
+    };
+
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .With(new X11PlatformOptions { EnableIme = false })
+            .With(new X11PlatformOptions { EnableIme = false, RenderingMode = RenderingModes() })
             .LogToTrace();
 }

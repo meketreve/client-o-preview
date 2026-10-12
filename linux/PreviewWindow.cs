@@ -27,7 +27,7 @@ internal sealed class PreviewWindow : Window
     private const int TitleBarHeight = 22;
 
     private readonly WindowItem _item;
-    private readonly WindowCapture _capture;
+    private readonly CaptureJob _capture;
     private readonly Border _titleBar;
     private readonly TextBlock _title;
     private readonly TextBlock _regionBadge;
@@ -47,7 +47,7 @@ internal sealed class PreviewWindow : Window
     private bool _snapToGrid;
     private int _gridSize = 20;
 
-    public PreviewWindow(WindowItem item, WindowCapture capture)
+    public PreviewWindow(WindowItem item, CaptureJob capture)
     {
         _item = item;
         _capture = capture;
@@ -139,7 +139,6 @@ internal sealed class PreviewWindow : Window
         Closed += (_, __) =>
         {
             _settle.Stop();
-            _capture.Dispose();
         };
     }
 
@@ -151,6 +150,9 @@ internal sealed class PreviewWindow : Window
     public IntPtr SourceHwnd => _item.HWnd;
     public string WindowTitle => _item.Title;
     public int OccurrenceIndex { get; set; }
+
+    /// <summary>Where the preview should open; re-applied once it is mapped.</summary>
+    public PixelPoint? WantedPosition { get; set; }
 
     /// <summary>The preview's own X window, for opacity and "is this one of ours".</summary>
     public IntPtr OwnHandle => TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
@@ -301,7 +303,8 @@ internal sealed class PreviewWindow : Window
     /// <summary>Reshapes the preview so the crop fills it without black bars.</summary>
     public void FitToRegion()
     {
-        if (!ThumbnailGeometry.NeedsCrop(_region) || !_capture.TryGetSourceSize(out var src)) return;
+        var src = _capture.SourceSize;
+        if (!ThumbnailGeometry.NeedsCrop(_region) || src.cx <= 0 || src.cy <= 0) return;
         double cw = Math.Max(1.0, src.cx * _region!.W);
         double ch = Math.Max(1.0, src.cy * _region.H);
         Height = Math.Max(MinHeight, Width * (ch / cw) + TitleBarHeight);
@@ -309,34 +312,38 @@ internal sealed class PreviewWindow : Window
 
     // ===== Frames =====
 
-    /// <summary>Called by the capture timer. Keeps the last frame when there is nothing new.</summary>
+    /// <summary>
+    /// Called by the UI frame timer: tells the capture thread what this preview needs now and
+    /// shows the newest frame it finished. No X round trip happens here.
+    /// </summary>
     public void RenderFrame()
     {
         var scale = RenderScaling;
         int areaW = (int)Math.Round(_imageHost.Bounds.Width * scale);
         int areaH = (int)Math.Round(_imageHost.Bounds.Height * scale);
-        if (areaW < 2 || areaH < 2 || !_capture.TryGetSourceSize(out var src)) return;
+        if (areaW < 2 || areaH < 2) return;
 
         bool zoomed = _zoom.InternalZoom && IsPointerOver;
-        var crop = ThumbnailGeometry.CropSource(src, _region, zoomed, _zoom);
-        var dest = new ClientOPreview.Native.NativeMethods.RECT { Left = 0, Top = 0, Right = areaW, Bottom = areaH };
-        if (ThumbnailGeometry.NeedsCrop(_region) && _region!.LockAspect)
-            dest = ThumbnailGeometry.Letterbox(dest, crop.Right - crop.Left, crop.Bottom - crop.Top);
+        _capture.Request = new CaptureRequest(areaW, areaH, _region?.Clone(), zoomed, _zoom);
 
-        int w = dest.Right - dest.Left, h = dest.Bottom - dest.Top;
-        if (_bitmap == null || _bitmap.PixelSize.Width != w || _bitmap.PixelSize.Height != h)
+        _capture.TryTake((pixels, w, h) =>
         {
-            _bitmap?.Dispose();
-            _bitmap = new WriteableBitmap(new PixelSize(w, h), new Vector(96 * scale, 96 * scale),
-                AvPixelFormat.Bgra8888, AlphaFormat.Opaque);
-            _image.Source = _bitmap;
-        }
-
-        bool ok;
-        using (var fb = _bitmap.Lock())
-        {
-            ok = fb.RowBytes == w * 4 && _capture.Capture(crop, w, h, fb.Address);
-        }
-        if (ok) _image.InvalidateVisual();
+            if (_bitmap == null || _bitmap.PixelSize.Width != w || _bitmap.PixelSize.Height != h)
+            {
+                _bitmap?.Dispose();
+                _bitmap = new WriteableBitmap(new PixelSize(w, h), new Vector(96 * scale, 96 * scale),
+                    AvPixelFormat.Bgra8888, AlphaFormat.Opaque);
+                _image.Source = _bitmap;
+            }
+            using (var fb = _bitmap.Lock())
+            {
+                if (fb.RowBytes == w * 4)
+                    System.Runtime.InteropServices.Marshal.Copy(pixels, 0, fb.Address, w * h * 4);
+                else
+                    for (int y = 0; y < h; y++)
+                        System.Runtime.InteropServices.Marshal.Copy(pixels, y * w * 4, fb.Address + y * fb.RowBytes, w * 4);
+            }
+            _image.InvalidateVisual();
+        });
     }
 }
