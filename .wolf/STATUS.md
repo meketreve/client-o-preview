@@ -86,7 +86,11 @@ para o usuário, exceto as 4 correções de bug abaixo.
 
 ---
 
-## 🚀 Próxima fase — validar a versão Linux in-game
+## 🚀 Próxima fase — pós v0.10.0
+
+v0.10.0 publicada em 2026-10-12 com os dois binários. Pendente: captura corrompida de cliente 1928x1074 (Wine/Vulkan), paridade Linux, CI.
+
+## (anterior) validar a versão Linux in-game
 
 1. Usuário roda `./build-linux.sh` (ou `cd linux && dotnet run`) e testa com o Perpetuum: preview, clique foca, Ctrl+Tab cicla, posição volta no restart.
 2. Corrigir o que aparecer; depois release v0.10.0 com os dois binários.

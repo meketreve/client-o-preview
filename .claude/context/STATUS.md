@@ -9,17 +9,15 @@ tier: 2
 
 ## Estado atual
 
-Versão Linux (MVP) em `linux/` — Avalonia + XComposite/XRender, X11 só. Compila, 63 testes verdes, testada ao vivo
-no Cinnamon com preview do Steam (recorte por preset, opacidade, hotkeys registradas). **Falta validação in-game
-pelo usuário** (Perpetuum via Proton): foco por clique/hotkey, ciclo, posição salva.
-Windows segue v0.9.0, build 0 warnings.
+v0.10.0 publicada (2026-10-12): Windows (sem mudança de comportamento) + primeira versão Linux (Avalonia + X11).
+Linux testado in-game pelo usuário com Perpetuum/Proton: previews, arraste, hotkeys ok; interface sem travar
+(captura em thread própria, render Software). Windows desta release não foi testado no Windows (só Loc.cs mudou).
 
 ## Próxima fase
 
-1. Usuário testa o Linux in-game → corrigir o que aparecer (foco `_NET_ACTIVE_WINDOW`, grab de teclado do jogo)
-2. Release v0.10.0 com os dois binários (`build.bat` no Windows + `./build-linux.sh`)
-3. Paridade Linux: seletor visual de região, aba Zoom, mapeamento hotkey → título, bandeja
-4. CI no GitHub Actions: build dos dois projetos + testes
+1. Cliente com janela 1928x1074 sai corrompido na captura (provável superfície Vulkan filha do Wine)
+2. Paridade Linux: seletor visual de região, aba Zoom, mapeamento hotkey → título, bandeja
+3. CI no GitHub Actions: build dos dois projetos + testes
 
 ## Pendências e bloqueios
 
@@ -27,6 +25,8 @@ Windows segue v0.9.0, build 0 warnings.
 - Caminho de foco/hotkey sem teste automatizado — checklist manual nos dois OS
 
 ## Concluído (recente)
+
+- v0.10.0: versão Linux; fixes de arraste/multi-monitor (bug-010) e desempenho/VRAM (bug-011)
 
 - 2026-10-11: versão Linux MVP (`linux/`), testes de `KeyNames`, `build-linux.sh`, README
 

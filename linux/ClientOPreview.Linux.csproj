@@ -9,7 +9,7 @@
     <RootNamespace>ClientOPreview.Linux</RootNamespace>
     <AssemblyName>client-o-preview</AssemblyName>
     <!-- Keep in step with <Version> in ../ClientOPreview.csproj: one release, two builds. -->
-    <Version>0.9.0</Version>
+    <Version>0.10.0</Version>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
 
