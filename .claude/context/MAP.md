@@ -9,10 +9,12 @@ tier: 2
 
 ## Comandos
 
-App só roda no Windows (WPF); no WSL compila e testa (`EnableWindowsTargeting`, testes em `net8.0`).
+Dois builds: Windows (WPF, raiz) e Linux (Avalonia + X11, `linux/`). Máquina de dev é Linux (X11): compila os dois, roda o Linux.
 
 - `~/.dotnet/dotnet build` — compila no WSL (Windows: `dotnet build`)
-- `~/.dotnet/dotnet test tests/ClientOPreview.Tests` — xUnit, 39 testes, roda no WSL
+- `~/.dotnet/dotnet test tests/ClientOPreview.Tests` — xUnit, 63 testes, roda no Linux
+- Linux: `cd linux && ~/.dotnet/dotnet run`; publicar: `./build-linux.sh` → `linux/bin/Release/net8.0/linux-x64/publish/client-o-preview`
+- Teste ao vivo sem sujar config: `XDG_CONFIG_HOME=<scratch> ~/.dotnet/dotnet linux/bin/Debug/net8.0/client-o-preview.dll` + `scrot`
 - `dotnet run` — executar, só no Windows (pede UAC: `requireAdministrator`)
 - `build.bat` / `dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained false` — `.exe` em `bin/Release/net8.0-windows/win-x64/publish/`
 - Release: `<Version>` no `ClientOPreview.csproj` → tag `vX.Y.Z` → `gh release create vX.Y.Z <exe>`
@@ -65,6 +67,7 @@ WARP.md
 - `Services/SettingsService.cs` — `%APPDATA%/client-o-preview/settings.json` (atômico + `.bak`); `AppLog.cs` → `error.log` lá
 - `Native/NativeMethods.cs` — todo P/Invoke (`user32`, `dwmapi`)
 - `Localization/Loc.cs` — string table en + pt-BR (sem WPF); `TrExtension.cs` = `{loc:Tr Chave}`
+- `linux/` — build Linux: `MainWindow.cs` (abas em código), `PreviewManager.cs` (= StreamManager+LayoutStore+RegionCoordinator), `PreviewWindow.cs`, `Platform/` (X11 EWMH, captura XRender, XGrabKey, KeyNames), `Native/Xlib.cs`
 - `tests/ClientOPreview.Tests/` — *source link* dos arquivos sem WPF (lista no `.csproj` de teste)
 - `.wolf/` — memória do OpenWolf (STATUS, cerebrum, anatomy, buglog); detalhe histórico mora lá
 - Lixo local não versionado na raiz: `csharp/` (vazia), `bin/`, `obj/`, `__pycache__/`, `error.log`
@@ -74,4 +77,4 @@ WARP.md
 - Boot: `App.xaml.cs` → `MainWindow` ctor: lê settings → resolve idioma (antes do `InitializeComponent`) → cria páginas e os 4 colaboradores → wiring → timer de foreground 400 ms
 - Preview: `ClientsPage` → `StreamManager` abre `StreamWindow` → `DwmRegisterThumbnail` → `UpdateThumbnailRect()` aplica `ThumbnailGeometry`
 - Config: página emite `event` → `MainWindow` aplica nas streams → `SettingsService.Save`
-- Mudar X → mexer em: nova config = `Models/Settings.cs` + página + 1 linha em `WirePages()`; texto novo = as DUAS tabelas do `Loc.cs` (`LocTests` reprova paridade)
+- Mudar X → mexer em: nova config = `Models/Settings.cs` + página + 1 linha em `WirePages()`; texto novo = as DUAS tabelas do `Loc.cs` (`LocTests` reprova paridade); feature nos dois OS = página WPF + aba em `linux/MainWindow.cs`

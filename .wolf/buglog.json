@@ -171,6 +171,64 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-09T16:00:00Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-10-11T18:16:00",
+      "error_message": "versão Linux: as janelas do próprio app (config e previews) apareciam na lista de clientes",
+      "file": "linux/Platform/X11.cs",
+      "root_cause": "o filtro era por _NET_WM_PID, e o Avalonia não grava _NET_WM_PID nas janelas dele",
+      "fix": "GetClientWindows recebe os handles X do próprio app (PreviewManager.OwnHandles) e os exclui",
+      "tags": [
+        "linux",
+        "x11",
+        "avalonia",
+        "window-list"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-11T18:16:00"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-10-11T22:20:00",
+      "error_message": "usuário (Linux): \"as miniaturas estão indo pra fora da tela e não to conseguindo arrastar elas\"",
+      "file": "linux/PreviewWindow.cs",
+      "root_cause": "1) previews escalonadas a partir de (50,50) do desktop; com 3 monitores de tamanhos diferentes esse canto (x<1440, y<180) não pertence a monitor nenhum. 2) arraste via BeginMoveDrag (_NET_WM_MOVERESIZE) não funcionou no Cinnamon para as previews sem borda/nunca ativadas",
+      "fix": "arraste e resize feitos à mão (captura do ponteiro + Position/Width/Height); EnsureOnScreen puxa a preview para o monitor mais próximo ao abrir e ao soltar; escalonamento parte da WorkingArea do monitor primário",
+      "tags": [
+        "linux",
+        "x11",
+        "multi-monitor",
+        "drag",
+        "avalonia"
+      ],
+      "related_bugs": [
+        "bug-009"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-11T22:20:00"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-10-12T10:20:00",
+      "error_message": "usuário (Linux): \"a interface do app fica travando\" + VRAM alta",
+      "file": "linux/Program.cs, linux/Platform/CaptureWorker.cs, linux/Platform/WindowCapture.cs",
+      "root_cause": "1) captura de todas as previews na thread da UI, com round trips ao X por preview a cada 66 ms; 2) Avalonia em GLX no driver NVIDIA: com ~10 janelas a thread de render gastava ~90% de um core (spin no swap) e cada janela tinha contexto GL; 3) XCompositeRedirectWindow em cada cliente = uma cópia extra em VRAM por cliente",
+      "fix": "CaptureWorker em thread própria com conexão X própria (UI só copia o quadro pronto); renderização Software por padrão (COP_RENDER=glx|egl para voltar); captura lê o pixmap do frame que o compositor já mantém, redirect do cliente só como fallback; alfa forçado a 0xFF (janela ARGB no modo software mostrava o fundo); posição reaplicada depois do map (Cinnamon cascateava as janelas em software)",
+      "tags": [
+        "linux",
+        "x11",
+        "performance",
+        "vram",
+        "avalonia",
+        "nvidia"
+      ],
+      "related_bugs": [
+        "bug-010"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T10:20:00"
     }
   ]
 }

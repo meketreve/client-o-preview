@@ -145,3 +145,12 @@ Fechou o ciclo das hotkeys, que vinha desde a v0.8.0.
 - **Features da v0.9.0**: ordem do ciclo arrastável e persistida (`_order` explícito no `StreamManager`, salva em `hotkeys.cycle_order` por chave de layout); Esc/Delete/Backspace limpam o campo de tecla.
 - Releases **v0.8.1** e **v0.9.0** publicadas com o `.exe`. v0.9.0 **validada in-game** pelo usuário.
 - Método que funcionou: publicar rc para `/mnt/c/Users/Meketreve/Downloads/`, usuário testa no Windows, log em `%APPDATA%` separa as hipóteses. Foram 4 rcs até a causa raiz aparecer.
+
+## Session: 2026-10-11 17:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:25 | versão Linux (Avalonia + X11) em linux/, núcleo por source link | linux/*, Loc.cs, ClientOPreview.csproj, README.md, build-linux.sh, tests | build ok, 63 testes, testado ao vivo (preview Steam, recorte, opacidade) | ~60k |
+| 22:22 | bug-010: previews fora da tela + arraste manual | linux/PreviewWindow.cs, PreviewManager.cs | build ok, clamp testado ao vivo | ~15k |
+| 10:20 | bug-011: captura em thread própria, render Software, frame pixmap do compositor | linux/Platform/*, Program.cs, PreviewWindow.cs, PreviewManager.cs | CPU 54%→8%, Xorg 746→542 MiB, testado ao vivo | ~40k |
+| 10:25 | release v0.10.0 (Windows + Linux), merge feat/linux → main | csproj x2, STATUS | publicada | ~5k |

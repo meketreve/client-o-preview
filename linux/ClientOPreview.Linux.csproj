@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>ClientOPreview.Linux</RootNamespace>
+    <AssemblyName>client-o-preview</AssemblyName>
+    <!-- Keep in step with <Version> in ../ClientOPreview.csproj: one release, two builds. -->
+    <Version>0.10.0</Version>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The OS-free core of the Windows app, source-linked (same trick as tests/): one copy of
+         the settings format, layout keys, crop math and string table for both builds. -->
+    <Compile Include="../Models/Settings.cs" Link="Shared/Settings.cs" />
+    <Compile Include="../Models/WindowItem.cs" Link="Shared/WindowItem.cs" />
+    <Compile Include="../Native/NativeMethods.cs" Link="Shared/NativeMethods.cs" />
+    <Compile Include="../Localization/Loc.cs" Link="Shared/Loc.cs" />
+    <Compile Include="../Services/AppLog.cs" Link="Shared/AppLog.cs" />
+    <Compile Include="../Services/LayoutKey.cs" Link="Shared/LayoutKey.cs" />
+    <Compile Include="../Services/SettingsService.cs" Link="Shared/SettingsService.cs" />
+    <Compile Include="../Services/ThumbnailGeometry.cs" Link="Shared/ThumbnailGeometry.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,29 @@
 # client-o-preview
 
-Aplicativo Windows para pré-visualizar janelas em miniaturas ao vivo. Feito com IA:
-- C# (WPF + DWM Thumbnails) neste diretório
+Aplicativo para pré-visualizar janelas em miniaturas ao vivo, no Windows e no Linux. Feito com IA:
+- Windows: C# (WPF + DWM Thumbnails) na raiz
+- Linux: C# (Avalonia + XComposite/XRender) em `linux/` — mesmo `settings.json`, mesmas regras de layout/recorte/hotkey
+
+## 🐧 Linux
+
+Precisa de **sessão X11 (Xorg)** — Cinnamon, KDE, XFCE, GNOME "on Xorg". No **Wayland não funciona**: o protocolo não deixa um app capturar a janela de outro. Jogos via Wine/Proton aparecem normalmente (são janelas X11).
+
+- Build (gera um executável único, não precisa de .NET instalado para rodar):
+  ```bash
+  ./build-linux.sh
+  ```
+  Saída: `linux/bin/Release/net8.0/linux-x64/publish/client-o-preview`
+- Rodar em dev: `cd linux && dotnet run`
+- Config e log: `~/.config/client-o-preview/` (`settings.json`, `error.log`)
+
+O que já tem: lista de janelas, miniaturas ao vivo, clique foca o cliente, arrastar (barra de título ou botão direito) e redimensionar (canto), posição salva por cliente, recorte por preset (digitado em %), zoom interno por hover (config do `settings.json`), hotkey de ciclo + 10 diretas, ordem do ciclo, en/pt-BR.
+
+Ainda não tem no Linux: seletor visual de região, aba de Zoom, mapeamento hotkey → título pela interface, bandeja do sistema.
+
+Diferenças do Windows:
+- Não precisa de administrador: o foco é pedido ao gerenciador de janelas (`_NET_ACTIVE_WINDOW`).
+- Atalho que o desktop já usa (ex.: atalhos do Cinnamon) é recusado pelo servidor X — o app avisa em laranja na aba Atalhos.
+- Jogo em tela cheia que "agarra" o teclado inteiro (`XGrabKeyboard`) engole os atalhos enquanto está em foco; em janela/sem borda funciona.
 
 ##  Build C# (WPF)
 

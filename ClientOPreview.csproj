@@ -8,14 +8,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Single source of truth for the version: the About page reads it from the assembly. -->
-    <Version>0.9.0</Version>
+    <Version>0.10.0</Version>
     <!-- requireAdministrator: focusing an elevated game client needs equal integrity (bug-008). -->
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- tests/ is its own project; keep it out of the app's default globbing. -->
+    <!-- tests/ and linux/ are their own projects; keep them out of the app's default globbing. -->
     <Compile Remove="tests/**" />
     <None Remove="tests/**" />
+    <!-- linux/ is the Avalonia/X11 build, its own project. -->
+    <Compile Remove="linux/**" />
+    <None Remove="linux/**" />
   </ItemGroup>
 </Project>

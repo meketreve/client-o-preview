@@ -10,6 +10,7 @@
 - `app.manifest` (~288 tok)
 - `App.xaml` — resources vazios; o startup é o handler OnStartup (~72 tok)
 - `App.xaml.cs` — handler global de exceção: loga via AppLog e mostra o caminho do error.log no MessageBox (~257 tok)
+- `build-linux.sh` — publish Release linux-x64 self-contained single-file (~120 tok)
 - `build.bat` — clean + publish Release win-x64 single-file framework-dependent. Só roda no Windows (~195 tok)
 - `CLAUDE.md` — aponta para .wolf/OPENWOLF.md (~57 tok)
 - `ClientOPreview.csproj` (~224 tok)
@@ -86,6 +87,21 @@
 
 - `ClientOPreview.Tests.csproj` — xUnit em net8.0; faz source link dos arquivos sem WPF ⇒ `dotnet test` roda no WSL também (~397 tok)
 - `LayoutKeyTests.cs` — chave por occurrence, chave legada, round-trip de `WxH+L+T`, rejeição de lixo (~478 tok)
+- `KeyNamesTests.cs` — KeyNames do Linux: nomes → keysym, modificadores (~600 tok)
 - `LocTests.cs` — paridade de chaves en↔pt-BR, sem tradução vazia, sem ponto na chave, placeholders iguais, Normalize (~789 tok)
 - `SettingsRoundTripTests.cs` — todo campo da UI sobrevive ao restart (guarda do bug-002), nomes snake_case, settings.json da v0.7.0, arquivo corrompido → .bak (~2160 tok)
 - `ThumbnailGeometryTests.cs` — recorte normalizado→pixels, zoom dentro da região, clamp na borda, letterbox centralizado (~947 tok)
+
+## linux/
+
+- `ClientOPreview.Linux.csproj` — Avalonia 11.2.3, net8.0; source-link do núcleo (Settings, Loc, LayoutKey, SettingsService, ThumbnailGeometry, NativeMethods p/ RECT/SIZE) (~400 tok)
+- `Program.cs` — XInitThreads, exige DISPLAY (X11), Avalonia desktop (~350 tok)
+- `App.cs` — app sem XAML, FluentTheme dark; instala o X error handler depois do Avalonia; lê settings e idioma (~350 tok)
+- `MainWindow.cs` — janela de config em código: abas Clientes/Miniatura/Região (preset em %)/Atalhos (KeyBox + ordem do ciclo)/Idioma/Sobre; rebuild no LanguageChanged (~5200 tok)
+- `PreviewManager.cs` — port do StreamManager + LayoutStore + RegionCoordinator: abre/fecha, occurrence, layout, região por hwnd, ciclo, foco, poll de foreground 400 ms, timer de frames 66 ms (~3300 tok)
+- `PreviewWindow.cs` — 1 preview Avalonia sem borda: barra de título, grip de resize, botão direito arrasta, WriteableBitmap preenchido pelo WindowCapture (~2300 tok)
+- `Native/Xlib.cs` — todo P/Invoke X11/Xcomposite/Xrender, structs 64-bit (~1900 tok)
+- `Platform/X11.cs` — EWMH: _NET_CLIENT_LIST, títulos, _NET_ACTIVE_WINDOW (ler/pedir), opacidade; error handler que não mata o processo (~2200 tok)
+- `Platform/WindowCapture.cs` — XCompositeRedirectWindow + XRender escala no servidor + XGetImage do resultado pequeno (~1500 tok)
+- `Platform/X11Hotkeys.cs` — XGrabKey no root (4 variantes NumLock/CapsLock), thread própria, auto-repeat detectável = NOREPEAT (~1700 tok)
+- `Platform/KeyNames.cs` — nome de tecla do settings (enum WPF/Avalonia) → keysym; modificadores. Puro, testado (~900 tok)
