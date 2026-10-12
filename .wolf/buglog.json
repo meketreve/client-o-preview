@@ -188,6 +188,26 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-11T18:16:00"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-10-11T22:20:00",
+      "error_message": "usuário (Linux): \"as miniaturas estão indo pra fora da tela e não to conseguindo arrastar elas\"",
+      "file": "linux/PreviewWindow.cs",
+      "root_cause": "1) previews escalonadas a partir de (50,50) do desktop; com 3 monitores de tamanhos diferentes esse canto (x<1440, y<180) não pertence a monitor nenhum. 2) arraste via BeginMoveDrag (_NET_WM_MOVERESIZE) não funcionou no Cinnamon para as previews sem borda/nunca ativadas",
+      "fix": "arraste e resize feitos à mão (captura do ponteiro + Position/Width/Height); EnsureOnScreen puxa a preview para o monitor mais próximo ao abrir e ao soltar; escalonamento parte da WorkingArea do monitor primário",
+      "tags": [
+        "linux",
+        "x11",
+        "multi-monitor",
+        "drag",
+        "avalonia"
+      ],
+      "related_bugs": [
+        "bug-009"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-11T22:20:00"
     }
   ]
 }

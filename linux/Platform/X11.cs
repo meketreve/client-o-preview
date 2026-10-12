@@ -209,6 +209,15 @@ internal sealed class X11 : IDisposable
         XFlush(Display);
     }
 
+    /// <summary>Where the window's top-left really is on the root, in pixels (asks the X server, not the toolkit).</summary>
+    public (int X, int Y)? RootPosition(IntPtr window)
+    {
+        if (window == IntPtr.Zero) return null;
+        ClearError(Display);
+        XTranslateCoordinates(Display, window, Root, 0, 0, out int x, out int y, out _);
+        return SyncError(Display) == null ? (x, y) : null;
+    }
+
     /// <summary>Whole-window opacity, honoured by compositing window managers.</summary>
     public void SetOpacity(IntPtr window, double alpha)
     {

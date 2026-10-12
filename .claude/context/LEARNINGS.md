@@ -34,6 +34,10 @@ tier: 2
 - [2026-10-11] [x11] Wayland não captura janela alheia — build Linux é só X11 (Xorg)
 - [2026-10-11] [x11] atalho que o desktop já usa → BadAccess no XGrabKey; jogo com XGrabKeyboard engole atalhos
 
+- [2026-10-11] [x11] multi-monitor deixa cantos mortos no desktop (ex.: (0,0) fora de qualquer tela) — posicionar relativo a `Screens`, nunca ao (0,0)
+- [2026-10-11] [avalonia] `BeginMoveDrag` não move preview sem borda no Cinnamon — arraste manual (bug-010)
+- [2026-10-11] [x11] `wmctrl -lG` dobra x/y com WM que reparenta — conferir posição com `XTranslateCoordinates`
+
 ## Erros a não repetir
 
 - [2026-08-08] [settings] campo-espelho de settings na `MainWindow` causou bug-002 — ler direto do model

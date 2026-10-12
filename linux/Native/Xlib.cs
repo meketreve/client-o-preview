@@ -171,6 +171,10 @@ internal static class Xlib
     [DllImport(X11)] public static extern int XSelectInput(IntPtr display, IntPtr window, nint mask);
     [DllImport(X11)] public static extern int XkbSetDetectableAutoRepeat(IntPtr display, int detectable, out int supported);
 
+    [DllImport(X11)]
+    public static extern int XTranslateCoordinates(IntPtr display, IntPtr src, IntPtr dest, int srcX, int srcY,
+        out int destX, out int destY, out IntPtr child);
+
     // ===== Composite =====
 
     [DllImport(Xcomposite)] public static extern int XCompositeQueryExtension(IntPtr display, out int eventBase, out int errorBase);

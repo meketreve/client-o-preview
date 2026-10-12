@@ -89,6 +89,7 @@ internal sealed class PreviewManager
         win.Opened += (_, __) =>
         {
             _x.SetOpacity(win.OwnHandle, t.OpacityPct / 100.0);
+            win.EnsureOnScreen();
             win.ApplyGridSettings(_settings.General.SnapToGrid, _settings.General.GridSize);
         };
         win.Closed += (_, __) =>
@@ -178,8 +179,10 @@ internal sealed class PreviewManager
             win.Height = Math.Max(win.MinHeight, h);
             return;
         }
+        // Stagger inside the primary monitor: (0,0) of the desktop may belong to no monitor at all.
+        var area = win.Screens.Primary?.WorkingArea ?? new PixelRect(0, 0, 800, 600);
         win.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.Manual;
-        win.Position = new PixelPoint(50 + (_stagger % 10) * 30, 50 + (_stagger % 10) * 30);
+        win.Position = new PixelPoint(area.X + 50 + (_stagger % 10) * 30, area.Y + 50 + (_stagger % 10) * 30);
         _stagger++;
     }
 

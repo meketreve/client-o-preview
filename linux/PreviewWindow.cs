@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -83,7 +84,7 @@ internal sealed class PreviewWindow : Window
         _titleBar = new Border { Height = TitleBarHeight, Background = IdleBrush, Child = titleRow, Cursor = new Cursor(StandardCursorType.SizeAll) };
         _titleBar.PointerPressed += (_, e) =>
         {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e);
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) StartDrag(DragMode.Move, e);
         };
 
         _image = new Image { Stretch = Stretch.None, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
@@ -103,8 +104,7 @@ internal sealed class PreviewWindow : Window
         };
         grip.PointerPressed += (_, e) =>
         {
-            BeginResizeDrag(WindowEdge.SouthEast, e);
-            e.Handled = true;
+            StartDrag(DragMode.Resize, e);
         };
 
         var body = new Grid();
@@ -120,15 +120,20 @@ internal sealed class PreviewWindow : Window
         // Right button held anywhere moves the preview, as on Windows.
         AddHandler(PointerPressedEvent, (_, e) =>
         {
-            if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed) BeginMoveDrag(e);
+            if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed) StartDrag(DragMode.Move, e);
         }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+        PointerMoved += (_, e) => ContinueDrag(e);
+        PointerReleased += (_, e) => EndDrag(e);
+        PointerCaptureLost += (_, __) => _drag = DragMode.None;
 
         PositionChanged += (_, __) => Restart(_settle);
         SizeChanged += (_, __) => Restart(_settle);
         _settle.Tick += (_, __) =>
         {
             _settle.Stop();
+            if (_drag != DragMode.None) return; // still dragging: settle again after release
             Snap();
+            EnsureOnScreen();
             LayoutSettled?.Invoke(this, EventArgs.Empty);
         };
         Closed += (_, __) =>
@@ -154,6 +159,86 @@ internal sealed class PreviewWindow : Window
     {
         t.Stop();
         t.Start();
+    }
+
+    // ===== Drag (move / resize) =====
+
+    // Done here instead of BeginMoveDrag/BeginResizeDrag: those hand the drag to the window
+    // manager (_NET_WM_MOVERESIZE), which Cinnamon ignored for these borderless, never-activated
+    // previews — the user could not move them at all.
+    private enum DragMode { None, Move, Resize }
+
+    private DragMode _drag;
+    private PixelPoint _dragStartPointer;
+    private PixelPoint _dragStartPosition;
+    private Size _dragStartSize;
+
+    private void StartDrag(DragMode mode, PointerPressedEventArgs e)
+    {
+        _drag = mode;
+        _dragStartPointer = this.PointToScreen(e.GetPosition(this));
+        _dragStartPosition = Position;
+        _dragStartSize = new Size(Bounds.Width, Bounds.Height);
+        e.Pointer.Capture(this);
+        e.Handled = true;
+    }
+
+    private void ContinueDrag(PointerEventArgs e)
+    {
+        if (_drag == DragMode.None) return;
+        var now = this.PointToScreen(e.GetPosition(this));
+        int dx = now.X - _dragStartPointer.X, dy = now.Y - _dragStartPointer.Y;
+        if (_drag == DragMode.Move)
+        {
+            Position = new PixelPoint(_dragStartPosition.X + dx, _dragStartPosition.Y + dy);
+        }
+        else
+        {
+            Width = Math.Max(MinWidth, _dragStartSize.Width + dx / RenderScaling);
+            Height = Math.Max(MinHeight, _dragStartSize.Height + dy / RenderScaling);
+        }
+    }
+
+    private void EndDrag(PointerReleasedEventArgs e)
+    {
+        if (_drag == DragMode.None) return;
+        _drag = DragMode.None;
+        e.Pointer.Capture(null);
+        Restart(_settle);
+    }
+
+    /// <summary>
+    /// Pulls the preview back when its title bar is outside every monitor. With monitors of
+    /// different sizes the desktop has dead corners (e.g. above a shorter screen) where a window
+    /// can sit unreachable.
+    /// </summary>
+    public void EnsureOnScreen()
+    {
+        var all = Screens.All;
+        if (all.Count == 0) return;
+
+        var p = Position;
+        int w = (int)Math.Round(Bounds.Width > 0 ? Bounds.Width : Width);
+        // A grab point on the title bar: what the user needs to reach.
+        var grab = new PixelPoint(p.X + Math.Min(40, w / 2), p.Y + TitleBarHeight / 2);
+        foreach (var screen in all)
+        {
+            if (screen.Bounds.Contains(grab)) return;
+        }
+
+        // No monitor holds the grab point: move into the nearest one, keeping the window whole.
+        var area = all.OrderBy(sc => Distance(sc.Bounds, grab)).First().WorkingArea;
+        int h = (int)Math.Round(Bounds.Height > 0 ? Bounds.Height : Height);
+        int x = Math.Clamp(p.X, area.X, Math.Max(area.X, area.Right - w));
+        int y = Math.Clamp(p.Y, area.Y, Math.Max(area.Y, area.Bottom - h));
+        Position = new PixelPoint(x, y);
+    }
+
+    private static double Distance(PixelRect r, PixelPoint p)
+    {
+        int dx = Math.Max(Math.Max(r.X - p.X, 0), p.X - r.Right);
+        int dy = Math.Max(Math.Max(r.Y - p.Y, 0), p.Y - r.Bottom);
+        return Math.Sqrt((double)dx * dx + (double)dy * dy);
     }
 
     // ===== Settings =====
